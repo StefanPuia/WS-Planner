@@ -1,0 +1,37 @@
+<!-- views/pages/index.ejs -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <% include ../partials/head %>
+</head>
+<body>
+
+<header>
+    <% include ../partials/header %>
+</header>
+
+<main class="planner">
+    <table>
+    	<thead>
+    		<tr>
+    			<th class="td_wno">Week Number</th>
+    			<th class="td_wpe">Week Period</th>
+    			<th class="td_wna">Week Name</th>
+    			<th class="td_str">Structure</th>
+    			<th class="td_com">Comments</th>
+    			<th class="td_res">Resources</th>
+    		</tr>
+    	</thead>
+    	<tbody contenteditable="true">
+    		<%= %>
+    	</tbody>
+    </table>
+</main>
+
+<footer>
+    <% include ../partials/footer %>
+</footer>
+
+</body>
+</html>
