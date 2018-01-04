@@ -3,41 +3,33 @@
 body {
 	padding-top: 50px;
 	overflow: auto;
-	min-height: 150vh;
 }
 
 .planner {
 	/*font-family: "Segoe UI";*/
 }
 
-.planner table td, .planner table th{
-	padding: 0.3em;
-	border: solid 2px grey;
-}
-
-.planner table th {
-	border-top: none;
-	padding-top: 0.6em;
-	padding-bottom: 0.6em;
-}
-
 /*week number*/
-.planner .td_wno {
-	min-width: 10em;
+.planner .td_act {
+	min-width: 12em;
 	text-align: center;
 	border-left: none;
+	vertical-align: middle;
 }
 
 /*week period*/
 .planner .td_wpe {
-	min-width: 15em;
+	min-width: 10em;
 	text-align: center;
+	vertical-align: middle;
+	cursor: pointer;
 }
 
 /*week name*/
 .planner .td_wna {
 	min-width: 15em;
 	text-align: center;
+	vertical-align: middle;
 }
 
 /*week structure*/
@@ -51,7 +43,7 @@ body {
 
 /*week comments*/
 .planner .td_com {
-	min-width: 20em;
+	min-width: 30em;
 }
 
 .planner th.td_com {
@@ -60,10 +52,22 @@ body {
 
 /*week resources*/
 .planner .td_res {
-	min-width: 20em;
-	border-right: none;
+	min-width: 30em;
+	width: auto;
+	vertical-align: middle;
+	cursor: pointer;
 }
 
 .planner th.td_res {
+	text-align: center;
+}
+
+.floating {
+    position: fixed;
+    right: 1em;
+    bottom: 1em;
+}
+
+.center {
 	text-align: center;
 }

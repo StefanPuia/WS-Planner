@@ -24,8 +24,11 @@
   },
   "homepage": "https://github.com/StefanPuia/WS-Planner#readme",
   "dependencies": {
+    "body-parser": "^1.18.2",
     "ejs": "^2.5.7",
     "express": "^4.16.2",
-    "mysql": "^2.15.0"
+    "multer": "^1.3.0",
+    "mysql": "^2.15.0",
+    "validator": "^9.2.0"
   }
 }

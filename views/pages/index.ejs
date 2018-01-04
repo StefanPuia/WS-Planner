@@ -8,25 +8,30 @@
 <body>
 
 <header>
+	<% include ../partials/modals %>
     <% include ../partials/header %>
 </header>
 
 <main class="planner">
-    <table>
+    <table class="table table-bordered">
     	<thead>
     		<tr>
-    			<th class="td_wno">Week Number</th>
+    			<th class="td_act">Actions</th>
     			<th class="td_wpe">Week Period</th>
     			<th class="td_wna">Week Name</th>
     			<th class="td_str">Structure</th>
     			<th class="td_com">Comments</th>
-    			<th class="td_res">Resources</th>
+    			<th class="td_res" colspan="2">Resources</th>
     		</tr>
     	</thead>
-    	<tbody contenteditable="true">
-    		<%= %>
+    	<tbody>
+    		<%- table %>
     	</tbody>
     </table>
+
+    <div class="floating">
+		<button type="button" class="btn btn-success" onclick="newWeek()">Add a new week</button>
+    </div>
 </main>
 
 <footer>
