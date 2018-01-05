@@ -4,8 +4,7 @@ function listify(array) {
     let out = "<ul>";
     for (let i = 0; i < array.length; i++) {
         if(array[i].name && array[i].url) {
-            out += `<li><b>${array[i].name}:</b> 
-            <a href="${array[i].url}">${array[i].url}</a></li>`;
+            out += `<li><b>${array[i].name}: </b><a href="${array[i].url}">${array[i].url}</a></li>`;
         }
     }
     out += "</ul>";
@@ -16,13 +15,14 @@ function listify(array) {
 
     return out;
 }
+module.exports.listify = listify;
 
 
 function makeTable(obj) {
     let out = "";
 
-    for (let i = 0; i < obj.planner.length; i++) {
-        let o = obj.planner[i];
+    for (let i = 0; i < obj.length; i++) {
+        let o = obj[i];
         out += `
             <tr>
                 <td class="td_act" rowspan="${o.str.length}">
@@ -79,3 +79,26 @@ function swapWeekPeriods(array, i, j) {
     return array;
 }
 module.exports.swapwpe = swapWeekPeriods;
+
+function getWeekPeriod(date) {
+    let startDate = new Date(date);
+    let endDate = new Date(date);
+    endDate.setDate(endDate.getDate() + 6)
+    let f = {
+        "sd": startDate.getDate(),
+        "sm": startDate.getMonth() + 1,
+        "sy": startDate.getFullYear(),
+        "ed": endDate.getDate(),
+        "em": endDate.getMonth() + 1,
+        "ey": endDate.getFullYear()
+    }
+    return `${f.sd}/${f.sm} - ${f.ed}/${f.em}`;
+}
+module.exports.getWeekPeriod = getWeekPeriod;
+
+function createRandomString( length ) {
+    let str = "";
+    for ( ; str.length < length; str += Math.random().toString( 36 ).substr( 2 ) );
+    return str.substr( 0, length );
+}
+module.exports.randomStr = createRandomString;

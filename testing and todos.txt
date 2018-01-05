@@ -1,0 +1,39 @@
+add week
+DONE
+
+delete week
+change week name
+move week up
+move week down
+change week period
+week period is 7 days long
+change structure name
+change comments for each structure
+change resources for each structure
+move resource up
+move resource down
+move structure up
+move strucutre down
+delete structure
+add structure
+add resource
+delete resource
+
+
+
+
+KINDA DONE
+
+collaboration on same file
+
+
+
+
+NOT DONE YET
+
+database
+authentication
+sessions
+multiple files
+url validation on resources
+auto populate dates when selecting one

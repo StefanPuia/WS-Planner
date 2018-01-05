@@ -1,8 +1,10 @@
 'use strict';
-// server variable -- PROVISIONAL --
+// server variable
 const sv = {};
 sv.port = 8080;
 sv.message = "Server started on port " + sv.port;
+sv.clients = [];
+
 
 
 
@@ -28,25 +30,62 @@ const wss = new WebSocket.Server({
 });
 
 server.on('request', app);
-wss.on('connection', function connection(ws) {
+// establish connection
+wss.on('connection', function connection(ws, req) {
+    // add client to the array
+    ws.sessionid = utils.randomStr(16);
+    ws.clientid = "";
+    sv.clients.push(ws);
+
     // error handling WIP
-    ws.on('error', () => console.log('errored'));
-    // broadcast
+    ws.on('error', () => {});
+
+    // listen for messages
     ws.on('message', function incoming(message) {
-        message = JSON.parse(message);
-        console.log(message);
-        if(message.action == "update") {
-            if(message.payload.value) {
-                let data = JSON.stringify({
-                    payload: message.payload
-                });
-                //ws.send(data);
-                wss.clients.forEach(function each(client) {
-                    if (client.readyState === WebSocket.OPEN) {
-                        client.send(data);
-                    }
-                });
-            }
+        let data = JSON.parse(message);
+        if(data.value) {
+            data.value = validator.escape(data.value);
+        }
+
+        switch(data.type) {
+            case 'wna':
+            case 'str':
+            case 'com':
+                // do nothing
+                break;
+
+            case 'wpe':
+                data.value = utils.getWeekPeriod(data.value);
+                break;
+
+            case 'res':
+                data.value = utils.listify(data.res);
+                data.res = undefined;
+                break;
+
+            case 'clientid':
+                if(ws.clientid === "") {
+                    ws.clientid = data.value;
+                    ws.send(JSON.stringify({
+                        "type": "sessionid",
+                        "value": ws.sessionid
+                    }));
+                }
+                break;
+        }
+        
+        // self send
+        //ws.send(JSON.stringify(data));
+
+        console.log(data);
+
+        // broadcast to all connected hosts, including sender
+        if(data) {
+            sv.clients.forEach(function(client) {
+                if (client.readyState === WebSocket.OPEN) {
+                    client.send(JSON.stringify(data));
+                }
+            });
         }
     });
 });
@@ -62,12 +101,8 @@ app.use(bodyParser.urlencoded({
 const utils = require('./utility');
 
 // database -- PROVISIONAL -- 
-let db = JSON.parse(fs.readFileSync('./server/db.json', 'utf8'));
-
-
-
-
-
+let planner = JSON.parse(fs.readFileSync('./server/db.json', 'utf8'));
+let db = planner.planner;
 
 
 
@@ -110,7 +145,7 @@ app.post('/api/week/new', function(req, res) {
             }]
         }]
     }
-    db.planner.push(blankweek);
+    db.push(blankweek);
     res.redirect('/');
 })
 
@@ -119,9 +154,9 @@ app.post('/api/res/update', function(req, res) {
     let data = req.body;
     let parts = data.id.split('_');
     if (data.res) {
-        db.planner[parts[2]].str[parts[3]].res = data.res.slice();
+        db[parts[2]].str[parts[3]].res = data.res.slice();
     } else {
-        db.planner[parts[2]].str[parts[3]].res = [].slice();
+        db[parts[2]].str[parts[3]].res = [].slice();
     }
     res.sendStatus(200);
 })
@@ -131,8 +166,8 @@ app.post('/api/week/up', function(req, res) {
     let data = req.body;
     let i = parseInt(data.id);
     if (i > 0) {
-        utils.swap(db.planner, i, i - 1);
-        utils.swapwpe(db.planner, i, i - 1);
+        utils.swap(db, i, i - 1);
+        utils.swapwpe(db, i, i - 1);
         res.sendStatus(200);
     } else {
         res.sendStatus(405)
@@ -143,9 +178,9 @@ app.post('/api/week/up', function(req, res) {
 app.post('/api/week/down', function(req, res) {
     let data = req.body;
     let i = parseInt(data.id);
-    if (i < db.planner.length - 1) {
-        utils.swap(db.planner, i, i + 1);
-        utils.swapwpe(db.planner, i, i + 1);
+    if (i < db.length - 1) {
+        utils.swap(db, i, i + 1);
+        utils.swapwpe(db, i, i + 1);
         res.sendStatus(200);
     } else {
         res.sendStatus(405)
@@ -156,14 +191,14 @@ app.post('/api/week/down', function(req, res) {
 app.post('/api/week/delete', function(req, res) {
     let data = req.body;
     let i = parseInt(data.id);
-    db.planner.splice(i, 1);
+    db.splice(i, 1);
 })
 
 // get week
 app.get('/api/week/get', function(req, res) {
     let id = parseInt(req.query.id);
-    if (db.planner[id]) {
-        res.json(db.planner[id]);
+    if (db[id]) {
+        res.json(db[id]);
         res.status(200);
     } else {
         res.sendStatus(404);
@@ -175,7 +210,7 @@ app.get('/api/week/get', function(req, res) {
 app.post('/api/str/update', function(req, res) {
     let data = req.body;
     let id = parseInt(data.id);
-    let week = db.planner[id];
+    let week = db[id];
     let str = data.str;
     let lastid = 0;
     let newWeek = [];
@@ -202,7 +237,7 @@ app.post('/api/str/update', function(req, res) {
         newWeek.push(item);
     }
 
-    db.planner[id].str = newWeek.slice();
+    db[id].str = newWeek.slice();
     res.sendStatus(200);
 })
 
@@ -214,22 +249,22 @@ app.post('/api/content/update', function(req, res) {
     switch (parts[1]) {
         case 'wna':
             if (validator.isNumeric(parts[2])) {
-                if (db.planner[parts[2]]) {
-                    db.planner[parts[2]].wna = content;
+                if (db[parts[2]]) {
+                    db[parts[2]].wna = content;
                 }
             }
             break;
         case 'str':
             if (validator.isNumeric(parts[2]) && validator.isNumeric(parts[3])) {
-                if (db.planner[parts[2]] && db.planner[parts[2]].str[parts[3]]) {
-                    db.planner[parts[2]].str[parts[3]].name = content;
+                if (db[parts[2]] && db[parts[2]].str[parts[3]]) {
+                    db[parts[2]].str[parts[3]].name = content;
                 }
             }
             break;
         case 'com':
             if (validator.isNumeric(parts[2]) && validator.isNumeric(parts[3])) {
-                if (db.planner[parts[2]] && db.planner[parts[2]].str[parts[3]]) {
-                    db.planner[parts[2]].str[parts[3]].com = content.split('\n');
+                if (db[parts[2]] && db[parts[2]].str[parts[3]]) {
+                    db[parts[2]].str[parts[3]].com = content.split('\n');
                 }
             }
             break;
@@ -240,20 +275,9 @@ app.post('/api/content/update', function(req, res) {
 // update period
 app.post('/api/period/update', function(req, res) {
     let data = req.body;
-    let id = parseInt(data.id);
-    let startDate = new Date(data.date);
-    let endDate = new Date(data.date);
-    endDate.setDate(endDate.getDate() + 6)
-    let f = {
-        "sd": startDate.getDate(),
-        "sm": startDate.getMonth() + 1,
-        "sy": startDate.getFullYear(),
-        "ed": endDate.getDate(),
-        "em": endDate.getMonth() + 1,
-        "ey": endDate.getFullYear()
-    }
-    let content = `${f.sd}/${f.sm} - ${f.ed}/${f.em}`;
-    db.planner[id].wpe = content;
+    let id = parseInt(data.id.split('_')[2]);
+    
+    db[id].wpe = utils.getWeekPeriod(data.date);
 
     res.sendStatus(200);
 })

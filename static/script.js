@@ -2,10 +2,16 @@
 
 // variable declaration
 let ws = new WebSocket("ws://" + window.location.hostname + ":" + (window.location.port || 80) + "/");
+let clientid = new Date().getTime().toString() + Math.floor((Math.random() * 900) + 100);
+let sessionid = "";
 
 // run functions when the page is loaded
 $(document).ready(function() {
     addListeners();
+    ws.send(JSON.stringify({
+        "type": "clientid",
+        "value": clientid
+    }))
 })
 
 // add listeners
@@ -25,7 +31,7 @@ function addListeners() {
     document.querySelector('#buttonResourcesSave').addEventListener('click', saveRes);
 
     // save table on table cells blur
-    document.querySelectorAll('[contenteditable="true"').forEach(function(el) {
+    document.querySelectorAll('[contenteditable="true"]').forEach(function(el) {
         el.addEventListener('blur',
             function(e) {
                 saveContent(e.currentTarget);
@@ -47,33 +53,39 @@ function addListeners() {
     document.querySelector('#buttonPeriodSave').addEventListener('click', savePer);
 }
 
-// jQuery(document).keydown(function(event) {
-//         if((event.ctrlKey || event.metaKey) && event.which == 83) {
-//             saveContent(document.activeElement);
-//             event.preventDefault();
-//             return false;
-//         }
-//     }
-// );
-
 // make a post request
-function postToServer(payload, url) {
-    $.post(url, payload)
-        .done(function(data) {
-            //console.log("Response: " + data);
-            update();
-        })
-    ws.send(JSON.stringify({
-        action: "update",
-        payload: payload
-    }));
+function postToServer(data, url) {
+    $.post(url, data);
+    data.clientid = clientid;
+    ws.send(JSON.stringify(data));
 }
 
 // receive table update from server
 function receivedMessageFromServer(e) {
     let data = JSON.parse(e.data);
-    console.log(data.payload);
-    updateTable(data.payload.id, data.payload.value);
+    console.log(data);
+
+    switch(data.type) {
+        case 'clientid':
+            clientid = data.value;
+            break;
+
+        case 'sessionid':
+            sessionid = data.value;
+            break;
+
+        case 'null':
+            update();
+            break;
+
+        case 'wpe':
+        case 'wna':
+        case 'str':
+        case 'com':
+        case 'res':
+            updateTable(data);
+            break;
+    }
 }
 
 // async update table
@@ -85,8 +97,10 @@ async function update() {
 }
 
 // update table from parameter
-function updateTable(id, data) {
-    document.querySelector(`#${id}`).innerText = data;
+function updateTable(data) {
+    if(data.type != "null") {
+        document.querySelector(`#${data.id}`).innerHTML = data.value.split(/\n|\r|\n\r/gm).join('<br>');   
+    }
 }
 
 
@@ -195,6 +209,7 @@ function saveRes() {
     let divs = document.querySelectorAll('#formResources > div');
     let id = document.querySelector('#formResources').dataset.id;
     let data = {
+        "type": "res",
         "res": [],
         "id": id
     };
@@ -221,29 +236,35 @@ function delRes(id) {
 
 // new week
 function newWeek() {
-    postToServer({}, '/api/week/new');
+    postToServer({"type":"null"}, '/api/week/new');
+    update();
 }
 
 // move up
 function moveWeekUp(id) {
     let data = {
+        "type": "null",
         "id": id
     };
     postToServer(data, '/api/week/up');
+    update();
 }
 
 // move down
 function moveWeekDown(id) {
     let data = {
+        "type": "null",
         "id": id
     };
     postToServer(data, '/api/week/down');
+    update();
 }
 
 // delete week
 function deleteWeek(id) {
     if (window.confirm("Are you sure you want to delete this week?\nThe action is irreversible!")) {
         let data = {
+            "type": "null",
             "id": id
         };
         postToServer(data, '/api/week/delete');
@@ -277,6 +298,7 @@ function addStr(el) {
                 <br /><br />`;
 
     div.innerHTML += content;
+    document.querySelector('#alertStructuresEmpty').remove();
     form.appendChild(div);
 }
 
@@ -350,6 +372,7 @@ function saveStr() {
     let divs = document.querySelectorAll('#formStructures > div');
     let id = document.querySelector('#formStructures').dataset.id;
     let data = {
+        "type": "null",
         "str": [],
         "id": id
     };
@@ -361,9 +384,22 @@ function saveStr() {
             data.str.push(item);
         }
     })
-    postToServer(data, '/api/str/update');
-    update();
-    $('#modalStructuresEdit').modal('hide');
+    if(data.str.length > 0) {
+        postToServer(data, '/api/str/update');
+        update();
+        $('#modalStructuresEdit').modal('hide');
+    }
+    else {
+        let alert = document.querySelector('#alertStructuresEmpty');
+        if(!alert) {
+            alert = document.createElement('div');
+            alert.classList.add('alert','alert-danger');
+            alert.role = "alert";
+            alert.id = "alertStructuresEmpty";
+            alert.textContent = "A week can only have one or more structure blocks. Please add one or delete the week.";
+            document.querySelector('#bodyModalStructures').prepend(alert);
+        }
+    }
 }
 
 // delete structure
@@ -380,6 +416,7 @@ function delStr(id) {
 // save content
 function saveContent(el) {
     let data = {
+        "type": el.id.split('_')[1],
         "id": el.id,
         "value": el.innerText
     };
@@ -407,10 +444,10 @@ function editPer(el) {
 // save period
 function savePer() {
     let input = document.querySelector('#inputDate');
-    let id = parseInt(input.dataset.id);
     if (input.value) {
         let data = {
-            "id": id,
+            "type": "wpe",
+            "id": input.dataset.id,
             "value": input.value
         }
         postToServer(data, '/api/period/update');
