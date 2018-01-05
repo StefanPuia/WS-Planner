@@ -2,8 +2,13 @@
 // server variable -- PROVISIONAL --
 const sv = {};
 sv.port = 8080;
+sv.message = "Server started on port " + sv.port;
+
+
 
 // define and initialise required packages 
+const http = require('http');
+
 const express = require('express');
 const app = express();
 // set view engine to ejs
@@ -15,6 +20,38 @@ const mysql = require('mysql');
 const fs = require('fs');
 const validator = require('validator');
 
+// web socket server
+const WebSocket = require('ws');
+const server = http.createServer();
+const wss = new WebSocket.Server({
+    server: server,
+});
+
+server.on('request', app);
+wss.on('connection', function connection(ws) {
+    // error handling WIP
+    ws.on('error', () => console.log('errored'));
+    // broadcast
+    ws.on('message', function incoming(message) {
+        message = JSON.parse(message);
+        console.log(message);
+        if(message.action == "update") {
+            if(message.payload.value) {
+                let data = JSON.stringify({
+                    payload: message.payload
+                });
+                //ws.send(data);
+                wss.clients.forEach(function each(client) {
+                    if (client.readyState === WebSocket.OPEN) {
+                        client.send(data);
+                    }
+                });
+            }
+        }
+    });
+});
+
+// body parser for json
 const bodyParser = require('body-parser');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
@@ -26,6 +63,13 @@ const utils = require('./utility');
 
 // database -- PROVISIONAL -- 
 let db = JSON.parse(fs.readFileSync('./server/db.json', 'utf8'));
+
+
+
+
+
+
+
 
 
 //// SERVE PAGES ////
@@ -42,6 +86,8 @@ app.get('/', function(req, res) {
 app.get('/login', function(req, res) {
     res.render('pages/index');
 });
+
+
 
 //// API ////
 // get the table
@@ -85,11 +131,11 @@ app.post('/api/week/up', function(req, res) {
     let data = req.body;
     let i = parseInt(data.id);
     if (i > 0) {
-        utils.swap(db.planner, i, i-1);
-        utils.swapwpe(db.planner, i, i-1);
-    	res.sendStatus(200);
+        utils.swap(db.planner, i, i - 1);
+        utils.swapwpe(db.planner, i, i - 1);
+        res.sendStatus(200);
     } else {
-    	res.sendStatus(405)
+        res.sendStatus(405)
     }
 })
 
@@ -98,31 +144,31 @@ app.post('/api/week/down', function(req, res) {
     let data = req.body;
     let i = parseInt(data.id);
     if (i < db.planner.length - 1) {
-        utils.swap(db.planner, i, i+1);
-        utils.swapwpe(db.planner, i, i+1);
-    	res.sendStatus(200);
+        utils.swap(db.planner, i, i + 1);
+        utils.swapwpe(db.planner, i, i + 1);
+        res.sendStatus(200);
     } else {
-    	res.sendStatus(405)
+        res.sendStatus(405)
     }
 })
 
 // delete week
 app.post('/api/week/delete', function(req, res) {
-	let data = req.body;
-	let i = parseInt(data.id);
+    let data = req.body;
+    let i = parseInt(data.id);
     db.planner.splice(i, 1);
 })
 
 // get week
 app.get('/api/week/get', function(req, res) {
     let id = parseInt(req.query.id);
-    if(db.planner[id]) {
+    if (db.planner[id]) {
         res.json(db.planner[id]);
         res.status(200);
     } else {
         res.sendStatus(404);
     }
-    
+
 })
 
 //update structures
@@ -133,14 +179,14 @@ app.post('/api/str/update', function(req, res) {
     let str = data.str;
     let lastid = 0;
     let newWeek = [];
-    for(let i = 0; i < str.length; i++) {
+    for (let i = 0; i < str.length; i++) {
         let strid = parseInt(str[i].id.split('_')[1]);
         str[i].id = strid;
     }
 
-    for(let i = 0; i < week.str.length; i++) {
-        for(let j = 0; j < str.length; j++) {
-            if(str[j].id == i) {
+    for (let i = 0; i < week.str.length; i++) {
+        for (let j = 0; j < str.length; j++) {
+            if (str[j].id == i) {
                 week.str[i].name = str[j].name;
                 newWeek.push(week.str[i]);
                 str.splice(j, 1);
@@ -148,7 +194,7 @@ app.post('/api/str/update', function(req, res) {
         }
     }
 
-    for(let j = 0; j < str.length; j++) {
+    for (let j = 0; j < str.length; j++) {
         let item = {};
         item.name = str[j].name;
         item.com = [];
@@ -157,7 +203,7 @@ app.post('/api/str/update', function(req, res) {
     }
 
     db.planner[id].str = newWeek.slice();
-    res.sendStatus(200);        
+    res.sendStatus(200);
 })
 
 // update content
@@ -165,24 +211,24 @@ app.post('/api/content/update', function(req, res) {
     let data = req.body;
     let content = validator.escape(data.value);
     let parts = validator.escape(data.id).split('_');
-    switch(parts[1]) {
+    switch (parts[1]) {
         case 'wna':
-            if(validator.isNumeric(parts[2])) {
-                if(db.planner[parts[2]]) {
+            if (validator.isNumeric(parts[2])) {
+                if (db.planner[parts[2]]) {
                     db.planner[parts[2]].wna = content;
                 }
             }
             break;
         case 'str':
-            if(validator.isNumeric(parts[2]) && validator.isNumeric(parts[3])) {
-                if(db.planner[parts[2]] && db.planner[parts[2]].str[parts[3]]) {
+            if (validator.isNumeric(parts[2]) && validator.isNumeric(parts[3])) {
+                if (db.planner[parts[2]] && db.planner[parts[2]].str[parts[3]]) {
                     db.planner[parts[2]].str[parts[3]].name = content;
                 }
             }
             break;
         case 'com':
-            if(validator.isNumeric(parts[2]) && validator.isNumeric(parts[3])) {
-                if(db.planner[parts[2]] && db.planner[parts[2]].str[parts[3]]) {
+            if (validator.isNumeric(parts[2]) && validator.isNumeric(parts[3])) {
+                if (db.planner[parts[2]] && db.planner[parts[2]].str[parts[3]]) {
                     db.planner[parts[2]].str[parts[3]].com = content.split('\n');
                 }
             }
@@ -213,6 +259,7 @@ app.post('/api/period/update', function(req, res) {
 })
 
 
+
+
 // listen on port 8080
-app.listen(sv.port);
-console.log(`server started on port ${sv.port}`);
+server.listen(sv.port, function () { console.log(sv.message); });

@@ -1,5 +1,8 @@
 'use strict';
 
+// variable declaration
+let ws = new WebSocket("ws://" + window.location.hostname + ":" + (window.location.port || 80) + "/");
+
 // run functions when the page is loaded
 $(document).ready(function() {
     addListeners();
@@ -7,6 +10,9 @@ $(document).ready(function() {
 
 // add listeners
 function addListeners() {
+    // webSocket message received listener
+    ws.addEventListener("message", receivedMessageFromServer);
+
     // edit resources table cells
     document.querySelectorAll("td.td_res").forEach(function(el) {
         el.addEventListener('click',
@@ -57,14 +63,30 @@ function postToServer(payload, url) {
             //console.log("Response: " + data);
             update();
         })
+    ws.send(JSON.stringify({
+        action: "update",
+        payload: payload
+    }));
 }
 
-// update table
+// receive table update from server
+function receivedMessageFromServer(e) {
+    let data = JSON.parse(e.data);
+    console.log(data.payload);
+    updateTable(data.payload.id, data.payload.value);
+}
+
+// async update table
 async function update() {
     const response = await fetch('/api/table/get');
     const data = await response.text();
     document.querySelector('.planner tbody').innerHTML = data;
-    addListeners();  
+    addListeners();
+}
+
+// update table from parameter
+function updateTable(id, data) {
+    document.querySelector(`#${id}`).innerText = data;
 }
 
 
@@ -204,20 +226,26 @@ function newWeek() {
 
 // move up
 function moveWeekUp(id) {
-    let data = {"id": id};
+    let data = {
+        "id": id
+    };
     postToServer(data, '/api/week/up');
 }
 
 // move down
 function moveWeekDown(id) {
-    let data = {"id": id};
+    let data = {
+        "id": id
+    };
     postToServer(data, '/api/week/down');
 }
 
 // delete week
 function deleteWeek(id) {
-    if(window.confirm("Are you sure you want to delete this week?\nThe action is irreversible!")) {
-        let data = {"id": id};
+    if (window.confirm("Are you sure you want to delete this week?\nThe action is irreversible!")) {
+        let data = {
+            "id": id
+        };
         postToServer(data, '/api/week/delete');
         update();
     }
@@ -340,7 +368,7 @@ function saveStr() {
 
 // delete structure
 function delStr(id) {
-    if(window.confirm(`Are you sure you want to delete this structure?\nThis will also delete the comments and resources assigned to this structure!\nThis action is irreversible!`)) {
+    if (window.confirm(`Are you sure you want to delete this structure?\nThis will also delete the comments and resources assigned to this structure!\nThis action is irreversible!`)) {
         let str = document.querySelector(`#str_${id}`);
         str.remove();
     }
@@ -380,16 +408,15 @@ function editPer(el) {
 function savePer() {
     let input = document.querySelector('#inputDate');
     let id = parseInt(input.dataset.id);
-    if(input.value) {
+    if (input.value) {
         let data = {
             "id": id,
-            "date": input.value
+            "value": input.value
         }
-        postToServer(data, '/api/period/update');    
+        postToServer(data, '/api/period/update');
         $('#modalPeriodEdit').modal('hide');
-    }
-    else {
+    } else {
         input.parentElement.classList.add('has-error');
     }
-    
+
 }
