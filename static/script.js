@@ -3,6 +3,7 @@
 // variable declaration
 let ws = new WebSocket("ws://" + window.location.hostname + ":" + (window.location.port || 80) + "/");
 let sessionid = "";
+let documentid = getQueryString('doc');
 let history = [];
 
 // run functions when the page is loaded
@@ -11,14 +12,13 @@ window.addEventListener('load', function() {
 })
 
 jQuery(document).keydown(function(event) {
-        // Ctrl + Z
-        if((event.ctrlKey || event.metaKey) && event.which == 90) {
-            undo();
-            event.preventDefault();
-            return false;
-        }
+    // Ctrl + Z
+    if ((event.ctrlKey || event.metaKey) && event.which == 90) {
+        undo();
+        event.preventDefault();
+        return false;
     }
-);
+});
 
 // add listeners
 function addListeners() {
@@ -33,13 +33,13 @@ function addListeners() {
         el.addEventListener('click',
             function(e) {
                 // do not trigger the modal if event happens on a link
-                if(e.target.tagName.toLowerCase() != "a") {
+                if (e.target.tagName.toLowerCase() != "a") {
                     editRes(e.currentTarget);
                 }
                 // only open links if control is pressed
                 else {
                     e.preventDefault();
-                    if(e.ctrlKey || e.metaKey) {
+                    if (e.ctrlKey || e.metaKey) {
                         window.open(e.target.href);
                     }
                 }
@@ -93,7 +93,8 @@ function connectedToServer() {
 function postToServer(data, url) {
     $.post(url, data);
     data.sessionid = sessionid;
-    ws.send(JSON.stringify(data));
+    data.documnetid = documentid;
+        ws.send(JSON.stringify(data));
 }
 
 // receive table update from server
@@ -122,7 +123,7 @@ function receivedMessageFromServer(e) {
 
 // async update table
 async function update() {
-    const response = await fetch('/api/table/get');
+    const response = await fetch('/api/table/get?doc=' + documentid);
     const data = await response.text();
     document.querySelector('.planner tbody').innerHTML = data;
     addListeners();
@@ -147,11 +148,10 @@ function saveContent(el) {
     };
 
     let last = history[history.length - 1];
-    if(last && last.id == data.id && last.value == data.value) {
+    if (last && last.id == data.id && last.value == data.value) {
         history.pop();
-    }
-    else {
-        postToServer(data, '/api/content/update');
+    } else {
+        postToServer(data, '/api/content/update?doc=' + documentid);
     }
 }
 
@@ -162,7 +162,7 @@ function saveHistoryContent(el) {
         "id": el.id,
         "value": el.innerText
     };
-    postToServer(data, '/api/content/update');
+    postToServer(data, '/api/content/update?doc=' + documentid);
 }
 
 
@@ -170,7 +170,7 @@ function saveHistoryContent(el) {
 
 // history undo
 function undo() {
-    if(history.length > 0) {
+    if (history.length > 0) {
         let data = history[history.length - 1];
         let el = document.querySelector(`#${data.id}`);
         el.innerText = data.value;
@@ -196,7 +196,7 @@ function addHistory(el) {
 function newWeek() {
     postToServer({
         "type": "null"
-    }, '/api/week/new');
+    }, '/api/week/new?doc=' + documentid);
     update();
 }
 
@@ -206,7 +206,7 @@ function moveWeekUp(id) {
         "type": "null",
         "id": id
     };
-    postToServer(data, '/api/week/up');
+    postToServer(data, '/api/week/up?doc=' + documentid);
     update();
 }
 
@@ -216,7 +216,7 @@ function moveWeekDown(id) {
         "type": "null",
         "id": id
     };
-    postToServer(data, '/api/week/down');
+    postToServer(data, '/api/week/down?doc=' + documentid);
     update();
 }
 
@@ -227,7 +227,7 @@ function deleteWeek(id) {
             "type": "null",
             "id": id
         };
-        postToServer(data, '/api/week/delete');
+        postToServer(data, '/api/week/delete?doc=' + documentid);
         update();
     }
 }
@@ -258,7 +258,7 @@ function savePer() {
             "id": input.dataset.id,
             "value": input.value
         }
-        postToServer(data, '/api/period/update');
+        postToServer(data, '/api/period/update?doc=' + documentid);
         $('#modalPeriodEdit').modal('hide');
     } else {
         input.parentElement.classList.add('has-error');
@@ -293,7 +293,7 @@ function addStr(el) {
     div.innerHTML += content;
 
     let alert = document.querySelector('#alertStructuresEmpty');
-    if(alert) {
+    if (alert) {
         alert.remove();
     }
     form.appendChild(div);
@@ -379,25 +379,23 @@ function saveStr() {
         item.name = el.querySelector('input').value;
         if (item.name) {
             data.str.push(item);
-        }
-        else {
+        } else {
             let empty = el.querySelectorAll('div.form-group')[0];
             empty.classList.add('has-error');
             empty.querySelector('input').addEventListener('input', function(e) {
-                if(e.target.value != "") {
+                if (e.target.value != "") {
                     e.target.parentElement.classList.remove('has-error');
-                }
-                else {
+                } else {
                     e.target.parentElement.classList.add('has-error');
                 }
             })
         }
     })
     if (data.str.length == divs.length) {
-        postToServer(data, '/api/str/update');
+        postToServer(data, '/api/str/update?doc=' + documentid);
         update();
         $('#modalStructuresEdit').modal('hide');
-    } else if(data.str.length == 0){
+    } else if (data.str.length == 0) {
         let alert = document.querySelector('#alertStructuresEmpty');
         if (!alert) {
             alert = document.createElement('div');
@@ -535,28 +533,25 @@ function saveRes() {
         item.url = el.querySelector('.res_url').value;
         if (item.name && item.url && validUrl(item.url)) {
             data.res.push(item);
-        }
-        else {
-            if(!item.name) {
+        } else {
+            if (!item.name) {
                 let empty = el.querySelectorAll('div.form-group')[0];
                 empty.classList.add('has-error');
                 empty.querySelector('input').addEventListener('input', function(e) {
-                    if(e.target.value != "") {
+                    if (e.target.value != "") {
                         e.target.parentElement.classList.remove('has-error');
-                    }
-                    else {
+                    } else {
                         e.target.parentElement.classList.add('has-error');
                     }
                 })
             }
-            if(!item.url || !validUrl(item.url)) {
+            if (!item.url || !validUrl(item.url)) {
                 let empty = el.querySelectorAll('div.form-group')[1];
                 empty.classList.add('has-error');
                 empty.querySelector('input').addEventListener('input', function(e) {
-                    if(e.target.value != "" && validUrl(e.target.value)) {
+                    if (e.target.value != "" && validUrl(e.target.value)) {
                         e.target.parentElement.classList.remove('has-error');
-                    }
-                    else {
+                    } else {
                         e.target.parentElement.classList.add('has-error');
                     }
                 })
@@ -564,8 +559,8 @@ function saveRes() {
         }
     })
 
-    if(divs.length == data.res.length) {
-        postToServer(data, '/api/res/update');
+    if (divs.length == data.res.length) {
+        postToServer(data, '/api/res/update?doc=' + documentid);
         $('#modalResourcesEdit').modal('hide');
     }
 }
@@ -584,3 +579,10 @@ function delRes(id) {
 function validUrl(url) {
     return /^((ht|f)tp(s?)\:\/\/|~\/|\/)([\w]+\:[\w]+@)?([a-zA-Z]{1}([\w\-]+\.?)+([\w]{0,5}))(:[\d]{1,5})?\/?([\w]*\/*)*(\.[\w]{3,4})?((\?\w+=\w+)?(&\w+=\w+)*)?(\#.+)?/.test(url);
 }
+
+function getQueryString(field, url) {
+    var href = url ? url : window.location.href;
+    var reg = new RegExp('[?&]' + field + '=([^&#]*)', 'i');
+    var string = reg.exec(href);
+    return string ? string[1] : null;
+};

@@ -38,8 +38,8 @@ app.use(bodyParser.urlencoded({
 const utils = require('./utility');
 
 // database -- PROVISIONAL -- 
-let planner = JSON.parse(fs.readFileSync('./server/db.json', 'utf8'));
-let db = planner.planner;
+let db = JSON.parse(fs.readFileSync('./server/db.json', 'utf8'));
+let doc;
 
 
 //// WEB SOCKET HANDLING ////
@@ -57,10 +57,11 @@ wss.on('connection', function connection(ws, req) {
     // listen for messages
     ws.on('message', function incoming(message) {
         let data = JSON.parse(message);
-        console.log(data);
 
         let sessionid = data.sessionid;
         delete data.sessionid;
+        doc = db[data.documentid];
+        delete data.documentid;
 
         switch (data.type) {
             case 'wna':
@@ -89,9 +90,7 @@ wss.on('connection', function connection(ws, req) {
         }
 
         // self send
-        //ws.send(JSON.stringify(data));
-
-        console.log(data);
+        // ws.send(JSON.stringify(data));
 
         // broadcast to all connected hosts, including sender
         if (data.value != "") {
@@ -109,15 +108,28 @@ wss.on('connection', function connection(ws, req) {
 
 // index
 app.get('/', function(req, res) {
-    res.render(
-        'pages/index', {
-            table: utils.makeTable(db)
+    if(req.query.doc) {
+        doc = utils.findDoc(db, req.query.doc);
+        if(doc !== false) {
+            res.render(
+                'pages/index', {
+                    table: utils.makeTable(doc)
+                });
+        }
+        else {
+            res.status(404).render('pages/404');;
+        }
+    }
+    else {
+        res.status(200).render('pages/userdocs', {
+            documents: utils.makeDocs(db)
         });
+    }
 });
 
 // login
 app.get('/login', function(req, res) {
-    res.render('pages/index');
+    res.render('pages/login');
 });
 
 
@@ -125,37 +137,48 @@ app.get('/login', function(req, res) {
 
 // get the table
 app.get('/api/table/get', function(req, res) {
-    res.send(utils.makeTable(db));
-    res.status(200);
+    doc = utils.findDoc(db, req.query.doc);
+    if(doc) {
+        res.status(200).send(utils.makeTable(doc));
+    }
+    else {
+        res.sendStatus(404);
+    }
 })
 
 // update content
 app.post('/api/content/update', function(req, res) {
-    let data = req.body;
-    let content = validator.escape(data.value);
-    let parts = validator.escape(data.id).split('_');
-    switch (parts[1]) {
-        case 'wna':
-            if (validator.isNumeric(parts[2])) {
-                if (db[parts[2]]) {
-                    db[parts[2]].wna = content;
+    doc = utils.findDoc(db, req.query.doc);
+    if(doc) {
+        let data = req.body;
+        let content = validator.escape(data.value);
+        let parts = validator.escape(data.id).split('_');
+        switch (parts[1]) {
+            case 'wna':
+                if (validator.isNumeric(parts[2])) {
+                    if (doc[parts[2]]) {
+                        doc[parts[2]].wna = content;
+                    }
                 }
-            }
-            break;
-        case 'str':
-            if (validator.isNumeric(parts[2]) && validator.isNumeric(parts[3])) {
-                if (db[parts[2]] && db[parts[2]].str[parts[3]]) {
-                    db[parts[2]].str[parts[3]].name = content;
+                break;
+            case 'str':
+                if (validator.isNumeric(parts[2]) && validator.isNumeric(parts[3])) {
+                    if (doc[parts[2]] && doc[parts[2]].str[parts[3]]) {
+                        doc[parts[2]].str[parts[3]].name = content;
+                    }
                 }
-            }
-            break;
-        case 'com':
-            if (validator.isNumeric(parts[2]) && validator.isNumeric(parts[3])) {
-                if (db[parts[2]] && db[parts[2]].str[parts[3]]) {
-                    db[parts[2]].str[parts[3]].com = content.split('\n');
+                break;
+            case 'com':
+                if (validator.isNumeric(parts[2]) && validator.isNumeric(parts[3])) {
+                    if (doc[parts[2]] && doc[parts[2]].str[parts[3]]) {
+                        doc[parts[2]].str[parts[3]].com = content.split('\n');
+                    }
                 }
-            }
-            break;
+                break;
+        }
+    }
+    else {
+        res.sendStatus(404);
     }
 })
 
@@ -164,64 +187,94 @@ app.post('/api/content/update', function(req, res) {
 
 // create a new week
 app.post('/api/week/new', function(req, res) {
-    let blankweek = {
-        "wpe": "",
-        "wna": "",
-        "str": [{
-            "name": "",
-            "com": [""],
-            "res": [{
+    doc = utils.findDoc(db, req.query.doc);
+    if(doc) {
+        let blankweek = {
+            "wpe": "",
+            "wna": "",
+            "str": [{
                 "name": "",
-                "url": ""
+                "com": [""],
+                "res": [{
+                    "name": "",
+                    "url": ""
+                }]
             }]
-        }]
+        }
+        doc.push(blankweek);
+        res.sendStatus(200);
     }
-    db.push(blankweek);
-    res.redirect('/');
+    else {
+        res.sendStatus(404);
+    }
 })
 
 // get week
 app.get('/api/week/get', function(req, res) {
-    let id = parseInt(req.query.id);
-    if (db[id]) {
-        res.json(db[id]);
-        res.status(200);
-    } else {
+    doc = utils.findDoc(db, req.query.doc);
+    if(doc) {
+        let id = parseInt(req.query.id);
+        if (doc[id]) {
+            res.json(doc[id]);
+            res.status(200);
+        } else {
+            res.sendStatus(404);
+        }
+    }
+    else {
         res.sendStatus(404);
     }
 })
 
 // move week up
 app.post('/api/week/up', function(req, res) {
-    let data = req.body;
-    let i = parseInt(data.id);
-    if (i > 0) {
-        utils.swap(db, i, i - 1);
-        utils.swapwpe(db, i, i - 1);
-        res.sendStatus(200);
-    } else {
-        res.sendStatus(405)
+    doc = utils.findDoc(db, req.query.doc);
+    if(doc) {
+        let data = req.body;
+        let i = parseInt(data.id);
+        if (i > 0) {
+            utils.swap(doc, i, i - 1);
+            utils.swapwpe(doc, i, i - 1);
+            res.sendStatus(200);
+        } else {
+            res.sendStatus(405)
+        }
+    }
+    else {
+        res.sendStatus(404);
     }
 })
 
 // move week down
 app.post('/api/week/down', function(req, res) {
-    let data = req.body;
-    let i = parseInt(data.id);
-    if (i < db.length - 1) {
-        utils.swap(db, i, i + 1);
-        utils.swapwpe(db, i, i + 1);
-        res.sendStatus(200);
-    } else {
-        res.sendStatus(405)
+    doc = utils.findDoc(db, req.query.doc);
+    if(doc) {
+        let data = req.body;
+        let i = parseInt(data.id);
+        if (i < doc.length - 1) {
+            utils.swap(doc, i, i + 1);
+            utils.swapwpe(doc, i, i + 1);
+            res.sendStatus(200);
+        } else {
+            res.sendStatus(405)
+        }
+    }
+    else {
+        res.sendStatus(404);
     }
 })
 
 // delete week
 app.post('/api/week/delete', function(req, res) {
-    let data = req.body;
-    let i = parseInt(data.id);
-    db.splice(i, 1);
+    doc = utils.findDoc(db, req.query.doc);
+    if(doc) {
+        let data = req.body;
+        let i = parseInt(data.id);
+        doc.splice(i, 1);
+    }
+    else {
+        res.sendStatus(404);
+    }
 })
 
 
@@ -229,12 +282,18 @@ app.post('/api/week/delete', function(req, res) {
 
 // update period
 app.post('/api/period/update', function(req, res) {
-    let data = req.body;
-    let id = parseInt(data.id.split('_')[2]);
+    doc = utils.findDoc(db, req.query.doc);
+    if(doc) {
+        let data = req.body;
+        let id = parseInt(data.id.split('_')[2]);
 
-    db[id].wpe = utils.getWeekPeriod(data.value);
+        doc[id].wpe = utils.getWeekPeriod(data.value);
 
-    res.sendStatus(200);
+        res.sendStatus(200);
+    }
+    else {
+        res.sendStatus(404);
+    }
 })
 
 
@@ -242,37 +301,43 @@ app.post('/api/period/update', function(req, res) {
 
 //update structures
 app.post('/api/str/update', function(req, res) {
-    let data = req.body;
-    let id = parseInt(data.id);
-    let week = db[id];
-    let str = data.str;
-    let lastid = 0;
-    let newWeek = [];
-    for (let i = 0; i < str.length; i++) {
-        let strid = parseInt(str[i].id.split('_')[1]);
-        str[i].id = strid;
-    }
+    doc = utils.findDoc(db, req.query.doc);
+    if(doc) {
+        let data = req.body;
+        let id = parseInt(data.id);
+        let week = doc[id];
+        let str = data.str;
+        let lastid = 0;
+        let newWeek = [];
+        for (let i = 0; i < str.length; i++) {
+            let strid = parseInt(str[i].id.split('_')[1]);
+            str[i].id = strid;
+        }
 
-    for (let i = 0; i < week.str.length; i++) {
-        for (let j = 0; j < str.length; j++) {
-            if (str[j].id == i) {
-                week.str[i].name = str[j].name;
-                newWeek.push(week.str[i]);
-                str.splice(j, 1);
+        for (let i = 0; i < week.str.length; i++) {
+            for (let j = 0; j < str.length; j++) {
+                if (str[j].id == i) {
+                    week.str[i].name = str[j].name;
+                    newWeek.push(week.str[i]);
+                    str.splice(j, 1);
+                }
             }
         }
-    }
 
-    for (let j = 0; j < str.length; j++) {
-        let item = {};
-        item.name = str[j].name;
-        item.com = [];
-        item.res = [];
-        newWeek.push(item);
-    }
+        for (let j = 0; j < str.length; j++) {
+            let item = {};
+            item.name = str[j].name;
+            item.com = [];
+            item.res = [];
+            newWeek.push(item);
+        }
 
-    db[id].str = newWeek.slice();
-    res.sendStatus(200);
+        doc[id].str = newWeek.slice();
+        res.sendStatus(200);
+    }
+    else {
+        res.sendStatus(404);
+    }
 })
 
 
@@ -280,14 +345,20 @@ app.post('/api/str/update', function(req, res) {
 
 // update the resources
 app.post('/api/res/update', function(req, res) {
-    let data = req.body;
-    let parts = data.id.split('_');
-    if (data.res) {
-        db[parts[2]].str[parts[3]].res = data.res.slice();
-    } else {
-        db[parts[2]].str[parts[3]].res = [].slice();
+    doc = utils.findDoc(db, req.query.doc);
+    if(doc) {
+        let data = req.body;
+        let parts = data.id.split('_');
+        if (data.res) {
+            doc[parts[2]].str[parts[3]].res = data.res.slice();
+        } else {
+            doc[parts[2]].str[parts[3]].res = [].slice();
+        }
+        res.sendStatus(200);
     }
-    res.sendStatus(200);
+    else {
+        res.sendStatus(404);
+    }
 })
 
 

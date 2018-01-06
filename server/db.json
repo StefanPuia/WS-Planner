@@ -1,63 +1,70 @@
 {
-    "planner":
+    "documents":
     [
         {
-            "wpe":"8/1 - 14/1",
-            "wna":"AJAX",
-            "str":
+            "name": "Web Script",
+            "id": "q961nqr3pxjqynja",
+            "weeks":
             [
                 {
-                    "name": "Lecture: intro to AJAX",
-                    "com":
-                    [
-                        "need to say about ajax stuff",
-                        "need to teach ajax"
-                    ],
-                    "res":
+                    "wpe":"8/1 - 14/1",
+                    "wna":"AJAX",
+                    "str":
                     [
                         {
-                            "name": "Presenatation", 
-                            "url": "http://goo.gl/as2dE"
+                            "name": "Lecture: intro to AJAX",
+                            "com":
+                            [
+                                "need to say about ajax stuff",
+                                "need to teach ajax"
+                            ],
+                            "res":
+                            [
+                                {
+                                    "name": "Presenatation", 
+                                    "url": "http://goo.gl/as2dE"
+                                },
+                                {
+                                    "name": "Documentation",
+                                    "url": "http://goo.gl/aw23tg"
+                                }
+                            ]
+
                         },
                         {
-                            "name": "Documentation",
-                            "url": "http://goo.gl/aw23tg"
+                            "name": "Practical: Working on AJAX",
+                            "com":
+                            [
+                                "need to show people in practicals how to use ajax"
+                            ],
+                            "res":
+                            [
+                                {
+                                    "name": "GitHub", 
+                                    "url": "http://github.com/portsoc/ws_ajax"
+                                }
+                            ]
                         }
                     ]
-
                 },
                 {
-                    "name": "Practical: Working on AJAX",
-                    "com":
-                    [
-                        "need to show people in practicals how to use ajax"
-                    ],
-                    "res":
+                    "wpe":"15/1 - 21/1",
+                    "wna":"Sockets",
+                    "str":
                     [
                         {
-                            "name": "GitHub", 
-                            "url": "http://github.com/portsoc/ws_ajax"
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "wpe":"15/1 - 21/1",
-            "wna":"Sockets",
-            "str":
-            [
-                {
-                    "name": "Practical",
-                    "com":
-                    [
-                        "show people how to use sockets in practicals"
-                    ],
-                    "res":
-                    [
-                        {
-                            "name": "GitHub",
-                            "url": "http://github.com/portsoc/ws_sockets"
+                            "name": "Practical",
+                            "com":
+                            [
+                                "show people how to use sockets in practicals"
+                            ],
+                            "res":
+                            [
+                                {
+                                    "name": "GitHub",
+                                    "url": "http://github.com/portsoc/ws_sockets"
+                                }
+                            ]
                         }
                     ]
                 }

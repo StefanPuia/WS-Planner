@@ -102,3 +102,43 @@ function createRandomString( length ) {
     return str.substr( 0, length );
 }
 module.exports.randomStr = createRandomString;
+
+function findDoc(db, id) {
+    let found = false;
+    db.documents.forEach(function(doc) {
+        if(doc.id == id) {
+            found = doc.weeks;
+            return;
+        }
+    })
+    return found;
+}
+module.exports.findDoc = findDoc;
+
+function makeDocs(obj) {
+    let docs = obj.documents;
+    let content = "";
+    let i = 1;
+    docs.forEach(function(doc) {
+        if(i == 1) {
+            content += '<div class="row">';
+        }
+
+        content += `
+            <div class="col-md-3">
+                <a href="/?doc=${doc.id}">
+                    <p>${doc.name}</p>
+                </a>
+            </div>
+        `;
+
+        i++;
+        if(i>4) {
+            i = 1;
+            content += "</div>";
+        }
+    })
+
+    return content;
+}
+module.exports.makeDocs = makeDocs;
