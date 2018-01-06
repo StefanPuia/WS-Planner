@@ -18,13 +18,21 @@ delete structure
 add structure
 add resource
 delete resource
+history
+collaboration on same file
+
+
+
+NEED TO BE DONE ASAP
 
 
 
 
 KINDA DONE
 
-collaboration on same file
+
+
+
 
 
 
@@ -37,3 +45,4 @@ sessions
 multiple files
 url validation on resources
 auto populate dates when selecting one
+

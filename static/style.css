@@ -62,10 +62,10 @@ body {
 	text-align: center;
 }
 
-.floating {
-    position: fixed;
-    right: 1em;
-    bottom: 1em;
+.new-week {
+    position: relative;
+    left: 2em;
+    padding-bottom: 8em;
 }
 
 .center {

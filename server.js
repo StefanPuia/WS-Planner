@@ -6,11 +6,7 @@ sv.message = "Server started on port " + sv.port;
 sv.clients = [];
 
 
-
-
 // define and initialise required packages 
-const http = require('http');
-
 const express = require('express');
 const app = express();
 // set view engine to ejs
@@ -21,6 +17,7 @@ app.use('/public', express.static('static'));
 const mysql = require('mysql');
 const fs = require('fs');
 const validator = require('validator');
+const http = require('http');
 
 // web socket server
 const WebSocket = require('ws');
@@ -28,69 +25,9 @@ const server = http.createServer();
 const wss = new WebSocket.Server({
     server: server,
 });
-
 server.on('request', app);
-// establish connection
-wss.on('connection', function connection(ws, req) {
-    // add client to the array
-    ws.sessionid = utils.randomStr(16);
-    ws.clientid = "";
-    sv.clients.push(ws);
 
-    // error handling WIP
-    ws.on('error', () => {});
-
-    // listen for messages
-    ws.on('message', function incoming(message) {
-        let data = JSON.parse(message);
-        if(data.value) {
-            data.value = validator.escape(data.value);
-        }
-
-        switch(data.type) {
-            case 'wna':
-            case 'str':
-            case 'com':
-                // do nothing
-                break;
-
-            case 'wpe':
-                data.value = utils.getWeekPeriod(data.value);
-                break;
-
-            case 'res':
-                data.value = utils.listify(data.res);
-                data.res = undefined;
-                break;
-
-            case 'clientid':
-                if(ws.clientid === "") {
-                    ws.clientid = data.value;
-                    ws.send(JSON.stringify({
-                        "type": "sessionid",
-                        "value": ws.sessionid
-                    }));
-                }
-                break;
-        }
-        
-        // self send
-        //ws.send(JSON.stringify(data));
-
-        console.log(data);
-
-        // broadcast to all connected hosts, including sender
-        if(data) {
-            sv.clients.forEach(function(client) {
-                if (client.readyState === WebSocket.OPEN) {
-                    client.send(JSON.stringify(data));
-                }
-            });
-        }
-    });
-});
-
-// body parser for json
+// json parser for http requests
 const bodyParser = require('body-parser');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
@@ -105,6 +42,67 @@ let planner = JSON.parse(fs.readFileSync('./server/db.json', 'utf8'));
 let db = planner.planner;
 
 
+//// WEB SOCKET HANDLING ////
+
+
+// establish connection
+wss.on('connection', function connection(ws, req) {
+    // add client to the array
+    ws.sessionid = utils.randomStr(16);
+    sv.clients.push(ws);
+
+    // error handling WIP
+    ws.on('error', () => {});
+
+    // listen for messages
+    ws.on('message', function incoming(message) {
+        let data = JSON.parse(message);
+        console.log(data);
+
+        let sessionid = data.sessionid;
+        delete data.sessionid;
+
+        switch (data.type) {
+            case 'wna':
+            case 'str':
+            case 'com':
+                if (data.value) {
+                    data.value = validator.escape(data.value);
+                }
+                break;
+
+            case 'wpe':
+                data.value = utils.getWeekPeriod(data.value);
+                break;
+
+            case 'res':
+                data.value = utils.listify(data.res);
+                data.res = undefined;
+                break;
+
+            case 'conn':
+                ws.send(JSON.stringify({
+                    "type": "sessionid",
+                    "value": ws.sessionid
+                }));
+                break;
+        }
+
+        // self send
+        //ws.send(JSON.stringify(data));
+
+        console.log(data);
+
+        // broadcast to all connected hosts, including sender
+        if (data.value != "") {
+            sv.clients.forEach(function(client) {
+                if (client.readyState === WebSocket.OPEN) {
+                    client.send(JSON.stringify(data));
+                }
+            });
+        }
+    });
+});
 
 
 //// SERVE PAGES ////
@@ -123,13 +121,46 @@ app.get('/login', function(req, res) {
 });
 
 
-
 //// API ////
+
 // get the table
 app.get('/api/table/get', function(req, res) {
     res.send(utils.makeTable(db));
     res.status(200);
 })
+
+// update content
+app.post('/api/content/update', function(req, res) {
+    let data = req.body;
+    let content = validator.escape(data.value);
+    let parts = validator.escape(data.id).split('_');
+    switch (parts[1]) {
+        case 'wna':
+            if (validator.isNumeric(parts[2])) {
+                if (db[parts[2]]) {
+                    db[parts[2]].wna = content;
+                }
+            }
+            break;
+        case 'str':
+            if (validator.isNumeric(parts[2]) && validator.isNumeric(parts[3])) {
+                if (db[parts[2]] && db[parts[2]].str[parts[3]]) {
+                    db[parts[2]].str[parts[3]].name = content;
+                }
+            }
+            break;
+        case 'com':
+            if (validator.isNumeric(parts[2]) && validator.isNumeric(parts[3])) {
+                if (db[parts[2]] && db[parts[2]].str[parts[3]]) {
+                    db[parts[2]].str[parts[3]].com = content.split('\n');
+                }
+            }
+            break;
+    }
+})
+
+
+//// WEEKS ////
 
 // create a new week
 app.post('/api/week/new', function(req, res) {
@@ -149,16 +180,15 @@ app.post('/api/week/new', function(req, res) {
     res.redirect('/');
 })
 
-// update the resources
-app.post('/api/res/update', function(req, res) {
-    let data = req.body;
-    let parts = data.id.split('_');
-    if (data.res) {
-        db[parts[2]].str[parts[3]].res = data.res.slice();
+// get week
+app.get('/api/week/get', function(req, res) {
+    let id = parseInt(req.query.id);
+    if (db[id]) {
+        res.json(db[id]);
+        res.status(200);
     } else {
-        db[parts[2]].str[parts[3]].res = [].slice();
+        res.sendStatus(404);
     }
-    res.sendStatus(200);
 })
 
 // move week up
@@ -194,17 +224,21 @@ app.post('/api/week/delete', function(req, res) {
     db.splice(i, 1);
 })
 
-// get week
-app.get('/api/week/get', function(req, res) {
-    let id = parseInt(req.query.id);
-    if (db[id]) {
-        res.json(db[id]);
-        res.status(200);
-    } else {
-        res.sendStatus(404);
-    }
 
+//// PERIOD ////
+
+// update period
+app.post('/api/period/update', function(req, res) {
+    let data = req.body;
+    let id = parseInt(data.id.split('_')[2]);
+
+    db[id].wpe = utils.getWeekPeriod(data.value);
+
+    res.sendStatus(200);
 })
+
+
+//// STRUCTURES ////
 
 //update structures
 app.post('/api/str/update', function(req, res) {
@@ -241,49 +275,27 @@ app.post('/api/str/update', function(req, res) {
     res.sendStatus(200);
 })
 
-// update content
-app.post('/api/content/update', function(req, res) {
+
+//// RESOURCES ////
+
+// update the resources
+app.post('/api/res/update', function(req, res) {
     let data = req.body;
-    let content = validator.escape(data.value);
-    let parts = validator.escape(data.id).split('_');
-    switch (parts[1]) {
-        case 'wna':
-            if (validator.isNumeric(parts[2])) {
-                if (db[parts[2]]) {
-                    db[parts[2]].wna = content;
-                }
-            }
-            break;
-        case 'str':
-            if (validator.isNumeric(parts[2]) && validator.isNumeric(parts[3])) {
-                if (db[parts[2]] && db[parts[2]].str[parts[3]]) {
-                    db[parts[2]].str[parts[3]].name = content;
-                }
-            }
-            break;
-        case 'com':
-            if (validator.isNumeric(parts[2]) && validator.isNumeric(parts[3])) {
-                if (db[parts[2]] && db[parts[2]].str[parts[3]]) {
-                    db[parts[2]].str[parts[3]].com = content.split('\n');
-                }
-            }
-            break;
+    let parts = data.id.split('_');
+    if (data.res) {
+        db[parts[2]].str[parts[3]].res = data.res.slice();
+    } else {
+        db[parts[2]].str[parts[3]].res = [].slice();
     }
-})
-
-
-// update period
-app.post('/api/period/update', function(req, res) {
-    let data = req.body;
-    let id = parseInt(data.id.split('_')[2]);
-    
-    db[id].wpe = utils.getWeekPeriod(data.date);
-
     res.sendStatus(200);
 })
 
 
 
 
-// listen on port 8080
-server.listen(sv.port, function () { console.log(sv.message); });
+
+
+// listen
+server.listen(sv.port, function() {
+    console.log(sv.message);
+});
