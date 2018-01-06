@@ -301,7 +301,7 @@ function addStr(el) {
 
 // edit structures
 async function editStr(id) {
-    const response = await fetch(`api/week/get?id=${id}`);
+    const response = await fetch(`api/week/get?doc=${documentid}&id=${id}`);
     const week = await response.json();
     let body = document.querySelector('#bodyModalStructures');
     let content = `<div class="container"><form class="form-inline" id="formStructures" data-id="${id}">`;

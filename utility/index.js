@@ -125,17 +125,46 @@ function makeDocs(obj) {
         }
 
         content += `
-            <div class="col-md-3">
-                <a href="/?doc=${doc.id}">
-                    <p>${doc.name}</p>
-                </a>
+            <div class="col-md-3 no-dec center">
+                <div class="thumbnail">
+                    <h3>${doc.name}</h3>
+                    <hr>
+                    <ul class="left">`;
+
+        for(let j = 0; j < 4 && j < doc.weeks.length; j++) {
+            let wna = doc.weeks[j].wna;
+            if(wna.length > 20) {
+                wna = wna.substr(0, 19) + "...";
+            }
+            content += `
+                        <li>${wna}
+                            <ul>`;
+
+            for(let k = 0; k < 3 && k < doc.weeks[j].str.length; k++) {
+                let str = doc.weeks[j].str[k];
+                if(str.length > 20) {
+                    str = str.substr(0, 19) + "...";
+                }
+                content += `<li>${str.name}</li>`;
+            }
+
+            content += `    </ul>
+                        </li>`;
+        }
+
+        content +=` </ul>
+                    <a class="btn btn-default" href="/?doc=${doc.id}">
+                        Edit
+                    </a>
+                </div>
             </div>
         `;
 
         i++;
         if(i>4) {
             i = 1;
-            content += "</div>";
+            // end row
+            content += `</div>`;
         }
     })
 

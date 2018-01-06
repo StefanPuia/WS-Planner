@@ -1,24 +1,23 @@
-<!-- views/pages/index.ejs -->
-
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <% include ../partials/head %>
-</head>
-<body>
+	<head>
+		<% include ../partials/head %>
+	</head>
 
-<header>
-	<% include ../partials/modals %>
-    <% include ../partials/header %>
-</header>
+	<header>
+		<% include ../partials/header %>
+	</header>
 
-<main class="container">
-    <%- documents %>
-</main>
-
-<footer>
-    <% include ../partials/footer %>
-</footer>
-
-</body>
+	<body class="container">
+		<main>
+			<div class="row">
+				<h1 class="center">My Documents</h1>
+				<hr>
+				<%-documents%>
+			</div>
+		</main>
+		<footer>
+			<% include ../partials/footer %>
+		</footer>
+	</body>
 </html>

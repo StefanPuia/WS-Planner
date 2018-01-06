@@ -132,6 +132,10 @@ app.get('/login', function(req, res) {
     res.render('pages/login');
 });
 
+app.post('/user/login', function(req, res) {
+    res.json(req.body);
+})
+
 
 //// API ////
 
@@ -142,7 +146,7 @@ app.get('/api/table/get', function(req, res) {
         res.status(200).send(utils.makeTable(doc));
     }
     else {
-        res.sendStatus(404);
+        res.status(404).json({});;
     }
 })
 
@@ -178,7 +182,7 @@ app.post('/api/content/update', function(req, res) {
         }
     }
     else {
-        res.sendStatus(404);
+        res.status(404).json({});;
     }
 })
 
@@ -205,7 +209,7 @@ app.post('/api/week/new', function(req, res) {
         res.sendStatus(200);
     }
     else {
-        res.sendStatus(404);
+        res.status(404).json({});;
     }
 })
 
@@ -218,11 +222,11 @@ app.get('/api/week/get', function(req, res) {
             res.json(doc[id]);
             res.status(200);
         } else {
-            res.sendStatus(404);
+            res.status(404).json({});;
         }
     }
     else {
-        res.sendStatus(404);
+        res.status(404).json({});;
     }
 })
 
@@ -241,7 +245,7 @@ app.post('/api/week/up', function(req, res) {
         }
     }
     else {
-        res.sendStatus(404);
+        res.status(404).json({});;
     }
 })
 
@@ -260,7 +264,7 @@ app.post('/api/week/down', function(req, res) {
         }
     }
     else {
-        res.sendStatus(404);
+        res.status(404).json({});;
     }
 })
 
@@ -273,7 +277,7 @@ app.post('/api/week/delete', function(req, res) {
         doc.splice(i, 1);
     }
     else {
-        res.sendStatus(404);
+        res.status(404).json({});;
     }
 })
 
@@ -292,7 +296,7 @@ app.post('/api/period/update', function(req, res) {
         res.sendStatus(200);
     }
     else {
-        res.sendStatus(404);
+        res.status(404).json({});;
     }
 })
 
@@ -336,7 +340,7 @@ app.post('/api/str/update', function(req, res) {
         res.sendStatus(200);
     }
     else {
-        res.sendStatus(404);
+        res.status(404).json({});;
     }
 })
 
@@ -357,7 +361,7 @@ app.post('/api/res/update', function(req, res) {
         res.sendStatus(200);
     }
     else {
-        res.sendStatus(404);
+        res.status(404).json({});;
     }
 })
 

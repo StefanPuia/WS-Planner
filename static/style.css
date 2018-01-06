@@ -71,3 +71,15 @@ body {
 .center {
 	text-align: center;
 }
+
+.no-dec a {
+	text-decoration: none;
+}
+
+.no-dec ul {
+	list-style: none;
+}
+
+.left {
+	text-align: left;
+}
