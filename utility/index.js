@@ -107,7 +107,7 @@ function findDoc(db, id) {
     let found = false;
     db.documents.forEach(function(doc) {
         if(doc.id == id) {
-            found = doc.weeks;
+            found = doc;
             return;
         }
     })

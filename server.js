@@ -60,7 +60,7 @@ wss.on('connection', function connection(ws, req) {
 
         let sessionid = data.sessionid;
         delete data.sessionid;
-        doc = db[data.documentid];
+        doc = utils.findDoc(db, data.documentid);
         delete data.documentid;
 
         switch (data.type) {
@@ -111,9 +111,10 @@ app.get('/', function(req, res) {
     if(req.query.doc) {
         doc = utils.findDoc(db, req.query.doc);
         if(doc !== false) {
+            console.log(doc);
             res.render(
                 'pages/index', {
-                    table: utils.makeTable(doc)
+                    table: utils.makeTable(doc.weeks)
                 });
         }
         else {
@@ -143,7 +144,7 @@ app.post('/user/login', function(req, res) {
 app.get('/api/table/get', function(req, res) {
     doc = utils.findDoc(db, req.query.doc);
     if(doc) {
-        res.status(200).send(utils.makeTable(doc));
+        res.status(200).send(utils.makeTable(doc.weeks));
     }
     else {
         res.status(404).json({});;
@@ -160,22 +161,22 @@ app.post('/api/content/update', function(req, res) {
         switch (parts[1]) {
             case 'wna':
                 if (validator.isNumeric(parts[2])) {
-                    if (doc[parts[2]]) {
-                        doc[parts[2]].wna = content;
+                    if (doc.weeks[parts[2]]) {
+                        doc.weeks[parts[2]].wna = content;
                     }
                 }
                 break;
             case 'str':
                 if (validator.isNumeric(parts[2]) && validator.isNumeric(parts[3])) {
-                    if (doc[parts[2]] && doc[parts[2]].str[parts[3]]) {
-                        doc[parts[2]].str[parts[3]].name = content;
+                    if (doc.weeks[parts[2]] && doc.weeks[parts[2]].str[parts[3]]) {
+                        doc.weeks[parts[2]].str[parts[3]].name = content;
                     }
                 }
                 break;
             case 'com':
                 if (validator.isNumeric(parts[2]) && validator.isNumeric(parts[3])) {
-                    if (doc[parts[2]] && doc[parts[2]].str[parts[3]]) {
-                        doc[parts[2]].str[parts[3]].com = content.split('\n');
+                    if (doc.weeks[parts[2]] && doc.weeks[parts[2]].str[parts[3]]) {
+                        doc.weeks[parts[2]].str[parts[3]].com = content.split('\n');
                     }
                 }
                 break;
@@ -205,7 +206,7 @@ app.post('/api/week/new', function(req, res) {
                 }]
             }]
         }
-        doc.push(blankweek);
+        doc.weeks.push(blankweek);
         res.sendStatus(200);
     }
     else {
@@ -218,8 +219,8 @@ app.get('/api/week/get', function(req, res) {
     doc = utils.findDoc(db, req.query.doc);
     if(doc) {
         let id = parseInt(req.query.id);
-        if (doc[id]) {
-            res.json(doc[id]);
+        if (doc.weeks[id]) {
+            res.json(doc.weeks[id]);
             res.status(200);
         } else {
             res.status(404).json({});;
@@ -237,8 +238,8 @@ app.post('/api/week/up', function(req, res) {
         let data = req.body;
         let i = parseInt(data.id);
         if (i > 0) {
-            utils.swap(doc, i, i - 1);
-            utils.swapwpe(doc, i, i - 1);
+            utils.swap(doc.weeks, i, i - 1);
+            utils.swapwpe(doc.weeks, i, i - 1);
             res.sendStatus(200);
         } else {
             res.sendStatus(405)
@@ -255,9 +256,9 @@ app.post('/api/week/down', function(req, res) {
     if(doc) {
         let data = req.body;
         let i = parseInt(data.id);
-        if (i < doc.length - 1) {
-            utils.swap(doc, i, i + 1);
-            utils.swapwpe(doc, i, i + 1);
+        if (i < doc.weeks.length - 1) {
+            utils.swap(doc.weeks, i, i + 1);
+            utils.swapwpe(doc.weeks, i, i + 1);
             res.sendStatus(200);
         } else {
             res.sendStatus(405)
@@ -274,7 +275,7 @@ app.post('/api/week/delete', function(req, res) {
     if(doc) {
         let data = req.body;
         let i = parseInt(data.id);
-        doc.splice(i, 1);
+        doc.weeks.splice(i, 1);
     }
     else {
         res.status(404).json({});;
@@ -291,7 +292,7 @@ app.post('/api/period/update', function(req, res) {
         let data = req.body;
         let id = parseInt(data.id.split('_')[2]);
 
-        doc[id].wpe = utils.getWeekPeriod(data.value);
+        doc.weeks[id].wpe = utils.getWeekPeriod(data.value);
 
         res.sendStatus(200);
     }
@@ -309,7 +310,7 @@ app.post('/api/str/update', function(req, res) {
     if(doc) {
         let data = req.body;
         let id = parseInt(data.id);
-        let week = doc[id];
+        let week = doc.weeks[id];
         let str = data.str;
         let lastid = 0;
         let newWeek = [];
@@ -336,7 +337,7 @@ app.post('/api/str/update', function(req, res) {
             newWeek.push(item);
         }
 
-        doc[id].str = newWeek.slice();
+        doc.weeks[id].str = newWeek.slice();
         res.sendStatus(200);
     }
     else {
@@ -354,9 +355,9 @@ app.post('/api/res/update', function(req, res) {
         let data = req.body;
         let parts = data.id.split('_');
         if (data.res) {
-            doc[parts[2]].str[parts[3]].res = data.res.slice();
+            doc.weeks[parts[2]].str[parts[3]].res = data.res.slice();
         } else {
-            doc[parts[2]].str[parts[3]].res = [].slice();
+            doc.weeks[parts[2]].str[parts[3]].res = [].slice();
         }
         res.sendStatus(200);
     }

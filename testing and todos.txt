@@ -24,6 +24,7 @@ empty string structure name validation
 no structures validation
 url validation on resources
 empty string resource name validation
+multiple files
 
 
 
@@ -47,6 +48,5 @@ NOT DONE YET
 database
 authentication
 sessions
-multiple files
 auto populate dates when selecting one
 
