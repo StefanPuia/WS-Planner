@@ -32,7 +32,17 @@ function addListeners() {
     document.querySelectorAll('td.td_res').forEach(function(el) {
         el.addEventListener('click',
             function(e) {
-                editRes(e.currentTarget);
+                // do not trigger the modal if event happens on a link
+                if(e.target.tagName.toLowerCase() != "a") {
+                    editRes(e.currentTarget);
+                }
+                // only open links if control is pressed
+                else {
+                    e.preventDefault();
+                    if(e.ctrlKey || e.metaKey) {
+                        window.open(e.target.href);
+                    }
+                }
             });
     })
 
@@ -230,7 +240,7 @@ function editPer(el) {
     let body = document.querySelector('#bodyModalPeriod');
     let content = `
         <div class="form-group">
-            <label for="inputDate" class="control-label">Enter first date of the week</label>
+            <label class="control-label">Enter first date of the week</label>
             <input id="inputDate" type="date" class="form-control" data-id="${el.id}">
         </div>`;
 
@@ -269,8 +279,8 @@ function addStr(el) {
     div.id = `str_${i}`;
     let content = `
                 <div class="form-group">
-                    <label>Name</label>
-                    <input required type="text" class="form-control str_name" value="">
+                    <label class="control-label">Name</label>
+                    <input type="text" class="form-control" value="">
                 </div>
                 <div class="form-group">
                     <label>Action</label>
@@ -302,8 +312,8 @@ async function editStr(id) {
         content += `
                 <div id="str_${i}">
                     <div class="form-group">
-                        <label>Name</label>
-                        <input required type="text" class="form-control str_name" value="${name?name:""}">
+                        <label class="control-label">Name</label>
+                        <input type="text" class="form-control" value="${name?name:""}">
                     </div>
                     <div class="form-group">
                         <label>Action</label>
@@ -366,16 +376,28 @@ function saveStr() {
     divs.forEach(function(el) {
         let item = {};
         item.id = el.id;
-        item.name = el.querySelector('.str_name').value;
+        item.name = el.querySelector('input').value;
         if (item.name) {
             data.str.push(item);
         }
+        else {
+            let empty = el.querySelectorAll('div.form-group')[0];
+            empty.classList.add('has-error');
+            empty.querySelector('input').addEventListener('input', function(e) {
+                if(e.target.value != "") {
+                    e.target.parentElement.classList.remove('has-error');
+                }
+                else {
+                    e.target.parentElement.classList.add('has-error');
+                }
+            })
+        }
     })
-    if (data.str.length > 0) {
+    if (data.str.length == divs.length) {
         postToServer(data, '/api/str/update');
         update();
         $('#modalStructuresEdit').modal('hide');
-    } else {
+    } else if(data.str.length == 0){
         let alert = document.querySelector('#alertStructuresEmpty');
         if (!alert) {
             alert = document.createElement('div');
@@ -411,11 +433,11 @@ function addRes(el) {
     div.id = `res_${i}`;
     let content = `
                 <div class="form-group">
-                    <label>Name</label>
+                    <label class="control-label">Name</label>
                     <input required type="text" class="form-control res_name" value="">
                 </div>
                 <div class="form-group">
-                    <label>URL</label>
+                    <label class="control-label">URL</label>
                     <input required type="url" class="form-control res_url" value="">
                 </div>
                 <div class="form-group">
@@ -442,11 +464,11 @@ function editRes(el) {
         content += `
                 <div id="res_${i}">
                     <div class="form-group">
-                        <label>Name</label>
+                        <label class="control-label">Name</label>
                         <input required type="text" class="form-control res_name" value="${name?name:""}">
                     </div>
                     <div class="form-group">
-                        <label>URL</label>
+                        <label class="control-label">URL</label>
                         <input required type="url" class="form-control res_url" value="${url?url:""}">
                     </div>
                     <div class="form-group">
@@ -511,16 +533,54 @@ function saveRes() {
         let item = {};
         item.name = el.querySelector('.res_name').value;
         item.url = el.querySelector('.res_url').value;
-        if (item.name && item.url) {
+        if (item.name && item.url && validUrl(item.url)) {
             data.res.push(item);
         }
+        else {
+            if(!item.name) {
+                let empty = el.querySelectorAll('div.form-group')[0];
+                empty.classList.add('has-error');
+                empty.querySelector('input').addEventListener('input', function(e) {
+                    if(e.target.value != "") {
+                        e.target.parentElement.classList.remove('has-error');
+                    }
+                    else {
+                        e.target.parentElement.classList.add('has-error');
+                    }
+                })
+            }
+            if(!item.url || !validUrl(item.url)) {
+                let empty = el.querySelectorAll('div.form-group')[1];
+                empty.classList.add('has-error');
+                empty.querySelector('input').addEventListener('input', function(e) {
+                    if(e.target.value != "" && validUrl(e.target.value)) {
+                        e.target.parentElement.classList.remove('has-error');
+                    }
+                    else {
+                        e.target.parentElement.classList.add('has-error');
+                    }
+                })
+            }
+        }
     })
-    postToServer(data, '/api/res/update');
-    $('#modalResourcesEdit').modal('hide');
+
+    if(divs.length == data.res.length) {
+        postToServer(data, '/api/res/update');
+        $('#modalResourcesEdit').modal('hide');
+    }
 }
 
 // delete
 function delRes(id) {
     let res = document.querySelector(`#res_${id}`);
     res.remove();
+}
+
+
+
+
+//// FUNCTIONS ////
+
+function validUrl(url) {
+    return /^((ht|f)tp(s?)\:\/\/|~\/|\/)([\w]+\:[\w]+@)?([a-zA-Z]{1}([\w\-]+\.?)+([\w]{0,5}))(:[\d]{1,5})?\/?([\w]*\/*)*(\.[\w]{3,4})?((\?\w+=\w+)?(&\w+=\w+)*)?(\#.+)?/.test(url);
 }

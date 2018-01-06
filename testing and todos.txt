@@ -1,6 +1,6 @@
-add week
 DONE
 
+add week
 delete week
 change week name
 move week up
@@ -20,6 +20,11 @@ add resource
 delete resource
 history
 collaboration on same file
+empty string structure name validation
+no structures validation
+url validation on resources
+empty string resource name validation
+
 
 
 
@@ -43,6 +48,5 @@ database
 authentication
 sessions
 multiple files
-url validation on resources
 auto populate dates when selecting one
 

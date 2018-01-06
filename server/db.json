@@ -17,11 +17,11 @@
                     [
                         {
                             "name": "Presenatation", 
-                            "url": "goo.gl/as2dE"
+                            "url": "http://goo.gl/as2dE"
                         },
                         {
                             "name": "Documentation",
-                            "url": "goo.gl/aw23tg"
+                            "url": "http://goo.gl/aw23tg"
                         }
                     ]
 
@@ -36,7 +36,7 @@
                     [
                         {
                             "name": "GitHub", 
-                            "url": "github.com/portsoc/ws_ajax"
+                            "url": "http://github.com/portsoc/ws_ajax"
                         }
                     ]
                 }
@@ -57,7 +57,7 @@
                     [
                         {
                             "name": "GitHub",
-                            "url": "github.com/portsoc/ws_sockets"
+                            "url": "http://github.com/portsoc/ws_sockets"
                         }
                     ]
                 }
