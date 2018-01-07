@@ -14,7 +14,15 @@ app.set('view engine', 'ejs');
 // serve static files
 app.use('/public', express.static('static'));
 
+// database connection
 const mysql = require('mysql');
+const mysql_conn = mysql.createConnection({
+  host     : 'localhost',
+  user     : 'root',
+  password : 'root',
+  database : 'planner'
+});
+
 const fs = require('fs');
 const validator = require('validator');
 const http = require('http');
@@ -38,7 +46,8 @@ app.use(bodyParser.urlencoded({
 const utils = require('./utility');
 
 // database -- PROVISIONAL -- 
-let db = JSON.parse(fs.readFileSync('./server/db.json', 'utf8'));
+let db = JSON.parse(fs.readFileSync('./server/backup.json', 'utf8'));
+// let db = utils.runQuery(mysql_conn, 'SELECT * FROM document');
 let doc;
 
 

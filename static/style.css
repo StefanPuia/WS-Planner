@@ -28,6 +28,7 @@ body {
 /*week name*/
 .planner .td_wna {
 	min-width: 15em;
+	max-width: 15em;
 	text-align: center;
 	vertical-align: middle;
 }
@@ -35,6 +36,7 @@ body {
 /*week structure*/
 .planner .td_str {
 	min-width: 20em;
+	max-width: 30em;
 }
 
 .planner th.td_str {
@@ -43,7 +45,9 @@ body {
 
 /*week comments*/
 .planner .td_com {
-	min-width: 30em;
+	min-width: 25em;
+	max-width: 40em;
+	white-space: normal;
 }
 
 .planner th.td_com {
@@ -56,6 +60,7 @@ body {
 	width: auto;
 	vertical-align: middle;
 	cursor: pointer;
+	white-space: nowrap;
 }
 
 .planner th.td_res {
@@ -98,4 +103,15 @@ body {
 	height: 17.358em;
 	position: relative;
 	top: 6em;
+}
+
+#history {
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	right: 0;
+}
+
+#history .breadcrumb {
+	margin-bottom: 0!important;
 }

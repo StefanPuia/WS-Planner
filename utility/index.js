@@ -96,7 +96,7 @@ function getWeekPeriod(date) {
 }
 module.exports.getWeekPeriod = getWeekPeriod;
 
-function createRandomString(length = 16) {
+function createRandomString(length = 24) {
     let str = "";
     for (; str.length < length; str += Math.random().toString(36).substr(2));
     return str.substr(0, length);
@@ -211,3 +211,15 @@ function deleteDoc(db, id) {
     return found;
 }
 module.exports.deleteDoc = deleteDoc;
+
+function runQuery(connection, query) {
+    connection.connect();
+     
+    connection.query(query, function (error, results) {
+        if (error) throw error;
+        return results;
+    });
+     
+    connection.end();
+}
+module.exports.runQuery = runQuery;

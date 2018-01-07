@@ -150,6 +150,7 @@ function saveContent(el) {
     let last = history[history.length - 1];
     if (last && last.id == data.id && last.value == data.value) {
         history.pop();
+        popHistoryBreadcrumb();
     } else {
         postToServer(data, '/api/content/update?doc=' + documentid);
     }
@@ -176,6 +177,7 @@ function undo() {
         el.innerText = data.value;
         saveHistoryContent(el);
         history.pop();
+        popHistoryBreadcrumb();
     }
 }
 
@@ -187,6 +189,7 @@ function addHistory(el) {
         "value": el.innerText
     };
     history.push(data);
+    pushHistoryBreadcrumb(data);
 }
 
 
@@ -577,7 +580,7 @@ function delRes(id) {
 //// FUNCTIONS ////
 
 function validUrl(url) {
-    return /^((ht|f)tp(s?)\:\/\/|~\/|\/)([\w]+\:[\w]+@)?([a-zA-Z]{1}([\w\-]+\.?)+([\w]{0,5}))(:[\d]{1,5})?\/?([\w]*\/*)*(\.[\w]{3,4})?((\?\w+=\w+)?(&\w+=\w+)*)?(\#.+)?/.test(url);
+    return /^((ht|f)tp(s?)\:\/\/|~\/|\/)([\w]+\:[\w]+@)?(([a-zA-Z]{1}([\w\-]+\.)+([\w]+))|(([0-9]{1,3}\.){3}[0-9]{1,3})|localhost)(\:[\d]{1,5})?\/?([\w]*\/*)*(\.[\w]{3,4})?((\?\w+=\w+)?(&\w+=\w+)*)?(\#.+)?/.test(url);
 }
 
 function getQueryString(field, url) {
@@ -586,3 +589,13 @@ function getQueryString(field, url) {
     var string = reg.exec(href);
     return string ? string[1] : null;
 };
+
+function pushHistoryBreadcrumb(data) {
+    let li = document.createElement('li');
+    li.textContent = data.type + ': ' + data.value.substr(0, 10);
+    document.querySelector('#history ol').append(li);
+}
+
+function popHistoryBreadcrumb() {
+    document.querySelector('#history ol').lastChild.remove();
+}
