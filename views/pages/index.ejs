@@ -8,8 +8,8 @@
 <body>
 
 <header>
-	<% include ../partials/modals %>
-    <% include ../partials/header %>
+	<%- include('../partials/modals') %>
+    <%- include('../partials/header', {header: doc.name})%>
 </header>
 
 <main class="planner">
@@ -35,7 +35,7 @@
 </main>
 
 <footer>
-    <% include ../partials/footer %>
+    <%- include('../partials/footer', {script: "client"}) %>
 </footer>
 
 </body>

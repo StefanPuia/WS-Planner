@@ -48,7 +48,7 @@ let doc;
 // establish connection
 wss.on('connection', function connection(ws, req) {
     // add client to the array
-    ws.sessionid = utils.randomStr(16);
+    ws.sessionid = utils.randomStr();
     sv.clients.push(ws);
 
     // error handling WIP
@@ -108,20 +108,18 @@ wss.on('connection', function connection(ws, req) {
 
 // index
 app.get('/', function(req, res) {
-    if(req.query.doc) {
+    if (req.query.doc) {
         doc = utils.findDoc(db, req.query.doc);
-        if(doc !== false) {
-            console.log(doc);
+        if (doc !== false) {
             res.render(
                 'pages/index', {
-                    table: utils.makeTable(doc.weeks)
+                    table: utils.makeTable(doc.weeks),
+                    doc: doc
                 });
-        }
-        else {
+        } else {
             res.status(404).render('pages/404');;
         }
-    }
-    else {
+    } else {
         res.status(200).render('pages/userdocs', {
             documents: utils.makeDocs(db)
         });
@@ -140,13 +138,49 @@ app.post('/user/login', function(req, res) {
 
 //// API ////
 
+//// DOCUMENTS ////
+
+// create document
+app.get('/api/document/new', function(req, res) {
+    let id = utils.randomStr();
+    console.log(id);
+    let newdoc = {
+        "name": "New Document",
+        "id": id,
+        "deleted": false,
+        "weeks": [{
+            "wpe": "",
+            "wna": "",
+            "str": [{
+                "name": "",
+                "com": [],
+                "res": []
+            }]
+        }]
+    };
+    db.documents.push(newdoc);
+    res.status(201).json({"id": id});
+})
+
+// delete document
+app.post('/api/document/delete', function(req, res) {
+    let deleted = utils.deleteDoc(db, req.body.docid);
+    if (deleted) {
+        db = deleted;
+        res.sendStatus(200);
+    } else {
+        res.status(404).json({});;
+    }
+})
+
+//// CONTENT ////
+
 // get the table
 app.get('/api/table/get', function(req, res) {
     doc = utils.findDoc(db, req.query.doc);
-    if(doc) {
+    if (doc) {
         res.status(200).send(utils.makeTable(doc.weeks));
-    }
-    else {
+    } else {
         res.status(404).json({});;
     }
 })
@@ -154,7 +188,7 @@ app.get('/api/table/get', function(req, res) {
 // update content
 app.post('/api/content/update', function(req, res) {
     doc = utils.findDoc(db, req.query.doc);
-    if(doc) {
+    if (doc) {
         let data = req.body;
         let content = validator.escape(data.value);
         let parts = validator.escape(data.id).split('_');
@@ -181,8 +215,7 @@ app.post('/api/content/update', function(req, res) {
                 }
                 break;
         }
-    }
-    else {
+    } else {
         res.status(404).json({});;
     }
 })
@@ -193,7 +226,7 @@ app.post('/api/content/update', function(req, res) {
 // create a new week
 app.post('/api/week/new', function(req, res) {
     doc = utils.findDoc(db, req.query.doc);
-    if(doc) {
+    if (doc) {
         let blankweek = {
             "wpe": "",
             "wna": "",
@@ -208,8 +241,7 @@ app.post('/api/week/new', function(req, res) {
         }
         doc.weeks.push(blankweek);
         res.sendStatus(200);
-    }
-    else {
+    } else {
         res.status(404).json({});;
     }
 })
@@ -217,7 +249,7 @@ app.post('/api/week/new', function(req, res) {
 // get week
 app.get('/api/week/get', function(req, res) {
     doc = utils.findDoc(db, req.query.doc);
-    if(doc) {
+    if (doc) {
         let id = parseInt(req.query.id);
         if (doc.weeks[id]) {
             res.json(doc.weeks[id]);
@@ -225,8 +257,7 @@ app.get('/api/week/get', function(req, res) {
         } else {
             res.status(404).json({});;
         }
-    }
-    else {
+    } else {
         res.status(404).json({});;
     }
 })
@@ -234,7 +265,7 @@ app.get('/api/week/get', function(req, res) {
 // move week up
 app.post('/api/week/up', function(req, res) {
     doc = utils.findDoc(db, req.query.doc);
-    if(doc) {
+    if (doc) {
         let data = req.body;
         let i = parseInt(data.id);
         if (i > 0) {
@@ -244,8 +275,7 @@ app.post('/api/week/up', function(req, res) {
         } else {
             res.sendStatus(405)
         }
-    }
-    else {
+    } else {
         res.status(404).json({});;
     }
 })
@@ -253,7 +283,7 @@ app.post('/api/week/up', function(req, res) {
 // move week down
 app.post('/api/week/down', function(req, res) {
     doc = utils.findDoc(db, req.query.doc);
-    if(doc) {
+    if (doc) {
         let data = req.body;
         let i = parseInt(data.id);
         if (i < doc.weeks.length - 1) {
@@ -263,8 +293,7 @@ app.post('/api/week/down', function(req, res) {
         } else {
             res.sendStatus(405)
         }
-    }
-    else {
+    } else {
         res.status(404).json({});;
     }
 })
@@ -272,12 +301,11 @@ app.post('/api/week/down', function(req, res) {
 // delete week
 app.post('/api/week/delete', function(req, res) {
     doc = utils.findDoc(db, req.query.doc);
-    if(doc) {
+    if (doc) {
         let data = req.body;
         let i = parseInt(data.id);
         doc.weeks.splice(i, 1);
-    }
-    else {
+    } else {
         res.status(404).json({});;
     }
 })
@@ -288,15 +316,14 @@ app.post('/api/week/delete', function(req, res) {
 // update period
 app.post('/api/period/update', function(req, res) {
     doc = utils.findDoc(db, req.query.doc);
-    if(doc) {
+    if (doc) {
         let data = req.body;
         let id = parseInt(data.id.split('_')[2]);
 
         doc.weeks[id].wpe = utils.getWeekPeriod(data.value);
 
         res.sendStatus(200);
-    }
-    else {
+    } else {
         res.status(404).json({});;
     }
 })
@@ -307,7 +334,7 @@ app.post('/api/period/update', function(req, res) {
 //update structures
 app.post('/api/str/update', function(req, res) {
     doc = utils.findDoc(db, req.query.doc);
-    if(doc) {
+    if (doc) {
         let data = req.body;
         let id = parseInt(data.id);
         let week = doc.weeks[id];
@@ -339,8 +366,7 @@ app.post('/api/str/update', function(req, res) {
 
         doc.weeks[id].str = newWeek.slice();
         res.sendStatus(200);
-    }
-    else {
+    } else {
         res.status(404).json({});;
     }
 })
@@ -351,7 +377,7 @@ app.post('/api/str/update', function(req, res) {
 // update the resources
 app.post('/api/res/update', function(req, res) {
     doc = utils.findDoc(db, req.query.doc);
-    if(doc) {
+    if (doc) {
         let data = req.body;
         let parts = data.id.split('_');
         if (data.res) {
@@ -360,8 +386,7 @@ app.post('/api/res/update', function(req, res) {
             doc.weeks[parts[2]].str[parts[3]].res = [].slice();
         }
         res.sendStatus(200);
-    }
-    else {
+    } else {
         res.status(404).json({});;
     }
 })

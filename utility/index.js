@@ -3,13 +3,13 @@
 function listify(array) {
     let out = "<ul>";
     for (let i = 0; i < array.length; i++) {
-        if(array[i].name && array[i].url) {
+        if (array[i].name && array[i].url) {
             out += `<li><b>${array[i].name}: </b><a href="${array[i].url}">${array[i].url}</a></li>`;
         }
     }
     out += "</ul>";
 
-    if(out.replace(/\<[a-zA-Z]*\>|\<\/[a-zA-Z]*\>/g, "").trim() == "") {
+    if (out.replace(/\<[a-zA-Z]*\>|\<\/[a-zA-Z]*\>/g, "").trim() == "") {
         out = "";
     }
 
@@ -96,17 +96,17 @@ function getWeekPeriod(date) {
 }
 module.exports.getWeekPeriod = getWeekPeriod;
 
-function createRandomString( length ) {
+function createRandomString(length = 16) {
     let str = "";
-    for ( ; str.length < length; str += Math.random().toString( 36 ).substr( 2 ) );
-    return str.substr( 0, length );
+    for (; str.length < length; str += Math.random().toString(36).substr(2));
+    return str.substr(0, length);
 }
 module.exports.randomStr = createRandomString;
 
 function findDoc(db, id) {
     let found = false;
     db.documents.forEach(function(doc) {
-        if(doc.id == id) {
+        if (doc.id == id) {
             found = doc;
             return;
         }
@@ -116,58 +116,98 @@ function findDoc(db, id) {
 module.exports.findDoc = findDoc;
 
 function makeDocs(obj) {
-    let docs = obj.documents;
+    let docs = obj.documents.slice().reverse();
     let content = "";
-    let i = 1;
+    let i = 2;
+    let first = true;
     docs.forEach(function(doc) {
-        if(i == 1) {
-            content += '<div class="row">';
-        }
-
-        content += `
-            <div class="col-md-3 no-dec center">
-                <div class="thumbnail">
-                    <h3>${doc.name}</h3>
-                    <hr>
-                    <ul class="left">`;
-
-        for(let j = 0; j < 4 && j < doc.weeks.length; j++) {
-            let wna = doc.weeks[j].wna;
-            if(wna.length > 20) {
-                wna = wna.substr(0, 19) + "...";
+        if (!doc.deleted) {
+            if (i == 1) {
+                content += '<div class="row">';
             }
+
+            if (first) {
+                first = false;
+                content += `
+                    <div class="col-md-3 no-dec center document-thumbnail new-doc-thumbnail">
+                        <a href="#" id="buttonDocumentNew">
+                            <div class="thumbnail">
+                                <h3>New Document</h3>
+                                <hr>
+                                <div class="content">
+                                    <h1>
+                                        <i class="glyphicon glyphicon-plus"></i>
+                                    </h1>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                `;
+            }
+
             content += `
-                        <li>${wna}
-                            <ul>`;
+                <div class="col-md-3 no-dec center document-thumbnail">
+                    <a href="/?doc=${doc.id}">
+                        <div class="thumbnail">
+                            <h3>${doc.name.length < 17 ? doc.name : doc.name.substr(0, 17) + "..."}</h3>
+                            <hr>
+                            <div class="content">
+                                <ul class="left">`;
 
-            for(let k = 0; k < 3 && k < doc.weeks[j].str.length; k++) {
-                let str = doc.weeks[j].str[k];
-                if(str.length > 20) {
-                    str = str.substr(0, 19) + "...";
+            for (let j = 0; j < 4 && j < doc.weeks.length; j++) {
+                let wna = doc.weeks[j].wna;
+                if (wna.length > 20) {
+                    wna = wna.substr(0, 19) + "...";
                 }
-                content += `<li>${str.name}</li>`;
+                content += `
+                            <li>${wna}
+                                <ul>`;
+
+                for (let k = 0; k < 5 && k < doc.weeks[j].str.length; k++) {
+                    let str = doc.weeks[j].str[k];
+                    if (str.length > 20) {
+                        str = str.substr(0, 19) + "...";
+                    }
+                    content += `<li>${str.name}</li>`;
+                }
+
+                content += `    </ul>
+                            </li>`;
             }
 
-            content += `    </ul>
-                        </li>`;
-        }
-
-        content +=` </ul>
-                    <a class="btn btn-default" href="/?doc=${doc.id}">
-                        Edit
+            content += `     </ul>
+                            </div>
+                            <hr>
+                            <button type="button" class="btn btn-danger buttonDocumentDelete" data-id="${doc.id}">
+                                Delete
+                            </button>
+                        </div>
                     </a>
                 </div>
-            </div>
-        `;
+            `;
 
-        i++;
-        if(i>4) {
-            i = 1;
-            // end row
-            content += `</div>`;
+            i++;
+            if (i > 4) {
+                i = 1;
+                // end row
+                content += `</div>`;
+            }
         }
     })
 
     return content;
 }
 module.exports.makeDocs = makeDocs;
+
+function deleteDoc(db, id) {
+    let found = false;
+    db.documents.forEach(function(doc, index) {
+        if (doc.id == id) {
+            db.documents[index].deleted = true;
+            found = db;
+            return;
+        }
+    })
+    return found;
+}
+module.exports.deleteDoc = deleteDoc;

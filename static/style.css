@@ -74,6 +74,7 @@ body {
 
 .no-dec a {
 	text-decoration: none;
+	color: inherit;
 }
 
 .no-dec ul {
@@ -82,4 +83,19 @@ body {
 
 .left {
 	text-align: left;
+}
+
+.document-thumbnail h3 {
+	overflow: hidden;
+}
+
+.document-thumbnail .content{
+	height: 12em;
+	overflow: hidden;
+}
+
+.new-doc-thumbnail .content{
+	height: 17.358em;
+	position: relative;
+	top: 6em;
 }

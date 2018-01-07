@@ -1,7 +1,8 @@
 {
     "documents": [{
-        "name": "minim",
+        "name": "Web Script",
         "id": "5a5127afd8d36e6c9ac2fa33",
+        "deleted": false,
         "weeks": [{
             "wpe": "8/1 - 14/1",
             "wna": "ex",
@@ -299,8 +300,9 @@
             }]
         }]
     }, {
-        "name": "eiusmod",
+        "name": "Data Structures and Algorithms",
         "id": "5a5127afb9536d295704ecae",
+        "deleted": false,
         "weeks": [{
             "wpe": "8/1 - 14/1",
             "wna": "adipisicing",
@@ -437,6 +439,7 @@
     }, {
         "name": "ad",
         "id": "5a5127b056ab0d11de10211e",
+        "deleted": false,
         "weeks": [{
             "wpe": "8/1 - 14/1",
             "wna": "ad",
@@ -881,6 +884,7 @@
     }, {
         "name": "dolor",
         "id": "5a5127b05cd32dfe45059e96",
+        "deleted": false,
         "weeks": [{
             "wpe": "8/1 - 14/1",
             "wna": "nisi",
@@ -1128,6 +1132,7 @@
     }, {
         "name": "sint",
         "id": "5a5127b05fba9d1319f29be5",
+        "deleted": false,
         "weeks": [{
             "wpe": "8/1 - 14/1",
             "wna": "anim",

@@ -25,6 +25,9 @@ no structures validation
 url validation on resources
 empty string resource name validation
 multiple files
+add documents
+delete documents
+custom document name in header
 
 
 
@@ -44,7 +47,7 @@ KINDA DONE
 
 
 NOT DONE YET
-
+recycle bin
 database
 authentication
 sessions
