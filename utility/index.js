@@ -24,7 +24,7 @@ function makeTable(obj) {
     for (let i = 0; i < obj.length; i++) {
         let o = obj[i];
         out += `
-            <tr>
+            <tr draggable="true">
                 <td class="td_act" rowspan="${o.str.length}">
                     <button type="button" class="btn btn-default btn-sm" onclick="moveWeekUp(${i})">
                         <i class="glyphicon glyphicon-chevron-up"></i>
@@ -34,6 +34,9 @@ function makeTable(obj) {
                     </button>
                     <button type="button" class="btn btn-success btn-sm" onclick="editStr(${i})">
                         <i class="glyphicon glyphicon-pencil"></i>
+                    </button>
+                    <button type="button" class="btn btn-default btn-sm">
+                        <i class="glyphicon glyphicon-resize-vertical week-drag-handle"></i>
                     </button>
                     <button type="button" class="btn btn-danger btn-sm" onclick="deleteWeek(${i})">
                         <i class="glyphicon glyphicon-remove"></i>

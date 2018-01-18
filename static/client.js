@@ -5,6 +5,8 @@ let ws = new WebSocket("ws://" + window.location.hostname + ":" + (window.locati
 let sessionid = "";
 let documentid = getQueryString('doc');
 let history = [];
+let weekMouseTarget = null;
+let weekDragElement = null;
 
 // run functions when the page is loaded
 window.addEventListener('load', function() {
@@ -78,6 +80,38 @@ function addListeners() {
 
     // save period button in modal
     document.querySelector('#buttonPeriodSave').addEventListener('click', savePer);
+
+    // add week drag listener
+    document.querySelectorAll('tr').forEach(function(el) {
+        el.addEventListener('dragstart', weekDragStart);
+    });
+
+    // add week mousedown listener
+    document.querySelectorAll('tr').forEach(function(el) {
+        el.addEventListener('mousedown', function(e) {
+            weekMouseTarget = e.target;
+        });
+    });
+
+    // allow drop in tbody
+    document.querySelector('.planner tbody').addEventListener('dragover', function(e) {
+        e.preventDefault();
+    })
+
+    // add drop 
+    document.querySelector('.planner tbody').addEventListener('drop', function(e) {
+        let elem = weekDragElement;
+        let target = matchParent(e.target, 'tr');
+        if(elem && target) {
+            target.parentNode.insertBefore(elem, target.nextSibling);
+            console.log('success');
+        }
+        else {
+            console.log( 'fail' );
+            console.log( elem );
+            console.log( target );
+        }
+    })
 }
 
 function connectedToServer() {
@@ -232,6 +266,18 @@ function deleteWeek(id) {
         };
         postToServer(data, '/api/week/delete?doc=' + documentid);
         update();
+    }
+}
+
+// drag week
+function weekDragStart(e) {
+    if(!weekMouseTarget.classList.contains('week-drag-handle')) {
+        e.preventDefault();
+        weekMouseTarget = null;
+        weekDragElement = null;
+    }
+    else {
+        weekDragElement = e.target;
     }
 }
 
@@ -598,4 +644,17 @@ function pushHistoryBreadcrumb(data) {
 
 function popHistoryBreadcrumb() {
     document.querySelector('#history ol').lastChild.remove();
+}
+
+function matchParent(el, query) {
+    let parent = null;
+    let current = el;
+    while(current.parentElement !== null) {
+        if(current.parentElement.matches(query)) {
+            parent = current.parentElement;
+            break;
+        }
+        current = current.parentElement;
+    }
+    return parent;
 }
