@@ -9,32 +9,22 @@ var connection = mysql.createConnection({
 });
  
 
+let data = null;
 
-
-let weeks = findInDb('document', '1', 'user');
-
-async function findInDb(table, id, ref='') {
-	let data = null;
-
+function findInDb(data, callback) {
 	connection.connect();
  
-	connection.query(`SELECT * FROM ${table} where ${ref}id='${id}'`, function (error, results) {
+	connection.query(`SELECT * FROM document`, function (error, results) {
 		if (error) throw error;
-		console.log(results);
-	    data = results;
+		callback(results);
 	});
 	connection.end();
-	connection.connect();
-
-	connection.query(`SELECT * FROM week where documentid=${data.id}`, function(error, results) {
-    	if(error) throw error;
-    	data = results;
-    	console.log(data);
-    })
 	 
 	
 	connection.end();
 	return data;
 }
 
-console.log(weeks);
+findInDb('', function(results) {
+	data = results;
+})
