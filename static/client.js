@@ -93,24 +93,27 @@ function addListeners() {
         });
     });
 
-    // allow drop in tbody
+    // allow drop in tbody and move dragged element
     document.querySelector('.planner tbody').addEventListener('dragover', function(e) {
         e.preventDefault();
+        let elem = weekDragElement;
+        elem.style.opacity = 0.5;
+        let target = matchParent(e.target, 'tr');
+        if(elem && target) {
+            target.parentNode.insertBefore(elem, target);
+        }
     })
 
     // add drop 
     document.querySelector('.planner tbody').addEventListener('drop', function(e) {
         let elem = weekDragElement;
-        let target = matchParent(e.target, 'tr');
-        if(elem && target) {
-            target.parentNode.insertBefore(elem, target.nextSibling);
-            console.log('success');
-        }
-        else {
-            console.log( 'fail' );
-            console.log( elem );
-            console.log( target );
-        }
+        elem.style.opacity = 1;
+    })
+
+    // reset opacity on release
+    document.querySelector('.planner tbody').addEventListener('dragend', function(e) {
+        let elem = weekDragElement;
+        elem.style.opacity = 1;
     })
 }
 
@@ -278,6 +281,7 @@ function weekDragStart(e) {
     }
     else {
         weekDragElement = e.target;
+        e.dataTransfer.setDragImage(document.createElement('img'), 0, 0);
     }
 }
 
