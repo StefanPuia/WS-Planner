@@ -8,6 +8,7 @@ var connection = mysql.createConnection({
     database: 'planner'
 });
 
+let data = null;
 
 async function getinfo(callback) {
 	connection.connect();
