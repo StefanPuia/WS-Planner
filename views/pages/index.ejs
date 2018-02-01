@@ -1,48 +1,48 @@
 <!-- views/pages/index.ejs -->
 
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <% include ../partials/head %>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>Weekly Planner</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="clientparser.js"></script>
 </head>
 <body>
+    <header>
+        <nav>
 
-<header>
-	<%- include('../partials/modals') %>
-    <%- include('../partials/header', {header: doc.name})%>
-</header>
+            <div class="nav-left">
+                <input id="document-name" type="text" value="Weekly Planner">
+                <a href="/userdocs">My Documents</a>
+            </div>
+            
+            <div class="nav-spacer"></div>
 
-<main class="planner">
-    <table class="table table-bordered">
-    	<thead>
-    		<tr>
-    			<th class="td_act">Actions</th>
-    			<th class="td_wpe">Week Period</th>
-    			<th class="td_wna">Week Name</th>
-    			<th class="td_str">Structure</th>
-    			<th class="td_com">Comments</th>
-    			<th class="td_res" colspan="2">Resources</th>
-    		</tr>
-    	</thead>
-    	<tbody>
-    		<%- table %>
-    	</tbody>
-    </table>
+            <div class="nav-right">
+                <a href="/logout">Log out</a>
+            </div>
+        </nav>
+    </header>
+    <main>
+        <div class="table table-bordered">
+            <div class="thead">
+                <div class="th">Actions</div>
+                <div class="th">Week Period</div>
+                <div class="th">Week Name</div>
+                <div class="thead-structure">
+                    <div class="th">Structure</div>
+                    <div class="th">Comments</div>
+                    <div class="th">Resources</div>
+                </div>
+            </div>
+            <div class="tbody">
 
-    <div class="new-week">
-		<button type="button" class="btn btn-success" onclick="newWeek()">Add a new week</button>
-    </div>
 
-    <div id="history">
-        <ol class="breadcrumb">
-        History
-        </ol>
-    </div>
-</main>
-
-<footer>
-    <%- include('../partials/footer', {script: "client"}) %>
-</footer>
-
+            </div>
+        </div>
+    </main>
 </body>
 </html>

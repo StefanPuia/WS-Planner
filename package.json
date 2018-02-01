@@ -4,8 +4,7 @@
   "description": "a weekly planner",
   "main": "server.js",
   "scripts": {
-    "test": "node server.js",
-    "dashboard": "node server.js"
+    "test": "node index",
   },
   "repository": {
     "type": "git",

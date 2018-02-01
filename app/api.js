@@ -1,6 +1,6 @@
 'use strict';
 
-const utils = require('./../utility'); 
+const utils = require('./utility'); 
 
 module.exports = function(app) {
 
