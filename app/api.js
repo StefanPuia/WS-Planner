@@ -1,8 +1,19 @@
 'use strict';
 
-const utils = require('./utility'); 
+const fs = require('fs');
+const bodyParser = require('body-parser');
+const util = require('./utility'); 
 
 module.exports = function(app) {
+
+    let db = JSON.parse(fs.readFileSync('./server/backup.json', 'utf8'));
+
+    // json parser for http requests
+
+    app.use(bodyParser.json());
+    app.use(bodyParser.urlencoded({
+        extended: true
+    }));
 
     //// API ////
 
@@ -10,7 +21,7 @@ module.exports = function(app) {
 
     // create document
     app.get('/api/document/new', function(req, res) {
-        let id = utils.randomStr();
+        let id = util.randomStr();
         console.log(id);
         let newdoc = {
             "name": "New Document",
@@ -32,7 +43,7 @@ module.exports = function(app) {
 
     // delete document
     app.post('/api/document/delete', function(req, res) {
-        let deleted = utils.deleteDoc(db, req.body.docid);
+        let deleted = util.deleteDoc(db, req.body.docid);
         if (deleted) {
             db = deleted;
             res.sendStatus(200);
@@ -41,13 +52,24 @@ module.exports = function(app) {
         }
     })
 
+    // get document
+    app.get('/api/document/get/:docid', function(req, res) {
+        let doc = util.findDoc(db, req.params.docid);
+        if(doc) {
+            res.status(200).json(doc);
+        }
+        else {
+            req.status(404).json({})
+        }
+    })
+
     //// CONTENT ////
 
     // get the table
     app.get('/api/table/get', function(req, res) {
-        doc = utils.findDoc(db, req.query.doc);
+        doc = util.findDoc(db, req.query.doc);
         if (doc) {
-            res.status(200).send(utils.makeTable(doc.weeks));
+            res.status(200).send(util.makeTable(doc.weeks));
         } else {
             res.status(404).json({});;
         }
@@ -55,7 +77,7 @@ module.exports = function(app) {
 
     // update content
     app.post('/api/content/update', function(req, res) {
-        doc = utils.findDoc(db, req.query.doc);
+        doc = util.findDoc(db, req.query.doc);
         if (doc) {
             let data = req.body;
             let content = validator.escape(data.value);
@@ -93,7 +115,7 @@ module.exports = function(app) {
 
     // create a new week
     app.post('/api/week/new', function(req, res) {
-        doc = utils.findDoc(db, req.query.doc);
+        doc = util.findDoc(db, req.query.doc);
         if (doc) {
             let blankweek = {
                 "wpe": "",
@@ -116,7 +138,7 @@ module.exports = function(app) {
 
     // get week
     app.get('/api/week/get', function(req, res) {
-        doc = utils.findDoc(db, req.query.doc);
+        doc = util.findDoc(db, req.query.doc);
         if (doc) {
             let id = parseInt(req.query.id);
             if (doc.weeks[id]) {
@@ -132,13 +154,13 @@ module.exports = function(app) {
 
     // move week up
     app.post('/api/week/up', function(req, res) {
-        doc = utils.findDoc(db, req.query.doc);
+        doc = util.findDoc(db, req.query.doc);
         if (doc) {
             let data = req.body;
             let i = parseInt(data.id);
             if (i > 0) {
-                utils.swap(doc.weeks, i, i - 1);
-                utils.swapwpe(doc.weeks, i, i - 1);
+                util.swap(doc.weeks, i, i - 1);
+                util.swapwpe(doc.weeks, i, i - 1);
                 res.sendStatus(200);
             } else {
                 res.sendStatus(405)
@@ -150,13 +172,13 @@ module.exports = function(app) {
 
     // move week down
     app.post('/api/week/down', function(req, res) {
-        doc = utils.findDoc(db, req.query.doc);
+        doc = util.findDoc(db, req.query.doc);
         if (doc) {
             let data = req.body;
             let i = parseInt(data.id);
             if (i < doc.weeks.length - 1) {
-                utils.swap(doc.weeks, i, i + 1);
-                utils.swapwpe(doc.weeks, i, i + 1);
+                util.swap(doc.weeks, i, i + 1);
+                util.swapwpe(doc.weeks, i, i + 1);
                 res.sendStatus(200);
             } else {
                 res.sendStatus(405)
@@ -168,7 +190,7 @@ module.exports = function(app) {
 
     // delete week
     app.post('/api/week/delete', function(req, res) {
-        doc = utils.findDoc(db, req.query.doc);
+        doc = util.findDoc(db, req.query.doc);
         if (doc) {
             let data = req.body;
             let i = parseInt(data.id);
@@ -183,12 +205,12 @@ module.exports = function(app) {
 
     // update period
     app.post('/api/period/update', function(req, res) {
-        doc = utils.findDoc(db, req.query.doc);
+        doc = util.findDoc(db, req.query.doc);
         if (doc) {
             let data = req.body;
             let id = parseInt(data.id.split('_')[2]);
 
-            doc.weeks[id].wpe = utils.getWeekPeriod(data.value);
+            doc.weeks[id].wpe = util.getWeekPeriod(data.value);
 
             res.sendStatus(200);
         } else {
@@ -201,7 +223,7 @@ module.exports = function(app) {
 
     //update structures
     app.post('/api/str/update', function(req, res) {
-        doc = utils.findDoc(db, req.query.doc);
+        doc = util.findDoc(db, req.query.doc);
         if (doc) {
             let data = req.body;
             let id = parseInt(data.id);
@@ -244,7 +266,7 @@ module.exports = function(app) {
 
     // update the resources
     app.post('/api/res/update', function(req, res) {
-        doc = utils.findDoc(db, req.query.doc);
+        doc = util.findDoc(db, req.query.doc);
         if (doc) {
             let data = req.body;
             let parts = data.id.split('_');

@@ -1,56 +1,15 @@
-window.onload = function() {
+let doc = {};
+
+window.onload = async function() {
+	const response = await fetch('/api/document/get/5a5127afd8d36e6c9ac2fa33');
+	doc = await response.json();
+
+
 	$('#document-name').value = doc.name;
 	generateTable();
 	resizeDocumentName();
 	$('#document-name').addEventListener('input', resizeDocumentName);
 }
-
-let doc = {
-        "name": "Webscript",
-        "id": "5a5127afd8d36e6c9ac2fa33",
-        "deleted": false,
-        "weeks": [{
-            "wpe": "10.11 - 17.11",
-            "wna": "AJAX",
-            "str": [{
-                "name": "Lecture: intro to AJAX",
-                "com": [
-                    "need to say about ajax stuff",
-                    "need to teach ajax"
-                ],
-                "res": [{
-                    "name": "Presenatation",
-                    "url": "goo.gl/as2dE"
-                }, {
-                    "name": "Documentation",
-                    "url": "goo.gl/aw23tg"
-                }]
-
-            }, {
-                "name": "Practical: Working on AJAX",
-                "com": [
-                    "need to show people in practicals how to use ajax"
-                ],
-                "res": [{
-                    "name": "GitHub",
-                    "url": "github.com/portsoc/ws_ajax"
-                }]
-            }]
-        }, {
-            "wpe": "18.11 - 25.11",
-            "wna": "Sockets",
-            "str": [{
-                "name": "Practical",
-                "com": [
-                    "show people how to use sockets in practicals"
-                ],
-                "res": [{
-                    "name": "GitHub",
-                    "url": "github.com/portsoc/ws_sockets"
-                }]
-            }]
-        }]
-    };
 
 $ = function(query) {
 	let result = document.querySelectorAll(query);

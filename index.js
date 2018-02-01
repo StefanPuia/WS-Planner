@@ -3,8 +3,6 @@
 let defaultPort = 8080;
 
 
-
-// database connection
 // const mysql = require('mysql');
 // const mysql_conn = mysql.createConnection({
 //   host     : 'localhost',
