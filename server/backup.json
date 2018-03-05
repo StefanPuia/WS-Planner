@@ -4,15 +4,15 @@
         "id": "5a5127afd8d36e6c9ac2fa33",
         "deleted": false,
         "weeks": [{
-            "wpe": "10.11 - 17.11",
-            "wna": "AJAX",
-            "str": [{
+            "period": "10.11 - 17.11",
+            "name": "AJAX",
+            "structures": [{
                 "name": "Lecture: intro to AJAX",
-                "com": [
+                "comments": [
                     "need to say about ajax stuff",
                     "need to teach ajax"
                 ],
-                "res": [{
+                "resources": [{
                     "name": "Presenatation",
                     "url": "goo.gl/as2dE"
                 }, {
@@ -22,23 +22,203 @@
 
             }, {
                 "name": "Practical: Working on AJAX",
-                "com": [
+                "comments": [
                     "need to show people in practicals how to use ajax"
                 ],
-                "res": [{
+                "resources": [{
                     "name": "GitHub",
                     "url": "github.com/portsoc/ws_ajax"
                 }]
             }]
         }, {
-            "wpe": "18.11 - 25.11",
-            "wna": "Sockets",
-            "str": [{
+            "period": "18.11 - 25.11",
+            "name": "Sockets",
+            "structures": [{
                 "name": "Practical",
-                "com": [
+                "comments": [
                     "show people how to use sockets in practicals"
                 ],
-                "res": [{
+                "resources": [{
+                    "name": "GitHub",
+                    "url": "github.com/portsoc/ws_sockets"
+                }]
+            }]
+        }]
+    },{
+        "name": "Webscript",
+        "id": "5a5127afd8d36e6c9ac2fa33",
+        "deleted": false,
+        "weeks": [{
+            "period": "10.11 - 17.11",
+            "name": "AJAX",
+            "structures": [{
+                "name": "Lecture: intro to AJAX",
+                "comments": [
+                    "need to say about ajax stuff",
+                    "need to teach ajax"
+                ],
+                "resources": [{
+                    "name": "Presenatation",
+                    "url": "goo.gl/as2dE"
+                }, {
+                    "name": "Documentation",
+                    "url": "goo.gl/aw23tg"
+                }]
+
+            }, {
+                "name": "Practical: Working on AJAX",
+                "comments": [
+                    "need to show people in practicals how to use ajax"
+                ],
+                "resources": [{
+                    "name": "GitHub",
+                    "url": "github.com/portsoc/ws_ajax"
+                }]
+            }]
+        }, {
+            "period": "18.11 - 25.11",
+            "name": "Sockets",
+            "structures": [{
+                "name": "Practical",
+                "comments": [
+                    "show people how to use sockets in practicals"
+                ],
+                "resources": [{
+                    "name": "GitHub",
+                    "url": "github.com/portsoc/ws_sockets"
+                }]
+            }]
+        }]
+    },{
+        "name": "Webscript",
+        "id": "5a5127afd8d36e6c9ac2fa33",
+        "deleted": false,
+        "weeks": [{
+            "period": "10.11 - 17.11",
+            "name": "AJAX",
+            "structures": [{
+                "name": "Lecture: intro to AJAX",
+                "comments": [
+                    "need to say about ajax stuff",
+                    "need to teach ajax"
+                ],
+                "resources": [{
+                    "name": "Presenatation",
+                    "url": "goo.gl/as2dE"
+                }, {
+                    "name": "Documentation",
+                    "url": "goo.gl/aw23tg"
+                }]
+
+            }, {
+                "name": "Practical: Working on AJAX",
+                "comments": [
+                    "need to show people in practicals how to use ajax"
+                ],
+                "resources": [{
+                    "name": "GitHub",
+                    "url": "github.com/portsoc/ws_ajax"
+                }]
+            }]
+        }, {
+            "period": "18.11 - 25.11",
+            "name": "Sockets",
+            "structures": [{
+                "name": "Practical",
+                "comments": [
+                    "show people how to use sockets in practicals"
+                ],
+                "resources": [{
+                    "name": "GitHub",
+                    "url": "github.com/portsoc/ws_sockets"
+                }]
+            }]
+        }]
+    },{
+        "name": "Webscript",
+        "id": "5a5127afd8d36e6c9ac2fa33",
+        "deleted": false,
+        "weeks": [{
+            "period": "10.11 - 17.11",
+            "name": "AJAX",
+            "structures": [{
+                "name": "Lecture: intro to AJAX",
+                "comments": [
+                    "need to say about ajax stuff",
+                    "need to teach ajax"
+                ],
+                "resources": [{
+                    "name": "Presenatation",
+                    "url": "goo.gl/as2dE"
+                }, {
+                    "name": "Documentation",
+                    "url": "goo.gl/aw23tg"
+                }]
+
+            }, {
+                "name": "Practical: Working on AJAX",
+                "comments": [
+                    "need to show people in practicals how to use ajax"
+                ],
+                "resources": [{
+                    "name": "GitHub",
+                    "url": "github.com/portsoc/ws_ajax"
+                }]
+            }]
+        }, {
+            "period": "18.11 - 25.11",
+            "name": "Sockets",
+            "structures": [{
+                "name": "Practical",
+                "comments": [
+                    "show people how to use sockets in practicals"
+                ],
+                "resources": [{
+                    "name": "GitHub",
+                    "url": "github.com/portsoc/ws_sockets"
+                }]
+            }]
+        }]
+    },{
+        "name": "Webscript",
+        "id": "5a5127afd8d36e6c9ac2fa33",
+        "deleted": false,
+        "weeks": [{
+            "period": "10.11 - 17.11",
+            "name": "AJAX",
+            "structures": [{
+                "name": "Lecture: intro to AJAX",
+                "comments": [
+                    "need to say about ajax stuff",
+                    "need to teach ajax"
+                ],
+                "resources": [{
+                    "name": "Presenatation",
+                    "url": "goo.gl/as2dE"
+                }, {
+                    "name": "Documentation",
+                    "url": "goo.gl/aw23tg"
+                }]
+
+            }, {
+                "name": "Practical: Working on AJAX",
+                "comments": [
+                    "need to show people in practicals how to use ajax"
+                ],
+                "resources": [{
+                    "name": "GitHub",
+                    "url": "github.com/portsoc/ws_ajax"
+                }]
+            }]
+        }, {
+            "period": "18.11 - 25.11",
+            "name": "Sockets",
+            "structures": [{
+                "name": "Practical",
+                "comments": [
+                    "show people how to use sockets in practicals"
+                ],
+                "resources": [{
                     "name": "GitHub",
                     "url": "github.com/portsoc/ws_sockets"
                 }]

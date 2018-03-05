@@ -1,0 +1,129 @@
+.td, .th {
+	padding: 0.6em;
+	line-height: 1.42;
+}
+
+.tbody {
+	display: grid;
+	grid-template-rows: auto;
+}
+
+.table-bordered .th, .table-bordered .td {
+	border: 1px solid #ddd;
+}
+
+.thead, .week {
+	display: grid;
+	grid-template-columns: 10em 10em 12.5em auto;
+}
+
+.thead-structure, .structure {
+	display: grid;
+	grid-template-columns: 10em 16em 25em 1fr;
+}
+
+.th {
+	font-weight: bold;
+	text-align: center;
+}
+
+.structure {
+	border-bottom: 1px solid #ddd;
+	margin: 0;
+	padding: 0;
+	display: grid;
+	word-break: break-all;
+}
+
+.structure > div {
+	border-right: 1px solid #ddd;
+	border-left: 1px solid #ddd;
+	margin: 0;
+	padding: 0.6em;
+	line-height: 1.42;
+}
+
+.structure > div:last-child {
+	border-right: 0;
+}
+
+.structure > div:first-child {
+	border-left: 0;
+}
+
+.week-structure {
+	padding: 0;
+	display: grid;
+	grid-template-rows: auto;
+}
+
+.week-structure .structure:last-child {
+	border:0;
+}
+
+.structure-actions {
+	text-align: center;
+}
+
+.structure-resources {
+	margin: 0;
+	padding: 0!important;
+	display: grid;
+}
+
+.resource {
+	margin: 0;
+	padding: 0;
+	display: grid;
+	grid-template-columns: 10em 1fr 1fr;
+}
+
+.resource > div, .resource > a {
+	margin: 0;
+	padding: 0.6em;
+	line-height: 1.42;
+}
+
+.resource-actions {
+	text-align: center;
+}
+
+.button-insert {
+	display: none;
+}
+
+.document-name {
+	display: none;
+}
+
+nav .document-name {
+	font-size: 18px;
+	background-color: #f8f8f8;
+	border: 1px solid #f8f8f8;
+	color: #777;
+	width: auto;
+}
+
+nav .document-name:hover, nav .document-name:focus {
+	border-color: #e7e7e7;
+	color: black!important;
+}
+
+nav .document-name:blur{
+	border-color: #f8f8f8;
+	color: #777;
+}
+
+.week-actions {
+	margin: 0;
+	padding: 0.5em;
+}
+
+@media screen and (max-width: 1599px) {
+	body {
+		width: 1600px;
+	}
+	nav {
+		width: 100%;
+	}
+}

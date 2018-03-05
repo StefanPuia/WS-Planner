@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+		<meta name="google-signin-client_id" content="16592814341-srr33lj6et1lj5ls0dj4v73q495khfko.apps.googleusercontent.com">
+		<title>Weekly Planner</title>
+		<link rel="stylesheet" href="/static/main.css">
+		<link rel="stylesheet" href="/static/landing.css">
+		<link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet">
+		<script src="https://apis.google.com/js/platform.js" async defer></script>
+		<script src="/static/functions.js"></script>
+		<script src="/static/client.js"></script>
+		<script src="/static/landing.js"></script>
+	</head>
+	<body>
+		<header>
+			<nav>
+				<div class="nav-left">
+					<a href="/">My Documents</a>
+				</div>
+				
+				<div class="nav-spacer"></div>
+				<div class="nav-right">
+					<span id="nav-greeting">Hello, </span>
+					<a id="nav-log" href="#">Log in</a>
+					<div id="button-google-signin" class="g-signin2 hidden" data-onsuccess="signIn" data-theme="dark"></div>
+				</div>
+			</nav>
+		</header>
+		<main>
+			<h1 id="page-title" class="center">My Documents</h1>
+			<section id="documents">
+				<div class="document-card" id="document-create-card">
+					<div class="document-card-header">
+						<h2>New Document</h2>
+					</div>
+					<div class="document-card-content center new-doc">
+						<i class="material-icons md-48">add_circle</i>
+					</div>
+					<div class="document-card-footer">
+						<button id="create-document" type="button" class="btn">Create</button>
+					</div>
+				</div>
+			</section>
+		</main>
+	</body>
+</html>

@@ -1,0 +1,15 @@
+main {
+	margin-top: 15em;
+}
+
+.g-signin2{
+  width: 100%;
+}
+
+.g-signin2 > div{
+  margin: 0 auto;
+}
+
+#login-button {
+	padding-top: 3em;
+}

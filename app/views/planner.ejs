@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+	    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+	    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+	    <meta name="google-signin-client_id" content="16592814341-srr33lj6et1lj5ls0dj4v73q495khfko.apps.googleusercontent.com">
+	    <title>Weekly Planner</title>
+	    <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet">
+	    <link rel="stylesheet" href="/static/main.css">
+	    <link rel="stylesheet" href="/static/planner.css">
+		<script src="https://apis.google.com/js/platform.js" async defer></script>
+		<script src="/static/functions.js"></script>
+		<script src="/static/client.js"></script>
+		<script src="/static/planner.js"></script>
+	</head>
+	<body>
+	    <header>
+	        <nav>
+	            <div class="nav-left">
+	                <input class="document-name" type="text" value="">
+	                <a href="/">My Documents</a>
+	            </div>
+	            
+	            <div class="nav-spacer"></div>
+
+	            <div class="nav-right">
+					<span id="nav-greeting">Hello, </span>
+	                <a id="nav-log" href="#">Log in</a>
+	            <div id="button-google-signin" class="g-signin2 hidden" data-onsuccess="signIn" data-theme="dark"></div>
+	            </div>
+	        </nav>
+	    </header>
+	    <main>
+	        <section class="table table-bordered" id="planner">
+	            <div class="thead">
+	                <div class="th">Actions</div>
+	                <div class="th">Week Period</div>
+	                <div class="th">Week Name</div>
+	                <div class="thead-structure">
+	                	<div class="th">Structure Actions</div>
+	                    <div class="th">Structure</div>
+	                    <div class="th">Comments</div>
+	                    <div class="th">Resources</div>
+	                </div>
+	            </div>
+	            <div class="tbody" id="weeks">
+
+
+	            </div>
+	        </section>
+	    </main>
+	</body>
+</html>

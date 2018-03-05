@@ -1,0 +1,89 @@
+.document-card {
+	border: solid 1px #e7e7e7;
+	width: 20em;
+	height: 26em;
+	margin: 1em;
+	text-align: center;
+	display: inline-block;
+	background-color: white;
+}
+
+#documents {
+	margin-left: 10em;
+	margin-right: 10em;
+	text-align: center;
+}
+
+.document-card-content {
+	text-align: left;
+	max-height: 15em;
+	min-height: 15em;
+	height: 15em;
+}
+
+.document-card-content > li {
+	font-weight: bold;
+}
+
+.document-card-content ul {
+	list-style: none;
+	padding-left: 2em;
+}
+
+.document-card button {
+	margin: 0.5em;
+}
+
+main {
+	margin-top: 6em;
+}
+
+@media screen and (max-width: 951px) {
+	#documents {
+		margin-left: 1em;
+		margin-right: 1em;
+		display: block;
+		text-align: center;
+		text-align: -webkit-center;
+	}
+
+	.document-card > .document-card-content, .document-card > hr{
+		display: none;
+	}
+
+	.document-card {
+		height: 8em;
+		margin-bottom: 2em;
+	}
+}
+
+.new-doc {
+    display: block;
+    -webkit-margin-before: 1em;
+    -webkit-margin-start: 0px;
+    -webkit-margin-end: 0px;
+    padding-left: 0;
+    padding-top: 5em;
+    line-height: 0;
+}
+
+body {
+	background-color: #2D95FF;
+}
+
+.document-card-header {
+	border-bottom: solid 1px black;
+}
+
+.document-card-footer {
+	border-top: solid 1px black;
+	padding-top: 1em;
+}
+
+#page-title {
+	color: white;
+}
+
+.week-name {
+	font-weight: bold;
+}

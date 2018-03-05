@@ -1,33 +1,21 @@
 'use strict';
 
-let defaultPort = 8080;
+// load the local modules
+const config = require('./app/config');
+
+// load the express routes
+const express = require('./app/core/express');
+
+// load the express api
+const api = require('./app/core/api')(express);
+
+// load the websocket module
+const wsserver = require('./app/core/wsocket')(express);
 
 
-// const mysql = require('mysql');
-// const mysql_conn = mysql.createConnection({
-//   host     : 'localhost',
-//   user     : 'root',
-//   password : 'root',
-//   database : 'planner'
-// });
-    
-
-const utils = require('./app/utility');
-
-const express = require('./app/express');
-express.start();
-const app = express.getApp();
-
-const api = require('./app/api.js')(app);
-
-const wsocket = require('./app/wsocket.js');
-wsocket.broadcast(app);
-const server = wsocket.getServer();
-
-
-
-
-// listen
-server.listen(defaultPort, function() {
-    console.log(`Listening on ${defaultPort}.`);
+// start listening on the specified port
+wsserver.listen(config.serverPort, function() {
+    console.log(`Listening on ${config.serverPort}.`);
 });
+
+
