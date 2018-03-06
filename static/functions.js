@@ -43,11 +43,19 @@ function getParameterValue(param, path) {
 }
 
 /**
+ * get the document key from the url
+ * @return {String} document key
+ */
+function getDocumentId() {
+    return getParameterValue('doc').split('-').slice(-1).pop();
+}
+
+/**
  * send data through the web socket connection
  * @param  {Object} payload the payload to be sent
  */
 function callSocket(payload) {
-    payload.docid = getParameterValue('doc');
+    payload.docid = getDocumentId();
     if(verbose) console.log("ws sending: ", payload);
     if (ws.readyState != ws.OPEN) {
         ws = new WebSocket("ws://" + window.location.hostname + ":" + (window.location.port || 80) + "/");

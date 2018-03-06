@@ -47,3 +47,12 @@ app.get('/login', function(req, res) {
 app.get('/doc/:docid', function(req, res) {
     res.status(200).render('planner');
 });
+
+/**
+ * GET /docview/:docid
+ * serve the document as a portrait view
+ * @param  {String} docid the document key
+ */
+app.get('/docview/:docid', function(req, res) {
+	res.status(200).render('document');
+})

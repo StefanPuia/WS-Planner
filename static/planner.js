@@ -3,6 +3,9 @@
 // websocket variable
 let ws;
 
+// drag target handle
+let dragTarget = false;
+
 /**
  * handles the window load event
  */
@@ -11,7 +14,7 @@ window.onload = async function() {
 
 	ws = new WebSocket("ws://" + window.location.hostname + ":" + (window.location.port || 80) + "/");
 	ws.addEventListener('message', receivedMessageFromServer);
-	let docid = getParameterValue('doc');
+	let docid = getDocumentId();
 
 	callServer('/api/document/' + docid, {}, function(doc) {
 		generateTable(doc);
@@ -49,8 +52,9 @@ function generateTable(doc) {
 
 	let insertWeekButton = newEl('button', {
 		classList: 'btn button-insert',
-		id: `insert_weeks_${getParameterValue('doc')}`
+		id: `insert_weeks_${getDocumentId()}`
 	}); container.append(insertWeekButton);
+	insertWeekButton.addEventListener('dragover', appendBlockRow);
 
 	addEditableListeners();
 	fixInsertButton();
@@ -95,8 +99,14 @@ function generateResource(resource, container) {
 
 	// resource actions
 	let resource_actions = newEl('div', {
+		draggable: 'true',
+		id: `resource_${resource.resourceid}_actions`,
 		classList: 'resource-actions'
 	}); resource_row.append(resource_actions);
+
+	resource_actions.addEventListener('mousedown', function(e) {dragTarget = e.target});
+	resource_actions.addEventListener('dragstart', startBlockDrag);
+	resource_actions.addEventListener('dragend', stopBlockDrag);
 
 	generateResourceActions(resource, resource_actions);
 
@@ -117,6 +127,8 @@ function generateResource(resource, container) {
 		id: `resource_${resource.resourceid}_url`
 	}); resource_row.append(resource_url);
 
+	resource_row.addEventListener('dragover', appendBlockRow);
+
 	// append resource to resources block before the insert button, if it exists
 	let button = container.childNodes[container.childNodes.length - 1];
 	if(!button || !button.classList.contains('button-insert')) {
@@ -133,17 +145,18 @@ function generateResource(resource, container) {
  * @param  {Node} container
  */
 function generateResourceActions(resource, container) {
-	let button_move = newEl('button', {
+	let button_drag = newEl('button', {
 		type: 'button',
 		classList: 'btn btn-action btn-sm',
 		id: `resource_${resource.resourceid}_delete`
 	})
-	button_move.append(newEl('i', {
+	button_drag.append(newEl('i', {
 		classList: 'material-icons md-24',
+		id: `resource_${resource.resourceid}_drag_handle`,
 		textContent: 'open_with'
 	}))
-	button_move.addEventListener('dragstart', startWeekDrag);
-	container.append(button_move);
+	button_drag.addEventListener('dragstart', startBlockDrag);
+	container.append(button_drag);
 
 	let button_delete = newEl('button', {
 		type: 'button',
@@ -161,7 +174,7 @@ function generateResourceActions(resource, container) {
 /**
  * generate the structures block
  * @param  {Object} week            the json week object
- * @param  {Node} week_structures the container for structures
+ * @param  {Node} structures the container for structures
  */
 function generateStructure(structure, container) {
 	// structure row
@@ -172,8 +185,14 @@ function generateStructure(structure, container) {
 
 	// structure actions
 	let structure_actions = newEl('div', {
+		draggable: 'true',
+		id: `structure_${structure.structureid}_actions`,
 		classList: 'structure-actions'
 	}); structure_row.append(structure_actions);
+
+	structure_actions.addEventListener('mousedown', function(e) {dragTarget = e.target});
+	structure_actions.addEventListener('dragstart', startBlockDrag);
+	structure_actions.addEventListener('dragend', stopBlockDrag);
 
 	generateStructureActions(structure, structure_actions);
 
@@ -211,9 +230,11 @@ function generateStructure(structure, container) {
 		classList: 'btn button-insert',
 		id: `insert_resources_${structure.structureid}`
 	}); structure_resources.append(insertResourceButton);
+	insertResourceButton.addEventListener('dragover', appendBlockRow);
 
 	// append resource block to structure row
 	structure_row.append(structure_resources);
+	structure_row.addEventListener('dragover', appendBlockRow);
 
 	// append structure row to structure block
 	let button = container.childNodes[container.childNodes.length - 1];
@@ -231,17 +252,18 @@ function generateStructure(structure, container) {
  * @param  {Node} container
  */
 function generateStructureActions(structure, container) {
-	let button_move = newEl('button', {
+	let button_drag = newEl('button', {
 		type: 'button',
 		classList: 'btn btn-action btn-sm',
 		id: `structure_${structure.structureid}_delete`
 	})
-	button_move.append(newEl('i', {
+	button_drag.append(newEl('i', {
 		classList: 'material-icons md-24',
+		id: `structure_${structure.structureid}_drag_handle`,
 		textContent: 'open_with'
 	}))
-	button_move.addEventListener('dragstart', startWeekDrag);
-	container.append(button_move);
+	button_drag.addEventListener('dragstart', startBlockDrag);
+	container.append(button_drag);
 
 	let button_delete = newEl('button', {
 		type: 'button',
@@ -265,14 +287,19 @@ function generateWeek(week, container) {
 	// week row
 	let week_row = newEl('div', {
 		classList: 'week', 
-		id: `week_${week.weekid}`
+		id: `week_${week.weekid}`,
 	});
 
 	// week actions
 	let week_actions = newEl('div', {
 		classList: 'td center week-actions',
-		id: `week_${week.weekid}_actions`
+		id: `week_${week.weekid}_actions`,
+		draggable: 'true'
 	}); week_row.append(week_actions);
+
+	week_actions.addEventListener('mousedown', function(e) {dragTarget = e.target;});
+	week_actions.addEventListener('dragstart', startBlockDrag);
+	week_actions.addEventListener('dragend', stopBlockDrag);
 
 	generateWeekActions(week, week_actions);
 
@@ -309,9 +336,12 @@ function generateWeek(week, container) {
 		classList: 'btn button-insert',
 		id: `insert_structures_${week.weekid}`
 	}); week_structures.append(insertStructureButton);
+	insertStructureButton.addEventListener('dragover', appendBlockRow);
 
 	// append structure block to week row
 	week_row.append(week_structures);
+
+	week_row.addEventListener('dragover', appendBlockRow);
 	
 	// append week row to table before the insert button, if it exists
 	let button = container.childNodes[container.childNodes.length - 1];
@@ -329,17 +359,18 @@ function generateWeek(week, container) {
  * @param  {Node} container
  */
 function generateWeekActions(week, container) {
-	let button_move = newEl('button', {
+	let button_drag = newEl('button', {
 		type: 'button',
 		classList: 'btn btn-action btn-sm',
-		id: `week_${week.weekid}_delete`
+		id: `week_${week.weekid}_drag`
 	})
-	button_move.append(newEl('i', {
+	button_drag.append(newEl('i', {
 		classList: 'material-icons md-24',
+		id: `week_${week.weekid}_drag_handle`,
 		textContent: 'open_with'
 	}))
-	button_move.addEventListener('dragstart', startWeekDrag);
-	container.append(button_move);
+	button_drag.addEventListener('dragstart', startBlockDrag);
+	container.append(button_drag);
 
 	let button_delete = newEl('button', {
 		type: 'button',
@@ -404,7 +435,7 @@ function sendInsertBlock(e) {
  */
 function insertBlock(data) {
 	let container = '';
-	if(data.docid == getParameterValue('doc')) {
+	if(data.docid == getDocumentId()) {
 		switch(data.block) {
 			case 'weeks':
 				container = '.tbody';
@@ -435,7 +466,7 @@ function sendUpdate(e) {
 	if(content) {
 		let parts = e.currentTarget.id.split('_');
 		let parentid = e.currentTarget.parentNode.parentNode.id.split('_')[1];
-		parentid = parentid?parentid:getParameterValue('doc');
+		parentid = parentid?parentid:getDocumentId();
 
 		let payload = {
 			type: 'update',
@@ -549,7 +580,7 @@ function updateBlock(data) {
  */
 function sendDeleteBlock(e) {
 	let parts = e.currentTarget.id.split('_');
-	if(window.confirm('Are you sure you want to delete the week? This action is irreversible!')) {
+	if(window.confirm(`Are you sure you want to delete the ${parts[0]}? This action is irreversible!`)) {
 		let payload = {
 			type: 'delete',
 			object: parts[0],
@@ -577,7 +608,41 @@ function deleteBlock(data) {
 	}
 }
 
-function startWeekDrag(e) {
-
+function startBlockDrag(e) {
+	let parts = e.currentTarget.id.split('_');
+	let handle = $(`#${parts[0]}_${parts[1]}_drag_handle`);
+	if (handle.contains(dragTarget)) {
+		e.dataTransfer.setDragImage($('#blank-image'), 0, 0)
+        $(`#${parts[0]}_${parts[1]}`).style.opacity = 0.5;
+    } else {
+        e.preventDefault();
+    }
 }
 
+function appendBlockRow(e) {
+	let parts = dragTarget.id.split('_');
+	let parent = $(`#${parts[0]}_${parts[1]}`).parentNode;
+	let dragSubject = $(`#${parts[0]}_${parts[1]}`);
+	let isChild = false;
+	for(let i = 0; i < parent.children.length; i++) {
+		let el = parent.children[i];
+		if(el.id == e.currentTarget.id) {
+			isChild = true;
+		}
+	}
+	if(isChild) {
+		parent.insertBefore(dragSubject, e.currentTarget);
+	}
+}
+
+function stopBlockDrag(e) {
+	dragTarget = false;
+	let parts = e.currentTarget.id.split('_');
+    $(`#${parts[0]}_${parts[1]}`).style.opacity = 1;
+
+    let payload = {
+    	type: 'reorder',
+    	block: parts[0],
+    	id: parts[1],
+    }
+}
