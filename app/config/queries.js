@@ -38,7 +38,11 @@ module.exports = {
         ON structure.weekid = week.id
     LEFT JOIN resource
         ON resource.structureid = structure.id
-    WHERE document.id = ?`,
+    WHERE document.id = ?
+    ORDER BY
+        week.position ASC,
+        structure.position ASC,
+        resource.position ASC`,
 
     useridbyemail: 'SELECT id FROM user WHERE email = ?',
 
@@ -52,6 +56,8 @@ module.exports = {
 
     resourcebyidandstructure: 'SELECT id, name, url FROM resource WHERE id = ? AND structureid = ?',
 
+    resourcesbystructure: 'SELECT id, name, url FROM resource WHERE structureid = ?',
+
     weekbyidanddoc: `SELECT 
         week.id AS weekid, week.name AS weekname, week.day,
         structure.id AS structureid, structure.name AS structurename, structure.comments, 
@@ -62,4 +68,12 @@ module.exports = {
         LEFT JOIN resource
             ON resource.structureid = structure.id
         WHERE week.id = ? AND week.documentid = ?`,
+
+    moveblockdown: `
+        UPDATE ?? SET position = position - 1 WHERE position >= ? AND position <= ?; 
+        UPDATE ?? SET position = ? WHERE id = ?;`,
+
+    moveblockup: `
+        UPDATE ?? SET position = position + 1 WHERE position >= ? AND position <= ?; 
+        UPDATE ?? SET position = ? WHERE id = ?;`,
 }

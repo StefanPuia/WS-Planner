@@ -53,7 +53,12 @@ module.exports = function(app) {
     app.get('/api/document/:docid', function(req, res) {
          util.getUserId(req.user, function(user) {
             util.getDocumentByKey(req.params.docid, function(documents) {
-                res.json(documents);
+                if(documents) {
+                    res.json(documents);
+                }
+                else {
+                    res.sendStatus(404);
+                }
             })
         })
     })

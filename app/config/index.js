@@ -8,6 +8,15 @@ module.exports = {
 		database: 'u619707583_wspla',
 		user:     'u619707583_wspla',
 		password: 'D3uHlNDnYdOP',
+		multipleStatements: true
+	},
+
+	localdb: {
+		host: 'localhost',
+		database: 'weeklyplanner',
+		user: 'root',
+		password: '',
+		multipleStatements: true
 	},
 
 	views: path.join(__dirname, './../views'),

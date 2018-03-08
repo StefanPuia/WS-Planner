@@ -12,7 +12,7 @@ const queries = require('./../config/queries');
 let mysqlConnection;
 
 function handleDisconnect() {
-    mysqlConnection = mysql.createConnection(config.database);
+    mysqlConnection = mysql.createConnection(config.localdb);
 
     mysqlConnection.connect(function(err) {
         if (err) {
@@ -218,20 +218,23 @@ module.exports.getDocumentByKey = function(docid, callback) {
  * @param  {Function} callback
  */
 module.exports.insertWeek = function(docid, callback) {
-    let date = new Date();
-    let cols = ['documentid', 'name', 'day'];
-    let vals = [docid, '', date];
-    mysqlConnection.query(queries.insert, ['week', cols, vals], function(err, results) {
+    mysqlConnection.query(queries.weeksbydoc, [docid], function(err, weeks) {
         if(err) throw err;
-        let weekid = results.insertId;
-        exports.insertStructure(weekid, function(response) {
-            let week = {
-                weekid: results.insertId,
-                weekname: '',
-                day: date,
-                structures: response
-            }
-            callback([week]);
+        let date = new Date();
+        let cols = ['documentid', 'name', 'day', 'position'];
+        let vals = [docid, '', date, weeks.length];
+        mysqlConnection.query(queries.insert, ['week', cols, vals], function(err, results) {
+            if(err) throw err;
+            let weekid = results.insertId;
+            exports.insertStructure(weekid, function(response) {
+                let week = {
+                    weekid: results.insertId,
+                    weekname: '',
+                    day: date,
+                    structures: response
+                }
+                callback([week]);
+            })
         })
     })
 }
@@ -242,19 +245,22 @@ module.exports.insertWeek = function(docid, callback) {
  * @param  {Function} callback
  */
 module.exports.insertStructure = function(weekid, callback) {
-    let cols = ['weekid', 'name', 'comments'];
-    let vals = [weekid, '', ''];
-    mysqlConnection.query(queries.insert, ['structure', cols, vals], function(err, results) {
+    mysqlConnection.query(queries.structuresbyweek, [weekid], function(err, structures) {
         if(err) throw err;
-        let structureid = results.insertId;
-        exports.insertResource(structureid, function(response) {
-            let structure = {
-                structureid: results.insertId,
-                structurename: '',
-                comments: '',
-                resources: response
-            }
-            callback([structure]);
+        let cols = ['weekid', 'name', 'comments', 'position'];
+        let vals = [weekid, '', '', structures.length];
+        mysqlConnection.query(queries.insert, ['structure', cols, vals], function(err, results) {
+            if(err) throw err;
+            let structureid = results.insertId;
+            exports.insertResource(structureid, function(response) {
+                let structure = {
+                    structureid: results.insertId,
+                    structurename: '',
+                    comments: '',
+                    resources: response
+                }
+                callback([structure]);
+            })
         })
     })
 }
@@ -265,16 +271,19 @@ module.exports.insertStructure = function(weekid, callback) {
  * @param  {Function} callback
  */
 module.exports.insertResource = function(structureid, callback) {
-    let cols = ['structureid', 'name', 'url'];
-    let vals = [structureid, '', ''];
-    mysqlConnection.query(queries.insert, ['resource', cols, vals], function(err, results) {
+    mysqlConnection.query(queries.resourcesbystructure, [structureid], function(err, resources) {
         if(err) throw err;
-        let resource = {
-            resourceid: results.insertId,
-            resourcename: '',
-            url: ''
-        }
-        callback([resource]);
+        let cols = ['structureid', 'name', 'url', 'position'];
+        let vals = [structureid, '', '', resources.length];
+        mysqlConnection.query(queries.insert, ['resource', cols, vals], function(err, results) {
+            if(err) throw err;
+            let resource = {
+                resourceid: results.insertId,
+                resourcename: '',
+                url: ''
+            }
+            callback([resource]);
+        })
     })
 }
 
@@ -294,15 +303,34 @@ module.exports.createDocument = function(user, callback) {
 }
 
 /**
- * delete a document
+ * delete a document and its contents recursively
+ * done like this because of a problem with foreign keys in the database
  * @param {Object} user
  * @param {String} docid document key
  * @param {Function} callback
  */
 module.exports.deleteDocument = function(user, docid, callback) {
-    mysqlConnection.query(queries.delete, ['document', 'id', docid], function(err, results) {
+    mysqlConnection.query(queries.weeksbydoc, [docid], function(err, results) {
         if(err) throw err;
-        callback(results);
+        results.forEach(function(week) {
+            mysqlConnection.query(queries.structuresbyweek, [week.id], function(err, results) {
+                results.forEach(function(structure) {
+                    mysqlConnection.query(queries.delete, ['resource', 'structureid', structure.id], function(err, results) {
+                        if(err) throw err;
+                    })
+                })
+                mysqlConnection.query(queries.delete, ['structure', 'weekid', week.id], function(err, results) {
+                    if(err) throw err;
+                })
+            })
+        })
+        mysqlConnection.query(queries.delete, ['week', 'documentid', docid], function(err, results) {
+            if(err) throw err;
+            mysqlConnection.query(queries.delete, ['document', 'id', docid], function(err, results) {
+                if(err) throw err;
+                callback(results);
+            })
+        })
     })
 }
 
@@ -331,6 +359,22 @@ module.exports.updateBlock = function(table, field, value, conditions, callback)
 module.exports.deleteBlock = function(table, id, callback) {
     let inserts = [table, 'id', id];
     mysqlConnection.query(queries.delete, inserts, function(err, results) {
+        if(err) throw err;
+        callback(results);
+    })
+}
+
+module.exports.moveBlockDown = function(id, block, prevpos, currpos, callback) {
+    let inserts = [block, prevpos + 1, currpos, block, currpos, id];
+     mysqlConnection.query(queries.moveblockdown, inserts, function(err, results) {
+        if(err) throw err;
+        callback(results);
+    })
+}
+
+module.exports.moveBlockUp = function(id, block, prevpos, currpos, callback) {
+    let inserts = [block, currpos, prevpos - 1, block, currpos, id];
+     mysqlConnection.query(queries.moveblockup, inserts, function(err, results) {
         if(err) throw err;
         callback(results);
     })

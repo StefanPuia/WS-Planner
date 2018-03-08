@@ -6,7 +6,7 @@ window.onload = async function() {
 		parseDocuments(documents);
 	})
 
-    $('#create-document').addEventListener('click', createDocument);
+    $('#document-create-card').addEventListener('click', createDocument);
 }
 
 /**

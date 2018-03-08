@@ -117,6 +117,19 @@ module.exports = function(app) {
                     })
                     break;
 
+                case 'move':
+                    if(data.prevpos < data.currpos) {
+                        util.moveBlockDown(data.id, data.block, data.prevpos, data.currpos, function() {
+                            sendAll(data);
+                        })
+                    }
+                    else if(data.prevpos > data.currpos){
+                        util.moveBlockUp(data.id, data.block, data.prevpos, data.currpos, function() {
+                            sendAll(data);
+                        })
+                    }
+                    break;
+
                 case 'delete':
                     util.deleteBlock(data.object, data.id, function(results) {
                         sendAll(data);

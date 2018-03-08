@@ -17,9 +17,9 @@
 	grid-template-columns: 10em 10em 12.5em auto;
 }
 
-.thead-structure, .structure {
+.thead-structure {
 	display: grid;
-	grid-template-columns: 22em 25em 1fr;
+	grid-template-columns: 25.1em 25em 1fr;
 }
 
 .th {
@@ -33,6 +33,7 @@
 	padding: 0;
 	display: grid;
 	word-break: break-all;
+	grid-template-columns: 9em 16em 25em 1fr;
 }
 
 .structure > div {
@@ -61,18 +62,9 @@
 	border:0;
 }
 
-.structure:hover {
-	grid-template-columns: 6em 16em 25em 1fr;
-}
-
-.structure:hover > .structure-actions {
-	display: block;
-}
-
 .structure-actions {
 	padding: 0.2em!important;
 	text-align: center;
-	display: none;
 }
 
 .structure-resources {
@@ -85,18 +77,7 @@
 	margin: 0;
 	padding: 0;
 	display: grid;
-	grid-template-columns: 1fr 1fr;
-}
-
-.resource:hover {
-	margin: 0;
-	padding: 0;
-	display: grid;
-	grid-template-columns: 6em 1fr 1fr;
-}
-
-.resource:hover > .resource-actions {
-	display: block;
+	grid-template-columns: 9em 1fr 1fr;
 }
 
 .resource > div, .resource > a {
@@ -111,7 +92,6 @@
 .resource-actions {
 	padding: 0.2em!important;
 	text-align: center;
-	display: none;
 }
 
 .button-insert {
