@@ -32,6 +32,8 @@ window.onload = async function() {
         resizeDocumentName();
         $('.document-name').addEventListener('input', resizeDocumentName);
         $('.document-name').addEventListener('change', sendUpdate)
+
+        $('#docview').href = '/doc/' + docid + '/view';
     })
 }
 

@@ -1,0 +1,46 @@
+@media (max-width: 800px) {
+	main {
+		margin-left: 1em!important;
+		margin-right: 1em!important;
+	}	
+}
+
+main {
+	margin-top: 8em;
+	margin-left: 25vw;
+	margin-right: 25vw;
+}
+
+#document-name {
+	padding-bottom: 1em;
+	word-break: break-all;
+}
+
+section {
+	padding-bottom: 2em;
+}
+
+.structure {
+	display: grid;
+	word-break: break-all;
+	grid-template-areas: "structure-name"
+						 "comments"
+						 "resources";
+
+}
+
+.comments p {
+	line-height: 5px;
+}
+
+.structure-name {
+	grid-area: structure-name;
+}
+
+.comments {
+	grid-area: comments;
+}
+
+.resources {
+	grid-area: resources;
+}

@@ -100,6 +100,8 @@
 
 .document-name {
 	display: none;
+	max-width: 20em;
+	min-width: 3em;
 }
 
 nav .document-name {

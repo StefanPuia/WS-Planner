@@ -10,6 +10,7 @@ const wss = new WebSocket.Server({
     server: server,
 });
 
+const config = require('./../config');
 const util = require('./utility');
 const sv = {clients: []};
 
