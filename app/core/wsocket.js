@@ -18,6 +18,7 @@ module.exports = function(app) {
 
     // establish connection
     wss.on('connection', function connection(ws, req) {
+        ws.docid = req.url.split('/').slice(-1).pop();
         sv.clients.push(ws);
 
         // error handling WIP
@@ -26,6 +27,7 @@ module.exports = function(app) {
         // listen for messages
         ws.on('message', function incoming(message) {
             let data = JSON.parse(message);
+            if(config.verbose) console.log(new Date(), "WS Recieved: ", data);
             let payload = {};
 
             switch(data.type) {
@@ -81,7 +83,7 @@ module.exports = function(app) {
                 case 'update':
                     let field = '';
                     let conditions = [];
-                    switch(data.object+data.property) {
+                    switch(data.block+data.property) {
                         case 'weekname':
                             field = 'name';
                             conditions = ['id', data.id, 'documentid', data.docid];
@@ -112,26 +114,42 @@ module.exports = function(app) {
                             conditions = ['id', data.id, 'id', data.id];
                             break;
                     }
-                    util.updateBlock(data.object, field, data.value, conditions, function(results) {
+                    util.updateBlock(data.block, field, data.value, conditions, function(results) {
                         sendAll(data);
                     })
                     break;
 
                 case 'move':
-                    if(data.prevpos < data.currpos) {
-                        util.moveBlockDown(data.id, data.block, data.prevpos, data.currpos, function() {
-                            sendAll(data);
-                        })
+                    if(data.prevparentid == data.currparentid) {
+                        if(data.prevpos < data.currpos) {
+                            util.moveBlockDown(data.block, data.id, data.prevpos, data.currpos, data.currparentid, function() {
+                                sendAll(data);
+                            })
+                        }
+                        else if(data.prevpos > data.currpos){
+                            util.moveBlockUp(data.block, data.id, data.prevpos, data.currpos, data.currparentid, function() {
+                                sendAll(data);
+                            })
+                        }
                     }
-                    else if(data.prevpos > data.currpos){
-                        util.moveBlockUp(data.id, data.block, data.prevpos, data.currpos, function() {
-                            sendAll(data);
+                    else {
+                        util.moveToNewParent(data.block, data.id, data.currparentid, function(results) {
+                            if(data.prevpos < data.currpos) {
+                                util.moveBlockDown(data.block, data.id, data.prevpos, data.currpos, data.currparentid, function() {
+                                    sendAll(data);
+                                })
+                            }
+                            else if(data.prevpos > data.currpos){
+                                util.moveBlockUp(data.block, data.id, data.prevpos, data.currpos, data.currparentid, function() {
+                                    sendAll(data);
+                                })
+                            }
                         })
                     }
                     break;
 
                 case 'delete':
-                    util.deleteBlock(data.object, data.id, function(results) {
+                    util.deleteBlock(data.block, data.id, data.parent, data.parentid, data.position, function(results) {
                         sendAll(data);
                     })
                     break;
@@ -142,10 +160,10 @@ module.exports = function(app) {
     return server;
 }
 
-// broadcast to all connected hosts, including sender
+// broadcast to all connected hosts with the same document key, including sender
 function sendAll(data) {
     sv.clients.forEach(function(client) {
-        if (client.readyState === WebSocket.OPEN) {
+        if (client.readyState === WebSocket.OPEN && client.docid == data.docid) {
             client.send(JSON.stringify(data));
         }
     });

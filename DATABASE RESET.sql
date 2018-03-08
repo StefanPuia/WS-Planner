@@ -66,11 +66,11 @@ CREATE TABLE `resource` (
 -- Dumping data for table `resource`
 --
 
-INSERT INTO `resource` (`id`, `structureid`, `name`, `url`) VALUES
-(1, 1, 'Presenatation', 'http://goo.gl/aw23tg'),
-(2, 1, 'Documentation', 'http://goo.gl/aw23tg'),
-(3, 2, 'Practical', 'http://goo.gl/uohcsa32'),
-(4, 2, 'GitHub', 'http://github.com/portsoc/ws_sockets');
+INSERT INTO `resource` (`id`, `structureid`, `name`, `url`, `position`) VALUES
+(1, 1, 'Presenatation', 'http://goo.gl/aw23tg', 0),
+(2, 1, 'Documentation', 'http://goo.gl/aw23tg', 1),
+(3, 2, 'Practical', 'http://goo.gl/uohcsa32', 0),
+(4, 2, 'GitHub', 'http://github.com/portsoc/ws_sockets', 1);
 
 -- --------------------------------------------------------
 
@@ -90,9 +90,9 @@ CREATE TABLE `structure` (
 -- Dumping data for table `structure`
 --
 
-INSERT INTO `structure` (`id`, `weekid`, `name`, `comments`) VALUES
-(1, 1, 'Lecture: intro to AJAX', 'need to say about ajax stuff\r\nneed to teach ajax'),
-(2, 1, 'Practical: Working on AJAX', 'need to show people in practicals how to use ajax');
+INSERT INTO `structure` (`id`, `weekid`, `name`, `comments`, `position`) VALUES
+(1, 1, 'Lecture: intro to AJAX', 'need to say about ajax stuff\r\nneed to teach ajax', 0),
+(2, 1, 'Practical: Working on AJAX', 'need to show people in practicals how to use ajax', 1);
 
 -- --------------------------------------------------------
 
@@ -132,8 +132,8 @@ CREATE TABLE `week` (
 -- Dumping data for table `week`
 --
 
-INSERT INTO `week` (`id`, `documentid`, `name`, `day`) VALUES
-(1, 'dd41c16c6b2dd2ea0b77da15', 'AJAX', '2018-02-26');
+INSERT INTO `week` (`id`, `documentid`, `name`, `day`, `position`) VALUES
+(1, 'dd41c16c6b2dd2ea0b77da15', 'AJAX', '2018-02-26', 0);
 
 --
 -- Indexes for dumped tables

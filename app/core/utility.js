@@ -12,7 +12,7 @@ const queries = require('./../config/queries');
 let mysqlConnection;
 
 function handleDisconnect() {
-    mysqlConnection = mysql.createConnection(config.localdb);
+    mysqlConnection = mysql.createConnection(config.database);
 
     mysqlConnection.connect(function(err) {
         if (err) {
@@ -95,9 +95,9 @@ function groupJSON(array, field, groupname, keep) {
 function makeDocumentsFromQuery(flatArray) {
     let docs = groupJSON(flatArray, "documentid", "weeks", ["name"]);
     docs.forEach(function(doc) {
-        let weeks = groupJSON(doc.weeks, "weekid", "structures", ["weekname", "day"]);
+        let weeks = groupJSON(doc.weeks, "weekid", "structures", ["weekname", "day", "weekpostion"]);
         weeks.forEach(function(week) {
-            let strs = groupJSON(week.structures, "structureid", "resources", ["structurename", "structureid", "comments"]);
+            let strs = groupJSON(week.structures, "structureid", "resources", ["structurename", "structureid", "comments", "structureposition"]);
             week.structures = strs;
         })
         doc.weeks = weeks;
@@ -231,6 +231,7 @@ module.exports.insertWeek = function(docid, callback) {
                     weekid: results.insertId,
                     weekname: '',
                     day: date,
+                    weekposition: weeks.length,
                     structures: response
                 }
                 callback([week]);
@@ -257,6 +258,7 @@ module.exports.insertStructure = function(weekid, callback) {
                     structureid: results.insertId,
                     structurename: '',
                     comments: '',
+                    structureposition: structures.length,
                     resources: response
                 }
                 callback([structure]);
@@ -280,7 +282,8 @@ module.exports.insertResource = function(structureid, callback) {
             let resource = {
                 resourceid: results.insertId,
                 resourcename: '',
-                url: ''
+                url: '',
+                resourceposition: resources.length,
             }
             callback([resource]);
         })
@@ -352,30 +355,70 @@ module.exports.updateBlock = function(table, field, value, conditions, callback)
 
 /**
  * delete a block
- * @param  {String}   table
- * @param  {Int}   id
+ * @param  {String}   block
+ * @param  {String}   parent
+ * @param {String} parentid
+ * @param {Int} position current position
+ * @param {Int} id
  * @param  {Function} callback
  */
-module.exports.deleteBlock = function(table, id, callback) {
-    let inserts = [table, 'id', id];
-    mysqlConnection.query(queries.delete, inserts, function(err, results) {
+module.exports.deleteBlock = function(block, id, parent, parentid, position, callback) {
+    let inserts = [block, parent + 'id', parentid];
+    mysqlConnection.query(queries.blocksbyparentid, inserts, function(err, blocks) {
+        if(err) throw err;
+        exports.moveBlockDown(block, id, parseInt(position) + 1, blocks.length -1, parentid, function(results) {
+            mysqlConnection.query(queries.delete, [block, 'id', id], function(err, results) {
+                if(err) throw err;
+                callback(results);
+            })
+        })
+    })
+}
+
+let cols = {
+    'week': ['documentid', 'name', 'day', 'position'],
+    'structure': ['weekid', 'name', 'comments', 'position'],
+    'resource': ['structureid', 'name', 'url', 'position'],
+}
+let parents = {
+    'week': 'document',
+    'structure': 'week',
+    'resource': 'structure'
+}
+
+module.exports.moveBlockDown = function(block, id, prevpos, currpos, parentid, callback) {
+    let inserts = [block, parseInt(prevpos), currpos, parents[block] + 'id', parentid, block, currpos, id];
+    mysqlConnection.query(queries.moveblockdown, inserts, function(err, results) {
         if(err) throw err;
         callback(results);
     })
 }
 
-module.exports.moveBlockDown = function(id, block, prevpos, currpos, callback) {
-    let inserts = [block, prevpos + 1, currpos, block, currpos, id];
-     mysqlConnection.query(queries.moveblockdown, inserts, function(err, results) {
+module.exports.moveBlockUp = function(block, id, prevpos, currpos, parentid, callback) {
+    let inserts = [block, parseInt(prevpos), currpos, parents[block] + 'id', parentid, block, currpos, id];
+    mysqlConnection.query(queries.moveblockup, inserts, function(err, results) {
         if(err) throw err;
         callback(results);
     })
 }
 
-module.exports.moveBlockUp = function(id, block, prevpos, currpos, callback) {
-    let inserts = [block, currpos, prevpos - 1, block, currpos, id];
-     mysqlConnection.query(queries.moveblockup, inserts, function(err, results) {
+module.exports.moveToNewParent = function(block, id, newparentid, callback) {
+    let inserts = [block, cols[block], cols[block], block, id];
+    mysqlConnection.query(queries.cloneblock, inserts, function(err, clone) {
         if(err) throw err;
-        callback(results);
+        mysqlConnection.query(queries.selectall, [block, 'id', id], function(err, resultblock) {
+            if(err) throw err;
+            mysqlConnection.query(queries.selectall, [block, parents[block] + 'id', newparentid], function(err, siblings) {
+                if(err) throw err;
+                exports.deleteBlock(block, id, parents[block], resultblock[0][parents[block] + 'id'], resultblock[0].position, function(delresult) {
+                    mysqlConnection.query(queries.updatethree, 
+                        [block, 'id', id, parents[block]+'id', newparentid, 'position', siblings.length ,'id', clone.insertId], 
+                        function(err, result) {
+                            if(err) throw err;
+                            callback(result);
+                    })
+                })
+            })
+        })
     })
 }

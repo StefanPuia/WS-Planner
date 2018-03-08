@@ -19,7 +19,7 @@ app.use('/', (req, res, next) => {
     if (ip.substr(0, 7) == "::ffff:") {
         ip = ip.substr(7)
     }
-    console.log(new Date(), ip, req.method, req.url);
+    if(config.verbose) console.log(new Date(), ip, req.method, req.url);
     next();
 });
 

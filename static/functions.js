@@ -57,8 +57,8 @@ function getDocumentId() {
 function callSocket(payload) {
     payload.docid = getDocumentId();
     if(verbose) console.log("ws sending: ", payload);
-    if (ws.readyState != ws.OPEN) {
-        ws = new WebSocket("ws://" + window.location.hostname + ":" + (window.location.port || 80) + "/");
+    if (ws.readyState !== ws.OPEN) {
+        ws = new WebSocket("ws://" + window.location.hostname + ":" + (window.location.port || 80) + "/" + getDocumentId());
     }
     ws.send(JSON.stringify(payload));
 }
@@ -74,6 +74,10 @@ function receivedMessageFromServer(message) {
 
         case 'update':
             updateBlock(message);
+            break;
+
+        case 'move':
+            moveBlock(message);
             break;
 
         case 'delete':
@@ -103,7 +107,7 @@ async function callServer(fetchURL, options, callback) {
 
     Object.assign(fetchOptions, options);
 
-    if(verbose) console.log(fetchOptions.method.toUpperCase() + ' ' + fetchURL);
+    if(verbose) console.log("requesting: " + fetchOptions.method.toUpperCase() + ' ' + fetchURL);
     const response = await fetch(fetchURL, fetchOptions);
     if (!response.ok) {
         console.log("Server error:\n" + response.status);
@@ -117,7 +121,7 @@ async function callServer(fetchURL, options, callback) {
         });
     }
 
-    if(verbose) console.log(data);
+    if(verbose) console.log("recieved: ", data);
     callback(data);
 }
 

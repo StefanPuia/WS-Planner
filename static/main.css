@@ -31,6 +31,19 @@ nav {
 	grid-template-columns: auto 1fr auto;
 }
 
+@media screen and (max-width: 1599px) {
+	main {
+		width: 1600px;
+		margin-top: 150px;
+	}
+	nav {
+		width: 100%;
+		grid-template-rows: 1fr 1fr;
+		grid-template-columns: 1fr 1fr;
+	}
+}
+
+
 nav a {
 	text-decoration: none;
 	color: #777;
@@ -70,6 +83,12 @@ main {
 	background-color: #d9534f;
 	border-color: #d43f3a;
 	color: #fff;
+}
+
+.btn-info {
+    color: #fff;
+    background-color: #5bc0de;
+    border-color: #46b8da;
 }
 
 .btn-success {

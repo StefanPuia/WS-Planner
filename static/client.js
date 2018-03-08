@@ -1,4 +1,4 @@
-let verbose = localStorage.verbose?localStorage.verbose:false;
+let verbose = localStorage.verbose;
 
 window.addEventListener('load', async function() {
     $('#nav-log').addEventListener('click', signOut);

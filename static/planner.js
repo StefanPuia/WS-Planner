@@ -3,17 +3,21 @@
 // websocket variable
 let ws;
 
+// move target
 let moveTarget = false;
+
+// initial block content
+let initialContent = '';
 
 /**
  * handles the window load event
  */
 window.onload = async function() {
+    let docid = getDocumentId();
     await gapi.auth2.getAuthInstance();
 
-    ws = new WebSocket("ws://" + window.location.hostname + ":" + (window.location.port || 80) + "/");
+    ws = new WebSocket("ws://" + window.location.hostname + ":" + (window.location.port || 80) + "/" + docid);
     ws.addEventListener('message', receivedMessageFromServer);
-    let docid = getDocumentId();
 
     callServer('/api/document/' + docid, {}, function(doc) {
         generateTable(doc);
@@ -50,8 +54,9 @@ function generateTable(doc) {
     });
 
     let insertWeekButton = newEl('button', {
-        classList: 'btn button-insert',
-        id: `insert_weeks_${getDocumentId()}`
+        classList: 'btn btn-info button-insert',
+        id: `insert_weeks_${getDocumentId()}`,
+        textContent: 'Insert a new week',
     });
     container.append(insertWeekButton);
 
@@ -64,6 +69,7 @@ function generateTable(doc) {
  */
 function addEditableListeners() {
     $('[contenteditable="true"]').forEach(function(el) {
+    	el.addEventListener('focus', function(e) { initialContent = e.currentTarget.innerText; })
         el.addEventListener('blur', sendUpdate);
     })
 }
@@ -72,14 +78,8 @@ function addEditableListeners() {
  * add the listeners and content to insert buttons
  */
 function fixInsertButton() {
-    // add the 'add' icon from material icons to every button
     $('button.button-insert').forEach(function(el) {
-        el.innerHTML = '';
-        el.append(newEl('i', {
-                classList: 'material-icons',
-                textContent: 'add'
-            }))
-            // add events for inserting blocks
+        // add events for inserting blocks
         el.addEventListener('click', sendInsertBlock);
     })
 }
@@ -93,7 +93,7 @@ function generateActions(block, blockName, container) {
     // move button
     let button_move = newEl('button', {
         type: 'button',
-        classList: `btn btn-action btn-sm btn-move-${blockName}`,
+        classList: `btn btn-sm btn-move-${blockName}`,
         id: `${blockName}_${block[blockName + 'id']}_move`
     })
     button_move.append(newEl('i', {
@@ -106,7 +106,7 @@ function generateActions(block, blockName, container) {
     // move top button
     let button_move_top = newEl('button', {
         type: 'button',
-        classList: `btn btn-success btn-action btn-sm btn-insert-before-${blockName} hidden`,
+        classList: `btn btn-success btn-sm btn-insert-before-${blockName} hidden`,
         id: `${blockName}_${block[blockName + 'id']}_move_top`
     })
     button_move_top.append(newEl('i', {
@@ -119,7 +119,7 @@ function generateActions(block, blockName, container) {
     // move bottom button
     let button_move_bottom = newEl('button', {
         type: 'button',
-        classList: `btn btn-success btn-action btn-sm btn-insert-after-${blockName} hidden`,
+        classList: `btn btn-success btn-sm btn-insert-after-${blockName} hidden`,
         id: `${blockName}_${block[blockName + 'id']}_move_bottom`
     })
     button_move_bottom.append(newEl('i', {
@@ -132,7 +132,7 @@ function generateActions(block, blockName, container) {
     // delete button
     let button_delete = newEl('button', {
         type: 'button',
-        classList: `btn btn-danger btn-action btn-sm btn-delete-${blockName}`,
+        classList: `btn btn-danger btn-sm btn-delete-${blockName}`,
         id: `${blockName}_${block[blockName + 'id']}_delete`
     })
     button_delete.append(newEl('i', {
@@ -154,6 +154,7 @@ function generateResource(resource, container) {
         classList: 'resource',
         id: `resource_${resource.resourceid}`
     })
+    resource_row.dataset.position = resource.resourceposition;
 
     // resource actions
     let resource_actions = newEl('div', {
@@ -204,6 +205,7 @@ function generateStructure(structure, container) {
         classList: 'structure',
         id: `structure_${structure.structureid}`
     });
+    structure_row.dataset.position = structure.structureposition;
 
     // structure actions
     let structure_actions = newEl('div', {
@@ -247,8 +249,9 @@ function generateStructure(structure, container) {
     })
 
     let insertResourceButton = newEl('button', {
-        classList: 'btn button-insert',
-        id: `insert_resources_${structure.structureid}`
+        classList: 'btn btn-info button-insert',
+        id: `insert_resources_${structure.structureid}`,
+        textContent: 'Insert a new resource',
     });
     structure_resources.append(insertResourceButton);
 
@@ -275,6 +278,7 @@ function generateWeek(week, container) {
         classList: 'week',
         id: `week_${week.weekid}`,
     });
+    week_row.dataset.position = week.weekpostion;
 
     // week actions
     let week_actions = newEl('div', {
@@ -317,8 +321,9 @@ function generateWeek(week, container) {
     })
 
     let insertStructureButton = newEl('button', {
-        classList: 'btn button-insert',
-        id: `insert_structures_${week.weekid}`
+        classList: 'btn btn-info button-insert',
+        id: `insert_structures_${week.weekid}`,
+        textContent: 'Insert a new structure',
     });
     week_structures.append(insertStructureButton);
 
@@ -421,7 +426,7 @@ function sendUpdate(e) {
 
         let payload = {
             type: 'update',
-            object: parts[0],
+            block: parts[0],
             id: parts[1],
             property: parts[2],
             parentid: parentid,
@@ -504,10 +509,11 @@ function validField(block) {
             break;
     }
 
-    if (content == '') {
+    if (content == '' || content == initialContent) {
         return false;
     }
 
+    initialContent = '';
     return content;
 }
 
@@ -516,7 +522,7 @@ function validField(block) {
  * @param  {Object} data update data
  */
 function updateBlock(data) {
-    $(`#${data.object}_${data.id}_${data.property}`).innerText = data.value;
+    $(`#${data.block}_${data.id}_${data.property}`).innerText = data.value;
 }
 
 /**
@@ -525,11 +531,16 @@ function updateBlock(data) {
  */
 function sendDeleteBlock(e) {
     let parts = e.currentTarget.id.split('_');
+    let block = $(`#${parts[0]}_${parts[1]}`);
+    let parent = block.parentNode;
     if (window.confirm(`Are you sure you want to delete the ${parts[0]}? This action is irreversible!`)) {
         let payload = {
             type: 'delete',
-            object: parts[0],
-            id: parts[1]
+            block: parts[0],
+            id: parts[1],
+            parent: parent.id.split('_')[0],
+            parentid: parent.id.split('_')[1],
+            position: block.dataset.position
         };
         callSocket(payload);
     }
@@ -540,14 +551,14 @@ function sendDeleteBlock(e) {
  * @param  {Object} data delete data
  */
 function deleteBlock(data) {
-    let element = $(`#${data.object}_${data.id}`);
+    let element = $(`#${data.block}_${data.id}`);
     let parent = element.parentNode
     let siblings = parent.children.length - 2;
     element.remove();
     if (siblings < 1) {
         let e = {};
         e.currentTarget = {
-            id: 'insert_' + data.object + 's_' + parent.id.split('_')[1]
+            id: 'insert_' + data.block + 's_' + parent.id.split('_')[1]
         }
         sendInsertBlock(e);
     }
@@ -626,10 +637,22 @@ function insertBlockBefore(e) {
 
 	parent.insertBefore(moveTarget, current);
 
-	if(moveParent.children.length <= 2) {
-		moveParent.querySelector('.button-insert').click();
+	if(moveParent.children.length < 2) {
+		moveParent.children[moveParent.children.length - 1].click();
+	}
+
+	let data = {
+		type: 'move',
+		block: moveTarget.id.split('_')[0],
+		id: moveTarget.id.split('_')[1],
+		parent: parent.id.split('_')[0],
+		prevparentid: moveParent.id.split('_')[1],
+		currparentid: parent.id.split('_')[1],
+		prevpos: moveTarget.dataset.position,
+		currpos: current.dataset.position != 0?parseInt(current.dataset.position) - 1:0,
 	}
 	stopMoveBlock();
+	callSocket(data);
 }
 
 function insertBlockAfter(e) {
@@ -641,8 +664,27 @@ function insertBlockAfter(e) {
 
 	parent.insertBefore(moveTarget, current.nextSibling);
 
-	if(moveParent.children.length <= 2) {
-		moveParent.querySelector('.button-insert').click();
+	if(moveParent.children.length < 2) {
+		moveParent.children[moveParent.children.length - 1].click();
+	}
+
+	let lastpos = parent.children.length - 2;
+	let data = {
+		type: 'move',
+		block: moveTarget.id.split('_')[0],
+		id: moveTarget.id.split('_')[1],
+		parent: parent.id.split('_')[0],
+		prevparentid: moveParent.id.split('_')[1],
+		currparentid: parent.id.split('_')[1],
+		prevpos: moveTarget.dataset.position,
+		currpos: current.dataset.position != lastpos?parseInt(current.dataset.position) + 1:lastpos,
 	}
 	stopMoveBlock();
+	callSocket(data);
+}
+
+function moveBlock(data) {
+	callServer('/api/document/' + data.docid, {}, function(doc) {
+        generateTable(doc);
+    })
 }

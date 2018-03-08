@@ -28,7 +28,6 @@
 }
 
 .structure {
-	border-bottom: 1px solid #ddd;
 	margin: 0;
 	padding: 0;
 	display: grid;
@@ -42,6 +41,7 @@
 	margin: 0;
 	padding: 0.6em;
 	line-height: 1.42;
+	border-bottom: 1px solid #ddd;
 }
 
 .structure > div:last-child {
