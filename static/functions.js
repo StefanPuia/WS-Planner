@@ -168,5 +168,8 @@ function getWeekPeriod(date) {
     f.ed = f.ed<10?'0'+f.ed:f.ed;
     f.em = f.em<10?'0'+f.em:f.em;
 
-    return `${f.sd}/${f.sm}/${f.sy} to ${f.ed}/${f.em}/${f.ey}`;
+    return {
+        start: `${f.sd}/${f.sm}/${f.sy}`,
+        end: `${f.ed}/${f.em}/${f.ey}`
+    };
 }

@@ -42,7 +42,7 @@ function generateWeek(week, container) {
 	}))
 	week_head.append(newEl('span', {
 		classList: 'week-period', 
-		textContent: getWeekPeriod(week.day),
+		textContent: getWeekPeriod(week.day).start + ' to ' +  getWeekPeriod(week.day).end,
 	}))
 
 	week_block.append(week_head);

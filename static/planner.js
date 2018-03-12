@@ -293,10 +293,24 @@ function generateWeek(week, container) {
 
     // week period
     let week_period = newEl('div', {
+        id: `week_${week.weekid}_period`,
         classList: 'td center week-period',
-        textContent: getWeekPeriod(week.day),
-        id: `week_${week.weekid}_period`
     });
+    week_period.addEventListener('click', showPeriodInput);
+    // week period text
+    let week_dates = newEl('span', {
+        innerText: getWeekPeriod(week.day).start + '\nto\n' + getWeekPeriod(week.day).end,
+        id: `week_${week.weekid}_period_text`
+    }); week_period.append(week_dates);
+    // week period input
+    let week_period_input = newEl('input', {
+        type: 'date',
+        classList: 'hidden fill',
+        id: `week_${week.weekid}_period_input`,
+        value: week.day,
+    }); 
+    week_period_input.addEventListener('blur', sendUpdate);
+    week_period.append(week_period_input);
     week_row.append(week_period);
 
     // week name
@@ -468,6 +482,17 @@ function validField(block) {
             }
             break;
 
+        case 'weekperiod':
+            content = block.value;
+            let date = new Date(content);
+            if(!isNaN(date.valueOf())) {
+                block.style.color = '#333';
+            } else {
+                block.style.color = 'red';
+                return false;
+            }
+            break;
+
         case 'structurename':
             if (content.length < 255) {
                 block.style.color = '#333';
@@ -511,7 +536,7 @@ function validField(block) {
             break;
     }
 
-    if (content == '' || content == initialContent) {
+    if (content == initialContent) {
         return false;
     }
 
@@ -524,7 +549,26 @@ function validField(block) {
  * @param  {Object} data update data
  */
 function updateBlock(data) {
-    $(`#${data.block}_${data.id}_${data.property}`).innerText = data.value;
+    switch(data.block + data.property) {
+        case 'weekperiod':
+            let input = $('#week_' + data.id + '_period_input');
+            let text = $('#week_' + data.id + '_period_text');
+            input.value = data.value;
+            input.style.display = 'none';
+            text.innerText =  getWeekPeriod(data.value).start + '\nto\n' + getWeekPeriod(data.value).end;
+            text.style.display = 'block';
+            break;
+
+
+        case 'documentname':
+            $('.document-name').value = data.value;
+            resizeDocumentName();
+            break;
+
+        default:
+            $(`#${data.block}_${data.id}_${data.property}`).innerText = data.value;
+            break;
+    }    
 }
 
 /**
@@ -689,4 +733,14 @@ function moveBlock(data) {
 	callServer('/api/document/' + data.docid, {}, function(doc) {
         generateTable(doc);
     })
+}
+
+function showPeriodInput(e) {
+    let parts = e.currentTarget.id.split('_');
+    let text = $(`#week_${parts[1]}_period_text`);
+    let input = $(`#week_${parts[1]}_period_input`);
+
+    text.style.display = 'none';
+    input.style.display = 'block';
+    input.focus();
 }

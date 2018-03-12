@@ -90,6 +90,11 @@ module.exports = function(app) {
                             conditions = ['id', data.id, 'documentid', data.docid];
                             break;
 
+                        case 'weekperiod':
+                            field = 'day';
+                            conditions = ['id', data.id, 'documentid', data.docid];
+                            break;
+
                         case 'structurename':
                             field = 'name';
                             conditions = ['id', data.id, 'weekid', data.parentid];
