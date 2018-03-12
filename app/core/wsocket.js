@@ -32,6 +32,7 @@ module.exports = function(app) {
             let payload = {};
 
             switch(data.type) {
+                // insert a new block
                 case 'insert':
                     let parts = data.id.split('_');
 
@@ -81,6 +82,7 @@ module.exports = function(app) {
                     }
                     break;
 
+                // update a block
                 case 'update':
                     let field = '';
                     let conditions = [];
@@ -125,7 +127,9 @@ module.exports = function(app) {
                     })
                     break;
 
+                // move a block
                 case 'move':
+                    // same parent
                     if(data.prevparentid == data.currparentid) {
                         if(data.prevpos < data.currpos) {
                             util.moveBlockDown(data.block, data.id, data.prevpos, data.currpos, data.currparentid, function() {
@@ -138,6 +142,7 @@ module.exports = function(app) {
                             })
                         }
                     }
+                    // different parent
                     else {
                         util.moveToNewParent(data.block, data.id, data.currparentid, function(results) {
                             if(data.prevpos < data.currpos) {
@@ -154,6 +159,7 @@ module.exports = function(app) {
                     }
                     break;
 
+                // delete a block
                 case 'delete':
                     util.deleteBlock(data.block, data.id, data.parent, data.parentid, data.position, function(results) {
                         sendAll(data);
@@ -162,11 +168,13 @@ module.exports = function(app) {
             }
         });
     });
-
     return server;
 }
 
-// broadcast to all connected hosts with the same document key, including sender
+/**
+ * broadcast to all connected hosts with the same document key, including sender
+ * @param  {Object} data
+ */
 function sendAll(data) {
     sv.clients.forEach(function(client) {
         if (client.readyState === WebSocket.OPEN && client.docid == data.docid) {

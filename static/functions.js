@@ -63,6 +63,10 @@ function callSocket(payload) {
     ws.send(JSON.stringify(payload));
 }
 
+/**
+ * handle the websocket message event
+ * @param  {Object} message
+ */
 function receivedMessageFromServer(message) {
     message = JSON.parse(message.data)
     if(verbose) console.log("ws recieved: ", message);
@@ -150,8 +154,17 @@ function mainSignIn() {
     window.location = "/";
 }
 
+/**
+ * get the start and the end of a week that contains the provided date
+ * @param  {String} date date-formatted string
+ * @return {Object}      start and end dates
+ */
 function getWeekPeriod(date) {
     let startDate = new Date(date);
+    while(startDate.getDay() != 1) {
+        startDate.setDate(startDate.getDate() - 1)
+    }
+
     let endDate = new Date(date);
     endDate.setDate(startDate.getDate() + 6)
     let f = {

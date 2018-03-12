@@ -610,6 +610,11 @@ function deleteBlock(data) {
     }
 }
 
+/**
+ * begin the moving of the block
+ * hide the move and delete buttons and show the append ones
+ * @param  {Event} e
+ */
 function startMoveBlock(e) {
 	if(!moveTarget) {
 	    let parts = e.currentTarget.id.split('_');
@@ -643,6 +648,10 @@ function startMoveBlock(e) {
 	}
 }
 
+/**
+ * stop the moving of the block
+ * show the delete and move buttons and hide the append ones
+ */
 function stopMoveBlock() {
 	if(moveTarget) {
 		let parts = moveTarget.id.split('_');
@@ -674,6 +683,11 @@ function stopMoveBlock() {
 	}
 }
 
+/**
+ * insert the moveTarget before the current element
+ * supports cross parent appending
+ * @param  {Event} e
+ */
 function insertBlockBefore(e) {
 	let current = e.currentTarget.parentNode.parentNode;
 	let moveParent = moveTarget.parentNode;
@@ -701,6 +715,11 @@ function insertBlockBefore(e) {
 	callSocket(data);
 }
 
+/**
+ * insert the moveTarget after the current element
+ * supports cross parent appending
+ * @param  {Event} e
+ */
 function insertBlockAfter(e) {
 	let current = e.currentTarget.parentNode.parentNode;
 	let moveParent = moveTarget.parentNode;
@@ -729,12 +748,20 @@ function insertBlockAfter(e) {
 	callSocket(data);
 }
 
+/**
+ * regenerate the table when a move request is received
+ * @param  {Object} data
+ */
 function moveBlock(data) {
 	callServer('/api/document/' + data.docid, {}, function(doc) {
         generateTable(doc);
     })
 }
 
+/**
+ * display the period input on .week_period click
+ * @param  {Event} e
+ */
 function showPeriodInput(e) {
     let parts = e.currentTarget.id.split('_');
     let text = $(`#week_${parts[1]}_period_text`);

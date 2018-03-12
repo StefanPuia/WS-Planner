@@ -1,11 +1,13 @@
 'use strict';
 
 const fs = require('fs');
-const bodyParser = require('body-parser');
 const path = require('path');
+
+const bodyParser = require('body-parser');
+const GoogleAuth = require('simple-google-openid');
+
 const util = require('./utility'); 
 const config = require('./../config');
-const GoogleAuth = require('simple-google-openid');
 
 module.exports = function(app) {
     // json parser for http requests

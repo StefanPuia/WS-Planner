@@ -6,6 +6,17 @@ const mysql = require('mysql');
 const config = require('./../config');
 const queries = require('./../config/queries');
 
+const cols = {
+    'week': ['documentid', 'name', 'day', 'position'],
+    'structure': ['weekid', 'name', 'comments', 'position'],
+    'resource': ['structureid', 'name', 'url', 'position'],
+}
+const parents = {
+    'week': 'document',
+    'structure': 'week',
+    'resource': 'structure'
+}
+
 /**
  * handle the sql server disconnect and reconnect if required
  */
@@ -375,17 +386,15 @@ module.exports.deleteBlock = function(block, id, parent, parentid, position, cal
     })
 }
 
-let cols = {
-    'week': ['documentid', 'name', 'day', 'position'],
-    'structure': ['weekid', 'name', 'comments', 'position'],
-    'resource': ['structureid', 'name', 'url', 'position'],
-}
-let parents = {
-    'week': 'document',
-    'structure': 'week',
-    'resource': 'structure'
-}
-
+/**
+ * move a block's position downwards
+ * @param  {String}   block
+ * @param  {Int}   id
+ * @param  {Int}   prevpos  initial position (before moving)
+ * @param  {Int}   currpos  current position (after moving)
+ * @param  {String}   parentid
+ * @param  {Function} callback
+ */
 module.exports.moveBlockDown = function(block, id, prevpos, currpos, parentid, callback) {
     let inserts = [block, parseInt(prevpos), currpos, parents[block] + 'id', parentid, block, currpos, id];
     mysqlConnection.query(queries.moveblockdown, inserts, function(err, results) {
@@ -394,6 +403,15 @@ module.exports.moveBlockDown = function(block, id, prevpos, currpos, parentid, c
     })
 }
 
+/**
+ * move a block's position upwards
+ * @param  {String}   block
+ * @param  {Int}   id
+ * @param  {Int}   prevpos  initial position (before moving)
+ * @param  {Int}   currpos  current position (after moving)
+ * @param  {String}   parentid
+ * @param  {Function} callback
+ */
 module.exports.moveBlockUp = function(block, id, prevpos, currpos, parentid, callback) {
     let inserts = [block, parseInt(prevpos), currpos, parents[block] + 'id', parentid, block, currpos, id];
     mysqlConnection.query(queries.moveblockup, inserts, function(err, results) {
@@ -402,6 +420,14 @@ module.exports.moveBlockUp = function(block, id, prevpos, currpos, parentid, cal
     })
 }
 
+/**
+ * move a block to the bottom of a new parent
+ * reorders the previous parents' children
+ * @param  {String}   block
+ * @param  {Int}   id
+ * @param  {String}   newparentid parent where the block should be moved to
+ * @param  {Function} callback
+ */
 module.exports.moveToNewParent = function(block, id, newparentid, callback) {
     let inserts = [block, cols[block], cols[block], block, id];
     mysqlConnection.query(queries.cloneblock, inserts, function(err, clone) {
