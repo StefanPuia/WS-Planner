@@ -5,7 +5,7 @@
  * @param {String} css selector
  * @return {NodeElement} / {NodeElementList} depending on query returning multiple elements
  */
-$ = function(query) {
+const $ = function(query) {
     let result = document.querySelectorAll(query);
     if (result.length > 1) {
         return result;
