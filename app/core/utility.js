@@ -106,7 +106,7 @@ function groupJSON(array, field, groupname, keep) {
 function makeDocumentsFromQuery(flatArray) {
     let docs = groupJSON(flatArray, "documentid", "weeks", ["name"]);
     docs.forEach(function(doc) {
-        let weeks = groupJSON(doc.weeks, "weekid", "structures", ["weekname", "day", "weekpostion"]);
+        let weeks = groupJSON(doc.weeks, "weekid", "structures", ["weekname", "day", "weekposition"]);
         weeks.forEach(function(week) {
             let strs = groupJSON(week.structures, "structureid", "resources", ["structurename", "structureid", "comments", "structureposition"]);
             week.structures = strs;

@@ -1,3 +1,5 @@
+'use strict';
+
 /**
  * Shorthand function for querySelector
  * @param {String} css selector
@@ -159,10 +161,13 @@ function mainSignIn() {
  * @param  {String} date date-formatted string
  * @return {Object}      start and end dates
  */
-function getWeekPeriod(date) {
+function getWeekPeriod(date, fullWeek = false) {
     let startDate = new Date(date);
-    while(startDate.getDay() != 1) {
-        startDate.setDate(startDate.getDate() - 1)
+
+    if(fullWeek) {
+        while(startDate.getDay() != 1) {
+            startDate.setDate(startDate.getDate() - 1)
+        }
     }
 
     let endDate = new Date(date);

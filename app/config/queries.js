@@ -33,7 +33,7 @@ module.exports = {
 
     documentbyid: `SELECT 
         document.id, document.name, 
-        week.id AS weekid, week.name AS weekname, week.day, week.position AS weekpostion,
+        week.id AS weekid, week.name AS weekname, week.day, week.position AS weekposition,
         structure.id AS structureid, structure.name AS structurename, structure.comments, structure.position AS structureposition,
         resource.id AS resourceid, resource.name AS resourcename, resource.url, resource.position AS resourceposition
     FROM 

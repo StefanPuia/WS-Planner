@@ -29,10 +29,6 @@ section {
 
 }
 
-.comments p {
-	line-height: 5px;
-}
-
 .structure-name {
 	grid-area: structure-name;
 }

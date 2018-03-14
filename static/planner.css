@@ -14,7 +14,7 @@
 
 .thead, .week {
 	display: grid;
-	grid-template-columns: 10em 10em 12.5em auto;
+	grid-template-columns: 10em 12.5em 10em auto;
 }
 
 .thead-structure {
@@ -50,6 +50,10 @@
 
 .structure > div:first-child {
 	border-left: 0;
+}
+
+.week-period {
+	cursor: pointer;
 }
 
 .week-structure {

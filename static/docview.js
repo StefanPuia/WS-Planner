@@ -54,7 +54,7 @@ function generateWeek(week, container) {
 	// week name
 	week_head.append(newEl('h2', {
 		classList: 'week-head',
-		textContent: week.weekname,
+		innerText: week.weekname,
 	}))
 	// week period
 	week_head.append(newEl('span', {
@@ -89,7 +89,7 @@ function generateStructure(structure, container) {
 	// structure name
 	structure_block.append(newEl('h3', {
 		classList: 'structure-name',
-		textContent: structure.structurename
+		innerText: structure.structurename
 	}))
 
 	// comments
@@ -99,7 +99,7 @@ function generateStructure(structure, container) {
 
 	structure.comments.split('\n').forEach(function(comment) {
 		comments_block.append(newEl('p', {
-			textContent: comment
+			innerText: comment
 		}))
 	})
 	structure_block.append(comments_block);

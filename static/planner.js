@@ -100,7 +100,8 @@ function generateActions(block, blockName, container) {
     })
     button_move.append(newEl('i', {
         classList: 'material-icons md-24',
-        textContent: 'swap_vert'
+        textContent: 'swap_vert',
+        title: 'Click to move this ' + blockName + '.'
     }))
     container.append(button_move);
     button_move.addEventListener('click', startMoveBlock);
@@ -109,7 +110,8 @@ function generateActions(block, blockName, container) {
     let button_move_top = newEl('button', {
         type: 'button',
         classList: `btn btn-success btn-sm btn-insert-before-${blockName} hidden`,
-        id: `${blockName}_${block[blockName + 'id']}_move_top`
+        id: `${blockName}_${block[blockName + 'id']}_move_top`,
+        title: 'Click to move the ' + blockName + ' above this one.'
     })
     button_move_top.append(newEl('i', {
         classList: 'material-icons md-24',
@@ -122,7 +124,8 @@ function generateActions(block, blockName, container) {
     let button_move_bottom = newEl('button', {
         type: 'button',
         classList: `btn btn-success btn-sm btn-insert-after-${blockName} hidden`,
-        id: `${blockName}_${block[blockName + 'id']}_move_bottom`
+        id: `${blockName}_${block[blockName + 'id']}_move_bottom`,
+        title: 'Click to move the ' + blockName + ' below this one.'
     })
     button_move_bottom.append(newEl('i', {
         classList: 'material-icons md-24',
@@ -135,7 +138,8 @@ function generateActions(block, blockName, container) {
     let button_delete = newEl('button', {
         type: 'button',
         classList: `btn btn-danger btn-sm btn-delete-${blockName}`,
-        id: `${blockName}_${block[blockName + 'id']}_delete`
+        id: `${blockName}_${block[blockName + 'id']}_delete`,
+        title: 'Click to delete the ' + blockName + '.'
     })
     button_delete.append(newEl('i', {
         classList: 'material-icons md-24',
@@ -280,7 +284,8 @@ function generateWeek(week, container) {
         classList: 'week',
         id: `week_${week.weekid}`,
     });
-    week_row.dataset.position = week.weekpostion;
+    console.log(week);
+    week_row.dataset.position = week.weekposition;
 
     // week actions
     let week_actions = newEl('div', {
@@ -290,6 +295,15 @@ function generateWeek(week, container) {
     week_row.append(week_actions);
 
     generateActions(week, 'week', week_actions);
+
+    // week name
+    let week_name = newEl('div', {
+        classList: 'td center week-name',
+        innerText: week.weekname,
+        contentEditable: 'true',
+        id: `week_${week.weekid}_name`
+    });
+    week_row.append(week_name);
 
     // week period
     let week_period = newEl('div', {
@@ -312,15 +326,6 @@ function generateWeek(week, container) {
     week_period_input.addEventListener('blur', sendUpdate);
     week_period.append(week_period_input);
     week_row.append(week_period);
-
-    // week name
-    let week_name = newEl('div', {
-        classList: 'td center week-name',
-        innerText: week.weekname,
-        contentEditable: 'true',
-        id: `week_${week.weekid}_name`
-    });
-    week_row.append(week_name);
 
     // week structure
     let week_structures = newEl('div', {
@@ -598,10 +603,12 @@ function sendDeleteBlock(e) {
  */
 function deleteBlock(data) {
     let element = $(`#${data.block}_${data.id}`);
-    let parent = element.parentNode
+    let parent = element.parentNode;
     let siblings = parent.children.length - 2;
+    console.log(siblings);
     element.remove();
-    if (siblings < 1) {
+    console.log(siblings);
+    if (siblings == 0) {
         let e = {};
         e.currentTarget = {
             id: 'insert_' + data.block + 's_' + parent.id.split('_')[1]
