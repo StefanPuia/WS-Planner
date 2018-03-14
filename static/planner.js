@@ -284,7 +284,6 @@ function generateWeek(week, container) {
         classList: 'week',
         id: `week_${week.weekid}`,
     });
-    console.log(week);
     week_row.dataset.position = week.weekposition;
 
     // week actions
@@ -704,6 +703,7 @@ function insertBlockBefore(e) {
 
 	parent.insertBefore(moveTarget, current);
 
+    // if there are no children left, click the insert button
 	if(moveParent.children.length < 2) {
 		moveParent.children[moveParent.children.length - 1].click();
 	}
@@ -736,6 +736,7 @@ function insertBlockAfter(e) {
 
 	parent.insertBefore(moveTarget, current.nextSibling);
 
+    // if there are no children left, click the insert button
 	if(moveParent.children.length < 2) {
 		moveParent.children[moveParent.children.length - 1].click();
 	}
