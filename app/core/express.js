@@ -8,10 +8,6 @@ const utils = require('./utility');
 
 module.exports = app;
 
-// set view engine to ejs   
-app.set('view engine', 'ejs');
-app.set('views', config.views);
-
 // serve static files
 app.use(config.staticRouted, express.static(config.staticFiles));
 
@@ -30,7 +26,7 @@ app.use('/', (req, res, next) => {
  * serve landing page
  */
 app.get('/', function(req, res) {
-    res.status(200).render('index');
+    res.status(200).sendFile(config.views + '/index.html');
 });
 
 /**
@@ -38,7 +34,7 @@ app.get('/', function(req, res) {
  * serve the login page
  */
 app.get('/login', function(req, res) {
-    res.status(200).render('login')
+    res.status(200).sendFile(config.views + '/login.html');
 })
 
 /**
@@ -47,7 +43,7 @@ app.get('/login', function(req, res) {
  * @param  {String} docid the document key
  */
 app.get('/doc/:docid', function(req, res) {
-    res.status(200).render('planner');
+    res.status(200).sendFile(config.views + '/planner.html');
 });
 
 /**
@@ -56,5 +52,5 @@ app.get('/doc/:docid', function(req, res) {
  * @param  {String} docid the document key
  */
 app.get('/doc/:docid/view', function(req, res) {
-	res.status(200).render('document');
+	res.status(200).sendFile(config.views + '/document.html');
 })
