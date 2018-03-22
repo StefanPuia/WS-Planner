@@ -1,6 +1,8 @@
 .td, .th {
 	padding: 0.6em;
 	line-height: 1.42;
+	
+	white-space: pre-line;
 }
 
 .tbody {

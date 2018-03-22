@@ -95,3 +95,9 @@ main {
 .material-icons.md-24 {
 	font-size: 24px;
 }
+
+.search-input {
+	padding-left: 5px;
+	padding-right: 5px;
+}
+

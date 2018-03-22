@@ -71,7 +71,7 @@ function generateTable(doc) {
  */
 function addEditableListeners() {
     $('[contenteditable="true"]').forEach(function(el) {
-    	el.addEventListener('focus', function(e) { initialContent = e.currentTarget.innerText; })
+    	el.addEventListener('focus', function(e) { initialContent = e.currentTarget.textContent; })
         el.addEventListener('blur', sendUpdate);
     })
 }
@@ -175,7 +175,7 @@ function generateResource(resource, container) {
     let resource_name = newEl('div', {
         classList: 'resource-name',
         contentEditable: 'true',
-        innerText: resource.resourcename,
+        textContent: resource.resourcename,
         id: `resource_${resource.resourceid}_name`
     });
     resource_row.append(resource_name);
@@ -225,7 +225,7 @@ function generateStructure(structure, container) {
     // structure name
     let structure_name = newEl('div', {
         classList: 'structure-name',
-        innerText: structure.structurename,
+        textContent: structure.structurename,
         contentEditable: 'true',
         id: `structure_${structure.structureid}_name`
     });
@@ -234,7 +234,7 @@ function generateStructure(structure, container) {
     // structure comments
     let structure_comments = newEl('div', {
         classList: 'structure-comments',
-        innerText: structure.comments,
+        textContent: structure.comments,
         contentEditable: 'true',
         id: `structure_${structure.structureid}_comments`
     });
@@ -298,7 +298,7 @@ function generateWeek(week, container) {
     // week name
     let week_name = newEl('div', {
         classList: 'td center week-name',
-        innerText: week.weekname,
+        textContent: week.weekname,
         contentEditable: 'true',
         id: `week_${week.weekid}_name`
     });
@@ -312,7 +312,7 @@ function generateWeek(week, container) {
     week_period.addEventListener('click', showPeriodInput);
     // week period text
     let week_dates = newEl('span', {
-        innerText: getWeekPeriod(week.day).start + '\nto\n' + getWeekPeriod(week.day).end,
+        textContent: getWeekPeriod(week.day).start + '\nto\n' + getWeekPeriod(week.day).end,
         id: `week_${week.weekid}_period_text`
     }); week_period.append(week_dates);
     // week period input
@@ -464,7 +464,7 @@ function sendUpdate(e) {
  */
 function validField(block) {
     let parts = block.id.split('_');
-    let content = block.innerText;
+    let content = block.textContent;
 
     switch (parts[0] + parts[2]) {
         case 'documentname':
@@ -559,7 +559,7 @@ function updateBlock(data) {
             let text = $('#week_' + data.id + '_period_text');
             input.value = data.value;
             input.style.display = 'none';
-            text.innerText =  getWeekPeriod(data.value).start + '\nto\n' + getWeekPeriod(data.value).end;
+            text.textContent =  getWeekPeriod(data.value).start + '\nto\n' + getWeekPeriod(data.value).end;
             text.style.display = 'block';
             break;
 
@@ -570,7 +570,7 @@ function updateBlock(data) {
             break;
 
         default:
-            $(`#${data.block}_${data.id}_${data.property}`).innerText = data.value;
+            $(`#${data.block}_${data.id}_${data.property}`).textContent = data.value;
             break;
     }    
 }

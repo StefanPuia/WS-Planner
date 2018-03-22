@@ -43,10 +43,15 @@ function parseDocuments(documents) {
 		})
         let contentList = newEl('ul');
 
+        let hidden_content = newEl('div', {
+            classList: 'hidden',
+        })
+
         // parse every week and add brief parts to the card
 		for (let j = 0; j < 4 && j < doc.weeks.length; j++) {
             // week name
             let wna = doc.weeks[j].weekname;
+            hidden_content.textContent += wna + ' ';
             if (wna.length > 20) {
                 wna = wna.substr(0, 19) + "...";
             }
@@ -59,6 +64,7 @@ function parseDocuments(documents) {
             let structureList = newEl('ul');
             for (let k = 0; k < 5 && k < doc.weeks[j].structures.length; k++) {
                 let str = doc.weeks[j].structures[k].structurename;
+                hidden_content.textContent += str + ' ' + doc.weeks[j].structures[k].comments + ' ';
                 if (str.length > 30) {
                     str = str.substr(0, 29) + "...";
                 }
@@ -69,6 +75,7 @@ function parseDocuments(documents) {
             contentList.append(structureList);
         }
         content.append(contentList);
+        content.append(hidden_content);
         card.append(content);
 
         // card footer
