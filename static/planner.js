@@ -12,7 +12,7 @@ let initialContent = '';
 // block names for easy access
 let _blocks = {
     week: {
-        parent: 'document',
+        parent: 'tbody',
         child: 'structure',
     },
 
@@ -57,6 +57,10 @@ window.addEventListener('load', async function() {
             $('#docview').href = '/doc/' + docid + '/view';
             $('#share').addEventListener('click', function() {shareDocument()});
             $('.search-input').addEventListener('input', searchDocument);
+            $('#cancel-move').addEventListener('click', stopMoveBlock);
+
+            $('#loading').classList.add('hidden');
+            $('#planner').classList.remove('hidden');
         }
     })
 })
@@ -84,7 +88,7 @@ function searchDocument() {
         }
     }
     else {
-        let weeks = $('.week');
+        let weeks = $('.week').length > 0 ? $('.week') : [$('.week')];
         for(let i = 0; i < weeks.length; i++) {
             let week = weeks[i];
             let found_week = false;
@@ -171,7 +175,7 @@ function generateTable(doc) {
     container.innerHTML = '';
 
     // generate each week and its components
-    doc.weeks.forEach(function(week) {
+    doc.weeks.forEach(function(week, key) {
         // generate the weeks
         generateWeek(week, container);
     });
@@ -188,7 +192,7 @@ function generateTable(doc) {
 }
 
 /**
- * add the sendUpdate function for every editable container
+ * add the sendUpdate function to every editable container
  */
 function addEditableListeners() {
     $('[contenteditable="true"]').forEach(function(el) {
@@ -214,71 +218,58 @@ function fixInsertButton() {
  */
 function generateActions(block, blockName, parent) {
     let container = newEl('div', {
-        classList: 'action-buttons',
+        classList: 'action-buttons action-' + blockName,
         id: blockName + '_' + block[blockName + 'id'] + '_actions',
     })
 
-    let parentid = parent.id.split('_')[1];
+    let parentid = parent.id.split('_')[1];  
 
-    if(_blocks[blockName].child != 'null') {
-        let insertButton = newEl('button', {
-            classList: 'btn md-24 btn-info button-insert',
-            id: `insert_${_blocks[blockName].child}s_${parentid}`,
-            textContent: 'Insert a new ' + _blocks[blockName].child,
-            contentEditable: 'false',
-        }, {
-            padding: '8px'
-        });
-        container.append(insertButton);
-        insertButton.addEventListener('click', sendInsertBlock)
-    }    
+    // move button
+    let button_move = newEl('button', {
+        type: 'button',
+        classList: `btn btn-sm btn-move btn-move-${blockName}`,
+        id: `${blockName}_${block[blockName + 'id']}_move`
+    })
+    button_move.append(newEl('i', {
+        classList: 'material-icons md-24',
+        textContent: 'swap_vert',
+        title: 'Click to move this ' + blockName + '.'
+    }))
+    container.append(button_move);
+    button_move.addEventListener('click', startMoveBlock);
 
-    // // move button
-    // let button_move = newEl('button', {
+    // // move top button
+    // let button_move_top = newEl('button', {
     //     type: 'button',
-    //     classList: `btn btn-sm btn-move-${blockName}`,
-    //     id: `${blockName}_${block[blockName + 'id']}_move`
+    //     classList: `btn btn-success btn-sm btn-insert-before-${blockName} hidden`,
+    //     id: `${blockName}_${block[blockName + 'id']}_move_top`,
+    //     title: 'Click to move the ' + blockName + ' above this one.'
     // })
-    // button_move.append(newEl('i', {
+    // button_move_top.append(newEl('i', {
     //     classList: 'material-icons md-24',
-    //     textContent: 'swap_vert',
-    //     title: 'Click to move this ' + blockName + '.'
+    //     textContent: 'vertical_align_top'
     // }))
-    // container.append(button_move);
-    // button_move.addEventListener('click', startMoveBlock);
+    // container.append(button_move_top);
+    // button_move_top.addEventListener('click', insertBlockBefore);
 
-    // move top button
-    let button_move_top = newEl('button', {
-        type: 'button',
-        classList: `btn btn-success btn-sm btn-insert-before-${blockName} hidden`,
-        id: `${blockName}_${block[blockName + 'id']}_move_top`,
-        title: 'Click to move the ' + blockName + ' above this one.'
-    })
-    button_move_top.append(newEl('i', {
-        classList: 'material-icons md-24',
-        textContent: 'vertical_align_top'
-    }))
-    container.append(button_move_top);
-    button_move_top.addEventListener('click', insertBlockBefore);
-
-    // move bottom button
-    let button_move_bottom = newEl('button', {
-        type: 'button',
-        classList: `btn btn-success btn-sm btn-insert-after-${blockName} hidden`,
-        id: `${blockName}_${block[blockName + 'id']}_move_bottom`,
-        title: 'Click to move the ' + blockName + ' below this one.'
-    })
-    button_move_bottom.append(newEl('i', {
-        classList: 'material-icons md-24',
-        textContent: 'vertical_align_bottom'
-    }))
-    container.append(button_move_bottom);
-    button_move_bottom.addEventListener('click', insertBlockAfter);
+    // // move bottom button
+    // let button_move_bottom = newEl('button', {
+    //     type: 'button',
+    //     classList: `btn btn-success btn-sm btn-insert-after-${blockName} hidden`,
+    //     id: `${blockName}_${block[blockName + 'id']}_move_bottom`,
+    //     title: 'Click to move the ' + blockName + ' below this one.'
+    // })
+    // button_move_bottom.append(newEl('i', {
+    //     classList: 'material-icons md-24',
+    //     textContent: 'vertical_align_bottom'
+    // }))
+    // container.append(button_move_bottom);
+    // button_move_bottom.addEventListener('click', insertBlockAfter);
 
     // delete button
     let button_delete = newEl('button', {
         type: 'button',
-        classList: `btn btn-danger btn-sm btn-delete-${blockName}`,
+        classList: `btn btn-danger btn-sm btn-delete btn-delete-${blockName}`,
         id: `${blockName}_${block[blockName + 'id']}_delete`,
         title: 'Click to delete the ' + blockName + '.'
     })
@@ -288,6 +279,20 @@ function generateActions(block, blockName, parent) {
     }))
     button_delete.addEventListener('click', sendDeleteBlock);
     container.append(button_delete);
+
+    if(_blocks[blockName].child != 'null') {
+        let insertButton = newEl('button', {
+            classList: 'btn md-24 btn-info button-insert',
+            id: `insert_${_blocks[blockName].child}s_${parentid}`,
+            textContent: 'Insert a new ' + _blocks[blockName].child,
+            contentEditable: 'false',
+            title: 'Click to insert a new ' + _blocks[blockName].child + ' under this ' + blockName + '.',
+        }, {
+            padding: '8px'
+        });
+        container.append(insertButton);
+        insertButton.addEventListener('click', sendInsertBlock)
+    }  
 
     parent.append(container);
 }
@@ -446,7 +451,7 @@ function generateWeek(week, container) {
 
     // week structure
     let week_structures = newEl('div', {
-        classList: 'week-structure',
+        classList: 'week-structures',
         id: `week_${week.weekid}_structures`
     })
 
@@ -726,7 +731,7 @@ function startMoveBlock(e) {
 	if(!moveTarget) {
 	    let parts = e.currentTarget.id.split('_');
 	    moveTarget = $(`#${parts[0]}_${parts[1]}`);
-	    moveTarget.style.opacity = 0.3;
+	    moveTarget.style.display = 'none';
 
 	    if($(`.${parts[0]}`).length > 1) {
             // add the cancel event on "Escape"
@@ -736,31 +741,60 @@ function startMoveBlock(e) {
                 }
             })
 
+            let parents = $('.' + _blocks[parts[0]].parent).length > 0 ? $('.' + _blocks[parts[0]].parent) : [$('.' + _blocks[parts[0]].parent)];
+            parents.forEach(function(parent) {
+                let last = parent.querySelector('.' + parts[0]);;
+                let blocks = parent.querySelectorAll('.' + parts[0]);
+                blocks.forEach(function(block) {
+                    if(block.id != moveTarget.id) {
+                        block.parentNode.insertBefore(newEl('div', {
+                            textContent:'insert here',
+                            classList: parts[0] + ' block-placeholder',
+                            id: 'before_' + block.id,
+                        }, {
+                            background: '#7DFA5C',
+                            opacity: 0.3,
+                            minHeight: '30px'
+                        }), block);
+                        last = block;                    
+                    }
+                })
+                last.parentNode.append(newEl('div', {
+                    textContent:'insert here',
+                    classList: parts[0] + ' block-placeholder',
+                    id: 'after_' + last.id,
+                }, {
+                    background: '#7DFA5C',
+                    opacity: 0.3,
+                }));
+            });
+
+            $('.tbody').append($('#insert_weeks_' + getDocumentId()));
+            $('.move-alert').childNodes[0].textContent = 'You are moving the ' + parts[0] + ` "${$(`#${parts[0]}_${parts[1]}_name`).textContent.substr(0, 30)}".`;
+            $('.move-alert').style.display = 'block';
+
+            $('.block-placeholder').forEach(function(placeholder) {
+                placeholder.addEventListener('click', function(e) {
+                    let parts = e.currentTarget.id.split('_');
+                    let event = {
+                        currentTarget: $(`#${parts[1]}_${parts[2]}`),
+                    }
+                    switch(parts[0]) {
+                        case 'before':
+                            insertBlockBefore(event);
+                            break;
+
+                        case 'after':
+                            insertBlockAfter(event);
+                            break;
+                    }
+                })
+            })
+
 		    // disable current buttons
 		    $(`#${parts[0]}_${parts[1]} button`).forEach(function(btn) {
 		        btn.disabled = 'true';
 		    })
-
-            // make the actions group visible
-            $(`.${parts[0]} .action-buttons`).forEach(function(group) {
-                group.style.display = '';
-                group.style.opacity = '1';
-            })
-
-		    // hide move and delete buttons for all similar blocks
-		    $('.btn-move-' + parts[0]).forEach(function(btn) {
-		        btn.setAttribute('style', 'display:none!important');
-		    });
-		    $('.btn-delete-' + parts[0]).forEach(function(btn) {
-		        btn.setAttribute('style', 'display:none!important');
-		    });
-		    // display insert before and after buttons for all similar blocks
-		    $('.btn-insert-before-' + parts[0]).forEach(function(btn) {
-		        btn.setAttribute('style', 'display:inline-block!important');
-		    });
-		    $('.btn-insert-after-' + parts[0]).forEach(function(btn) {
-		        btn.setAttribute('style', 'display:inline-block!important');
-		    });
 		}
 		else {
 			stopMoveBlock();
@@ -776,36 +810,22 @@ function stopMoveBlock() {
 	if(moveTarget) {
 		let parts = moveTarget.id.split('_');
 		// reset opacity
-		moveTarget.style.opacity = 1;
+		moveTarget.style.display = '';
 		moveTarget = false;
+
+        let blocks = $('.block-placeholder').length > 0 ? $('.block-placeholder') : [$('.block-placeholder')];
+        blocks.forEach(function(block) {
+            block.remove();
+        })
 
 		if($(`.${parts[0]}`).length > 1) {
 		    // enable current buttons
 		    $(`#${parts[0]}_${parts[1]} button`).forEach(function(btn) {
 		        btn.disabled = '';
 		    })
-
-            // make the actions group invisible
-            $(`.${parts[0]} .action-buttons`).forEach(function(group) {
-                group.style.display = 'none';
-                group.style.opacity = '0.2';
-            })
-
-		    // display move and delete buttons for all similar blocks
-		    $('.btn-move-' + parts[0]).forEach(function(btn) {
-		        btn.setAttribute('style', 'display:inline-block!important');
-		    });
-		    $('.btn-delete-' + parts[0]).forEach(function(btn) {
-		        btn.setAttribute('style', 'display:inline-block!important');
-		    });
-		    // hide insert before and after buttons for all similar blocks
-		    $('.btn-insert-before-' + parts[0]).forEach(function(btn) {
-		        btn.setAttribute('style', 'display:none!important');
-		    });
-		    $('.btn-insert-after-' + parts[0]).forEach(function(btn) {
-		        btn.setAttribute('style', 'display:none!important');
-		    });
 		}
+
+        $('.move-alert').style.display = 'none';
 	}
 }
 

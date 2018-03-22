@@ -37,7 +37,11 @@
 	        </nav>
 	    </header>
 	    <main>
-	        <section class="table table-bordered" id="planner">
+			<section id="loading" class="center">
+				Loading...
+			</section>
+
+	        <section class="table table-bordered hidden" id="planner">
 	            <div class="thead">
 	                <!-- <div class="th">Actions</div> -->
 	                <div class="th">Week Name</div>
@@ -45,7 +49,8 @@
 	                <div class="thead-structure">
 	                    <div class="th">Structure Name</div>
 	                    <div class="th">Comments</div>
-	                    <div class="th">Resources</div>
+	                    <div class="th">Resource Name</div>
+	                    <div class="th">Resource URL</div>
 	                </div>
 	            </div>
 	            <div class="tbody" id="weeks">
@@ -53,6 +58,11 @@
 
 	            </div>
 	        </section>
+	        <div class="move-alert">
+	        	You are moving.
+	        	<br>
+	        	<button class="btn btn-danger" id="cancel-move">Cancel</button>
+	        </div>
 	    </main>
 	</body>
 </html>

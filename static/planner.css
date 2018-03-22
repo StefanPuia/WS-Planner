@@ -59,7 +59,7 @@ nav .document-name:blur{
 
 .thead-structure {
 	display: grid;
-	grid-template-columns: 25em 25em 1fr;
+	grid-template-columns: 25em 25em 25em 1fr;
 }
 
 .th {
@@ -79,7 +79,7 @@ nav .document-name:blur{
 
 /*border-left: 1px solid #ddd;*/
 
-.week-structure {
+.week-structures {
 	padding: 0;
 	display: grid;
 	grid-template-rows: auto;
@@ -95,7 +95,7 @@ nav .document-name:blur{
 	margin: 0;
 	padding: 0;
 	display: grid;
-	grid-template-columns: 40% 1fr;
+	grid-template-columns: 25em 1fr;
 	min-height: 4em;
 	position: relative;
 }
@@ -113,4 +113,37 @@ nav .document-name:blur{
 
 .action-buttons .btn:hover {
 	opacity: 1;
+}
+
+.block-placeholder {
+	cursor: pointer;
+	padding: 5px;
+}
+
+.move-alert {
+	display: block;
+	height: 100px;
+	width: 50vw;
+	background: yellow;
+	word-break: break-all;
+	position: fixed;
+	bottom: 30px;
+	left: 25vw;
+	text-align: center;
+	padding: 25px;
+	line-height: 30px;
+	display: none;
+}
+
+.action-structure {
+	left: 33em;
+}
+
+.action-week {
+	left: 8em;
+}
+
+.action-resource {
+	left: auto;
+	right: 0.5em;
 }

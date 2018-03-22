@@ -1,15 +1,18 @@
 'use strict';
 
-window.onload = async function() {
+window.addEventListener('load', async function() {
     await gapi.auth2.getAuthInstance();
 	callServer('/api/document', {}, function(status, documents) {
 		parseDocuments(documents);
-	})
 
-    $('#document-create-card').addEventListener('click', createDocument);
-    $('.search-input').addEventListener('input', searchDocuments);
-    $('.search-input').focus();
-}
+        $('#document-create-card').addEventListener('click', createDocument);
+        $('.search-input').addEventListener('input', searchDocuments);
+        $('.search-input').focus();
+
+        $('#loading').classList.add('hidden');
+        $('#documents').classList.remove('hidden');
+    })
+})
 
 /**
  * parse the documents and create the cards
