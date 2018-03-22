@@ -19,11 +19,13 @@ const $ = function(query) {
  * Creates a new [tag] element and assigns the provided attributes to it
  * @param  {String} tag name
  * @param  {Object} attributes object to be applied
+ * @param  {Object} style style to be applied to the object
  * @return {NodeElement} the new element
  */
-function newEl(tag, attr = {}) {
+function newEl(tag, attr = {}, style={}) {
     let el = document.createElement(tag);
     Object.assign(el, attr);
+    Object.assign(el.style, style)
     return el;
 }
 
@@ -117,18 +119,19 @@ async function callServer(fetchURL, options, callback) {
     const response = await fetch(fetchURL, fetchOptions);
     if (!response.ok) {
         console.log("Server error:\n" + response.status);
-        return;
+        callback(response.status);
     }
+    else {
+        let data = await response.json();
+        if (!data) {
+            data = JSON.stringify({
+                err: "error on fetch"
+            });
+        }
 
-    let data = await response.json();
-    if (!data) {
-        data = JSON.stringify({
-            err: "error on fetch"
-        });
-    }
-
-    if(verbose) console.log("recieved: ", data);
-    callback(data);
+        if(verbose) console.log("recieved: ", data);
+        callback(null, data);
+    }    
 }
 
 /**
@@ -136,7 +139,7 @@ async function callServer(fetchURL, options, callback) {
  */
 function signIn() {
     $('#nav-log').textContent = "Log Out";
-    callServer('/api/user/', {}, function(user) {
+    callServer('/api/user/', {}, function(status, user) {
         $('#nav-greeting').textContent = 'Hello, ' + user.name;
     })
 }
@@ -190,4 +193,18 @@ function getWeekPeriod(date, fullWeek = false) {
         start: `${f.sd}/${f.sm}/${f.sy}`,
         end: `${f.ed}/${f.em}/${f.ey}`
     };
+}
+
+/**
+ * displays a prompt with the document url
+ */
+function shareDocument(view = '') {
+    let docNameEl = $('.document-name');
+    let docname = docNameEl.textContent;
+    if(docNameEl.tagName == 'input') {
+        docname = docNameEl.value;
+    }
+    let docid = getDocumentId();
+    let url = location.origin + '/doc/' + docname + '-' + docid + '/' + view;
+    window.prompt('Copy this URL and share it.\nEveryone with the URL can EDIT this file.', url);
 }

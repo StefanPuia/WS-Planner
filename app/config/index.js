@@ -33,4 +33,33 @@ module.exports = {
 	}, 
 
 	verbose: true,
+
+	cols: {
+		'document': ['id', 'userid', 'name'], 
+	    'week': ['documentid', 'name', 'day', 'position'],
+	    'structure': ['weekid', 'name', 'comments', 'position'],
+	    'resource': ['structureid', 'name', 'url', 'position'],
+	},
+
+	blocks: {
+		document: {
+			parent: '',
+			child: 'week',
+		},
+
+	    week: {
+	        parent: 'document',
+	        child: 'structure',
+	    },
+
+	    structure: {
+	        parent: 'week',
+	        child: 'resource',
+	    },
+
+	    resource: {
+	        parent: 'structure',
+	        child: '',
+	    },
+	},
 }

@@ -34,47 +34,31 @@ module.exports = function(app) {
             switch(data.type) {
                 // insert a new block
                 case 'insert':
-                    let parts = data.id.split('_');
+                    payload = {
+                        type: 'insert',
+                        docid: data.docid,
+                        parent: config.blocks[data.block].parent,
+                        parentid: data.parentid,
+                        block: data.block
+                    }
 
-                    switch(parts[1]) {
-                        case 'weeks':
-                            payload = {
-                                type: 'insert',
-                                docid: data.docid,
-                                parent: 'document',
-                                parentid: data.docid,
-                                block: 'weeks'
-                            }
-
-                            util.insertWeek(data.docid, function(response) {
+                    switch(data.block) {
+                        case 'week':
+                            util.insertWeek(data.parentid, function(response) {
                                 payload.weeks = response;
                                 sendAll(payload);
                             })
                             break;
 
-                        case 'structures':
-                            payload = {
-                                type: 'insert',
-                                docid: data.docid,
-                                parent: 'week',
-                                parentid: parts[2],
-                                block: 'structures'
-                            }
-                            util.insertStructure(parts[2], function(response) {
+                        case 'structure':
+                            util.insertStructure(data.parentid, function(response) {
                                 payload.structures = response;
                                 sendAll(payload);
                             })
                             break;
 
-                        case 'resources':
-                            payload = {
-                                type: 'insert',
-                                docid: data.docid,
-                                parent: 'structure',
-                                parentid: parts[2],
-                                block: 'resources'
-                            }
-                            util.insertResource(parts[2], function(response) {
+                        case 'resource':
+                            util.insertResource(data.parentid, function(response) {
                                 payload.resources = response;
                                 sendAll(payload);
                             })
@@ -84,44 +68,9 @@ module.exports = function(app) {
 
                 // update a block
                 case 'update':
-                    let field = '';
-                    let conditions = [];
-                    switch(data.block+data.property) {
-                        case 'weekname':
-                            field = 'name';
-                            conditions = ['id', data.id, 'documentid', data.docid];
-                            break;
+                    let field = data.property;
+                    let conditions = ['id', data.id, config.blocks[data.block].parent + 'id', data.parentid];
 
-                        case 'weekperiod':
-                            field = 'day';
-                            conditions = ['id', data.id, 'documentid', data.docid];
-                            break;
-
-                        case 'structurename':
-                            field = 'name';
-                            conditions = ['id', data.id, 'weekid', data.parentid];
-                            break;
-
-                        case 'structurecomments':
-                            field = 'comments';
-                            conditions = ['id', data.id, 'weekid', data.parentid];
-                            break;
-
-                        case 'resourcename':
-                            field = 'name';
-                            conditions = ['id', data.id, 'structureid', data.parentid];
-                            break;
-
-                        case 'resourceurl':
-                            field = 'url';
-                            conditions = ['id', data.id, 'structureid', data.parentid];
-                            break;
-
-                        case 'documentname':
-                            field = 'name';
-                            conditions = ['id', data.id, 'id', data.id];
-                            break;
-                    }
                     util.updateBlock(data.block, field, data.value, conditions, function(results) {
                         sendAll(data);
                     })

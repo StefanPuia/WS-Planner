@@ -10,7 +10,7 @@ let moveTarget = false;
 let initialContent = '';
 
 // block names for easy access
-let blocks = {
+let _blocks = {
     week: {
         parent: 'document',
         child: 'structure',
@@ -30,42 +30,36 @@ let blocks = {
 /**
  * handles the window load event
  */
-window.onload = async function() {
+window.addEventListener('load', async function() {
     let docid = getDocumentId();
     await gapi.auth2.getAuthInstance();
 
     ws = new WebSocket("ws://" + window.location.hostname + ":" + (window.location.port || 80) + "/" + docid);
     ws.addEventListener('message', receivedMessageFromServer);
 
-    callServer('/api/document/' + docid, {}, function(doc) {
-        generateTable(doc);
+    callServer('/api/document/' + docid, {}, function(status, doc) {
+        if(status == 404) {
+            window.location = '/';
+        }
+        else {
+            generateTable(doc);
 
-        $('.tbody').id = 'document_' + docid + '_weeks';
+            $('.tbody').id = 'document_' + docid + '_weeks';
 
-        // set the document name
-        $('.document-name').value = doc.name;
-        $('.document-name').style.display = "inline-block";
-        $('.document-name').id = 'document_' + docid + '_name';
-        // add listener and execute function
-        resizeDocumentName();
-        $('.document-name').addEventListener('input', resizeDocumentName);
-        $('.document-name').addEventListener('change', sendUpdate)
+            // set the document name
+            $('.document-name').value = doc.name;
+            $('.document-name').style.display = "inline-block";
+            $('.document-name').id = 'document_' + docid + '_name';
+            $('.document-name').addEventListener('input', resizeDocumentName);
+            $('.document-name').addEventListener('change', sendUpdate)
+            resizeDocumentName();
 
-        $('#docview').href = '/doc/' + docid + '/view';
-        $('#share').addEventListener('click', shareDocument);
-        $('.search-input').addEventListener('input', searchDocument);
+            $('#docview').href = '/doc/' + docid + '/view';
+            $('#share').addEventListener('click', function() {shareDocument()});
+            $('.search-input').addEventListener('input', searchDocument);
+        }
     })
-}
-
-/**
- * displays a prompt with the document url
- */
-function shareDocument() {
-    let docname = $('.document-name').value;
-    let docid = getDocumentId();
-    let url = location.origin + '/doc/' + docname + '-' + docid;
-    window.prompt('Copy this URL and share it.\nEveryone with the URL can EDIT this file.', url);
-}
+})
 
 /**
  * searches the current planner showing only the cells that contain the query and their parents
@@ -226,12 +220,14 @@ function generateActions(block, blockName, parent) {
 
     let parentid = parent.id.split('_')[1];
 
-    if(blocks[blockName].child != 'null') {
+    if(_blocks[blockName].child != 'null') {
         let insertButton = newEl('button', {
             classList: 'btn md-24 btn-info button-insert',
-            id: `insert_${blocks[blockName].child}s_${parentid}`,
-            textContent: 'Insert a new ' + blocks[blockName].child,
+            id: `insert_${_blocks[blockName].child}s_${parentid}`,
+            textContent: 'Insert a new ' + _blocks[blockName].child,
             contentEditable: 'false',
+        }, {
+            padding: '8px'
         });
         container.append(insertButton);
         insertButton.addEventListener('click', sendInsertBlock)
@@ -319,8 +315,8 @@ function generateResource(resource, container) {
     resource_row.append(resource_name);
 
     generateActions(resource, 'resource', resource_row);
-    resource_row.addEventListener('mouseenter', showInsertButton);
-    resource_row.addEventListener('mouseleave', hideInsertButton);
+    resource_row.addEventListener('mouseenter', showActions);
+    resource_row.addEventListener('mouseleave', hideActions);
 
     // resource url
     let resource_url = newEl('a', {
@@ -365,8 +361,8 @@ function generateStructure(structure, container) {
     structure_row.append(structure_name);
 
     generateActions(structure, 'structure', structure_row);
-    structure_row.addEventListener('mouseenter', showInsertButton);
-    structure_row.addEventListener('mouseleave', hideInsertButton);
+    structure_row.addEventListener('mouseenter', showActions);
+    structure_row.addEventListener('mouseleave', hideActions);
 
     // structure comments
     let structure_comments = newEl('div', {
@@ -423,8 +419,8 @@ function generateWeek(week, container) {
     week_row.append(week_name);
 
     generateActions(week, 'week', week_row);
-    week_row.addEventListener('mouseenter', showInsertButton);
-    week_row.addEventListener('mouseleave', hideInsertButton);
+    week_row.addEventListener('mouseenter', showActions);
+    week_row.addEventListener('mouseleave', hideActions);
 
     // // week period
     // let week_period = newEl('div', {
@@ -455,18 +451,9 @@ function generateWeek(week, container) {
     })
 
     week.structures.forEach(function(structure) {
-        // gengenerateStructureerate each structure and its components
+        // generate each structure and its components
         generateStructure(structure, week_structures);
     })
-
-    // let insertStructureButton = newEl('button', {
-    //     classList: 'btn btn-info button-insert',
-    //     id: `insert_structures_${week.weekid}`,
-    //     textContent: 'Insert a new structure',
-    // });
-    // week_structures.append(insertStructureButton);
-
-    // append structure block to week row
     week_row.append(week_structures);
 
 
@@ -485,14 +472,13 @@ function generateWeek(week, container) {
 function resizeDocumentName() {
     let input = $('.document-name');
     input.style.width = input.value.length * 10 + 11 + 'px';
-    // keep this between 300 and 800px?
 }
 
 /**
  * display the button for block insertion
  * @param  {Event} e
  */
-function showInsertButton(e) {
+function showActions(e) {
     let parts = e.currentTarget.id.split('_');
     if (parts[0] != '') {
         $(`#${parts[0]}_${parts[1]}_actions`).style.display = 'block';
@@ -503,7 +489,7 @@ function showInsertButton(e) {
  * hide the button for block insertion
  * @param  {Event} e
  */
-function hideInsertButton(e) {
+function hideActions(e) {
     let parts = e.currentTarget.id.split('_');
     if (parts[0] != '') {
         $(`#${parts[0]}_${parts[1]}_actions`).style.display = 'none';
@@ -515,9 +501,11 @@ function hideInsertButton(e) {
  * @param  {Event} e 
  */
 function sendInsertBlock(e) {
+    let parts = e.currentTarget.id.split('_');
     let payload = {
         type: 'insert',
-        id: e.currentTarget.id
+        block: parts[1].slice(0, -1),
+        parentid: parts[2],
     }
 
     callSocket(payload);
@@ -532,20 +520,23 @@ function insertBlock(data) {
     let container = '';
     if (data.docid == getDocumentId()) {
         switch (data.block) {
-            case 'weeks':
+            case 'week':
                 container = '.tbody';
                 generateWeek(data.weeks[0], $(container));
                 $(container).append($('#insert_weeks_' + data.docid));
+                $(`#week_${data.weeks[0].weekid}_name`).focus();
                 break;
 
-            case 'structures':
-                container = `#${data.parent}_${data.parentid}_${data.block}`;
+            case 'structure':
+                container = `#${data.parent}_${data.parentid}_${data.block}s`;
                 generateStructure(data.structures[0], $(container));
+                $(`#structure_${data.structures[0].structureid}_name`).focus();
                 break;
 
-            case 'resources':
-                container = `#${data.parent}_${data.parentid}_${data.block}`;
+            case 'resource':
+                container = `#${data.parent}_${data.parentid}_${data.block}s`;
                 generateResource(data.resources[0], $(container));
+                $(`#resource_${data.resources[0].resourceid}_name`).focus();
                 break;
         }
         addEditableListeners();
@@ -714,9 +705,10 @@ function sendDeleteBlock(e) {
 function deleteBlock(data) {
     let element = $(`#${data.block}_${data.id}`);
     let parent = element.parentNode;
-    let siblings = parent.children.length - 1;
+    let siblings = parent.querySelectorAll('.' + data.block);
+    console.log(siblings);
     element.remove();
-    if (siblings <= 0) {
+    if (siblings.length - 1 <= 0) {
         let e = {};
         e.currentTarget = {
             id: 'insert_' + data.block + 's_' + parent.id.split('_')[1]
@@ -889,25 +881,21 @@ function insertBlockAfter(e) {
  * @param  {Object} data
  */
 function moveBlock(data) {
-	callServer('/api/document/' + data.docid, {}, function(doc) {
-        generateTable(doc);
+	callServer('/api/document/' + data.docid, {}, function(status, doc) {
+        if(status == 404) {
+            window.location = '/';
+        }
+        else {
+            generateTable(doc);
+        }
     })
 }
 
 /**
- * display the period input on .week_period click
- * @param  {Event} e
+ * set the initial content of a contenteditable block such that
+ * an update request is not sent if the block has not changed
+ * @param {Event} e
  */
-function showPeriodInput(e) {
-    let parts = e.currentTarget.id.split('_');
-    let text = $(`#week_${parts[1]}_period_text`);
-    let input = $(`#week_${parts[1]}_period_input`);
-
-    text.style.display = 'none';
-    input.style.display = 'block';
-    input.focus();
-}
-
 function setInitialContent(e) {
     initialContent = e.currentTarget.childNodes.length > 0 ? e.currentTarget.childNodes[0].textContent : ''; 
 }

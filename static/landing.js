@@ -2,12 +2,13 @@
 
 window.onload = async function() {
     await gapi.auth2.getAuthInstance();
-	callServer('/api/document', {}, function(documents) {
+	callServer('/api/document', {}, function(status, documents) {
 		parseDocuments(documents);
 	})
 
     $('#document-create-card').addEventListener('click', createDocument);
     $('.search-input').addEventListener('input', searchDocuments);
+    $('.search-input').focus();
 }
 
 /**
@@ -123,7 +124,7 @@ function openDocument(e) {
 function deleteDocument(e) {
     if(window.confirm("Are you sure you want to delete this document? This action is irreversable!")) {
         callServer('/api/document/' + e.currentTarget.dataset.docid, {method: "delete"}, function() {
-            callServer('/api/document', {}, function(docs) {
+            callServer('/api/document', {}, function(status, docs) {
                 parseDocuments(docs);
             })
         })
@@ -134,7 +135,7 @@ function deleteDocument(e) {
  * create a document
  */
 function createDocument() {
-    callServer('/api/document', {method: 'post'}, function(docid) {
+    callServer('/api/document', {method: 'post'}, function(status, docid) {
         window.location = '/doc/' + docid;
     })
 }

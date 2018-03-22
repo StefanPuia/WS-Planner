@@ -64,6 +64,8 @@ main {
     text-align: center;
     white-space: nowrap;
     vertical-align: middle;
+    margin-left: 1px;
+    margin-right: 1px;
 }
 
 .btn[disabled] {

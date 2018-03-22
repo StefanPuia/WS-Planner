@@ -1,16 +1,24 @@
 'use strict';
 
-window.addEventListener('load', function() {
+window.addEventListener('load', async function() {
 	let docid = getDocumentId();
+	await gapi.auth2.getAuthInstance();
 
 	$('#print').addEventListener('click', function() { window.print(); })
 
 	// generate the plain document view
-	callServer('/api/document/' + docid, {}, function(doc) {
-    	generateDocument(doc);
-    	$('#planner').href = '/doc/' + docid;
-		$('#document-name').textContent = doc.name;
+	callServer('/api/document/' + docid, {}, function(status, doc) {
+		if(status == 404) {
+			window.location = '/';
+		}
+		else {
+			generateDocument(doc);
+	    	$('#planner').href = '/doc/' + docid;
+			$('#document-name').textContent = doc.name;
+		}
     })
+
+    $('#share').addEventListener('click', function() {shareDocument('view')});
 })
 
 // reformat the page and remove the nav for printing

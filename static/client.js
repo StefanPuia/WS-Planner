@@ -1,7 +1,7 @@
 'use strict';
 
 // output requests and messages to console
-let verbose = false;
+let verbose = true;
 
 window.addEventListener('load', async function() {
     $('#nav-log').addEventListener('click', signOut);
