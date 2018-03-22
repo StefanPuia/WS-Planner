@@ -5,6 +5,10 @@
 	}	
 }
 
+.nav-left {
+	padding: 5px;
+}
+
 main {
 	margin-top: 8em;
 	margin-left: 25vw;

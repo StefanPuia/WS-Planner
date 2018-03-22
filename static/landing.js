@@ -7,6 +7,7 @@ window.onload = async function() {
 	})
 
     $('#document-create-card').addEventListener('click', createDocument);
+    $('.search-input').addEventListener('input', searchDocuments);
 }
 
 /**
@@ -23,6 +24,11 @@ function parseDocuments(documents) {
 	documents.forEach(function(doc) {
         // create a full id with a name part for friendly urls
         let fullid = doc.name.substr(0, 17).replace(' ', '-') + '-' + doc.documentid;
+
+        let hidden_content = newEl('div', {
+            classList: 'hidden full-text',
+            textContent: doc.name + ' ',
+        })
 
 		let card = newEl('div', {
 			classList: 'document-card'
@@ -42,10 +48,6 @@ function parseDocuments(documents) {
 			classList: 'document-card-content',
 		})
         let contentList = newEl('ul');
-
-        let hidden_content = newEl('div', {
-            classList: 'hidden',
-        })
 
         // parse every week and add brief parts to the card
 		for (let j = 0; j < 4 && j < doc.weeks.length; j++) {
@@ -135,4 +137,18 @@ function createDocument() {
     callServer('/api/document', {method: 'post'}, function(docid) {
         window.location = '/doc/' + docid;
     })
+}
+
+function searchDocuments() {
+    let docs = $('.document-card');
+    let query = $('.search-input').value.toLowerCase();
+    for(let i = 0; i < docs.length; i++) {
+        let text = docs[i].querySelector('.full-text').textContent.toLowerCase();
+        if(text.indexOf(query) > -1) {
+            docs[i].setAttribute('style', 'display:inline-block!important')
+        }
+        else {
+            docs[i].setAttribute('style', 'display:none!important')
+        }
+    }
 }

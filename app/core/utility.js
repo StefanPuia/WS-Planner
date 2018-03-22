@@ -286,8 +286,8 @@ module.exports.insertStructure = function(weekid, callback) {
 module.exports.insertResource = function(structureid, callback) {
     mysqlConnection.query(queries.resourcesbystructure, [structureid], function(err, resources) {
         if(err) throw err;
-        let cols = ['structureid', 'name', 'url', 'position'];
-        let vals = [structureid, '', '', resources.length];
+        let cols = ['structureid', 'position'];
+        let vals = [structureid, resources.length];
         mysqlConnection.query(queries.insert, ['resource', cols, vals], function(err, results) {
             if(err) throw err;
             let resource = {

@@ -31,6 +31,10 @@ nav {
 	grid-template-columns: auto 1fr auto;
 }
 
+.nav-right {
+	padding: 5px;
+}
+
 nav a {
 	text-decoration: none;
 	color: #777;
@@ -39,7 +43,7 @@ nav a {
 }
 
 main {
-	margin-top: 50px;
+	margin-top: 60px;
 	margin-bottom: 10em;
 }
 
@@ -77,9 +81,9 @@ main {
 }
 
 .btn-info {
-    color: #fff;
     background-color: #5bc0de;
     border-color: #46b8da;
+    color: #fff;
 }
 
 .btn-success {
@@ -97,7 +101,6 @@ main {
 }
 
 .search-input {
-	padding-left: 5px;
-	padding-right: 5px;
+	padding: 5px;
 }
 

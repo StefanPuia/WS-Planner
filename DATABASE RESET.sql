@@ -38,7 +38,7 @@ CREATE TABLE `document` (
   `id` varchar(24) COLLATE utf8_unicode_ci NOT NULL,
   `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `userid` int(11) NOT NULL,
-  `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL
+  `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL DEFAULT "New Document"
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
@@ -57,8 +57,8 @@ INSERT INTO `document` (`id`, `created`, `userid`, `name`) VALUES
 CREATE TABLE `resource` (
   `id` int(11) NOT NULL,
   `structureid` int(11) NOT NULL,
-  `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-  `url` varchar(2083) COLLATE utf8_unicode_ci NOT NULL,
+  `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL DEFAULT "Resource Name",
+  `url` varchar(2083) COLLATE utf8_unicode_ci NOT NULL DEFAULT "http://resource.url",
   `position` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 

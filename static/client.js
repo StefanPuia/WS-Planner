@@ -1,7 +1,7 @@
 'use strict';
 
 // output requests and messages to console
-let verbose = localStorage.verbose;
+let verbose = false;
 
 window.addEventListener('load', async function() {
     $('#nav-log').addEventListener('click', signOut);
