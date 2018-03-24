@@ -10,7 +10,7 @@
 }
 
 main {
-	margin-top: 8em;
+	margin-top: 10em;
 	margin-left: 25vw;
 	margin-right: 25vw;
 }
@@ -43,4 +43,8 @@ section {
 
 .resources {
 	grid-area: resources;
+}
+
+#loading {
+	margin-top: 10em;
 }

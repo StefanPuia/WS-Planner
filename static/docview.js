@@ -15,6 +15,8 @@ window.addEventListener('load', async function() {
 			generateDocument(doc);
 	    	$('#planner').href = '/doc/' + docid;
 			$('#document-name').textContent = doc.name;
+			$('#loading').classList.add('hidden');
+			$('main').classList.remove('hidden');
 		}
     })
 

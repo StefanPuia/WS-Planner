@@ -5,9 +5,9 @@
  * @param {String} css selector
  * @return {NodeElement} / {NodeElementList} depending on query returning multiple elements
  */
-const $ = function(query) {
+const $ = function(query, returnArray = false) {
     let result = document.querySelectorAll(query);
-    if (result.length > 1) {
+    if (result.length > 1 || returnArray) {
         return result;
     } else if (result) {
         return result[0];
@@ -207,4 +207,20 @@ function shareDocument(view = '') {
     let docid = getDocumentId();
     let url = location.origin + '/doc/' + docname + '-' + docid + '/' + view;
     window.prompt('Copy this URL and share it.\nEveryone with the URL can EDIT this file.', url);
+}
+
+/**
+ * toggles the verbose state
+ */
+function toggleVerbose() {
+    if(localStorage.verbose == 'false') {
+        verbose = true;
+        localStorage.verbose = true;
+        console.log("Verbose mode enabled.");
+    }
+    else {
+        verbose = false;
+        localStorage.verbose = false;
+        console.log("Verbose mode disabled. Enjoy the silence.");
+    }
 }

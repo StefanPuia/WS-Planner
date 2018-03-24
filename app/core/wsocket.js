@@ -30,6 +30,7 @@ module.exports = function(app) {
             let data = JSON.parse(message);
             if(config.verbose) console.log(new Date(), "WS Recieved: ", data);
             let payload = {};
+            let conditions = [];
 
             switch(data.type) {
                 // insert a new block
@@ -69,7 +70,7 @@ module.exports = function(app) {
                 // update a block
                 case 'update':
                     let field = data.property;
-                    let conditions = ['id', data.id, config.blocks[data.block].parent + 'id', data.parentid];
+                    conditions = ['id', data.id, config.blocks[data.block].parent + 'id', data.parentid];
 
                     util.updateBlock(data.block, field, data.value, conditions, function(results) {
                         sendAll(data);
@@ -78,34 +79,11 @@ module.exports = function(app) {
 
                 // move a block
                 case 'move':
-                    // same parent
-                    if(data.prevparentid == data.currparentid) {
-                        if(data.prevpos < data.currpos) {
-                            util.moveBlockDown(data.block, data.id, data.prevpos, data.currpos, data.currparentid, function() {
-                                sendAll(data);
-                            })
-                        }
-                        else if(data.prevpos > data.currpos){
-                            util.moveBlockUp(data.block, data.id, data.prevpos, data.currpos, data.currparentid, function() {
-                                sendAll(data);
-                            })
-                        }
-                    }
-                    // different parent
-                    else {
-                        util.moveToNewParent(data.block, data.id, data.currparentid, function(results) {
-                            if(data.prevpos < data.currpos) {
-                                util.moveBlockDown(data.block, data.id, data.prevpos, data.currpos, data.currparentid, function() {
-                                    sendAll(data);
-                                })
-                            }
-                            else if(data.prevpos > data.currpos){
-                                util.moveBlockUp(data.block, data.id, data.prevpos, data.currpos, data.currparentid, function() {
-                                    sendAll(data);
-                                })
-                            }
-                        })
-                    }
+                    conditions = ['id', data.id, data.parent + 'id', data.prevparentid]
+                    console.log(data.block, data.parent + 'id', data.currparentid, conditions);
+                    util.updateBlock(data.block, data.parent + 'id', data.currparentid, conditions, function(results) {
+                        sendAll(data);
+                    })
                     break;
 
                 // delete a block

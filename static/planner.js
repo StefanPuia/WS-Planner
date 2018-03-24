@@ -88,7 +88,7 @@ function searchDocument() {
         }
     }
     else {
-        let weeks = $('.week').length > 0 ? $('.week') : [$('.week')];
+        let weeks = $('.week', true);
         for(let i = 0; i < weeks.length; i++) {
             let week = weeks[i];
             let found_week = false;
@@ -175,7 +175,7 @@ function generateTable(doc) {
     container.innerHTML = '';
 
     // generate each week and its components
-    doc.weeks.forEach(function(week, key) {
+    doc.weeks.forEach(function(week) {
         // generate the weeks
         generateWeek(week, container);
     });
@@ -189,6 +189,8 @@ function generateTable(doc) {
     insertWeekButton.addEventListener('click', sendInsertBlock)
 
     addEditableListeners();
+    resetWeekNumbers();
+    fixMoveButtons();
 }
 
 /**
@@ -225,46 +227,20 @@ function generateActions(block, blockName, parent) {
     let parentid = parent.id.split('_')[1];  
 
     // move button
-    let button_move = newEl('button', {
-        type: 'button',
-        classList: `btn btn-sm btn-move btn-move-${blockName}`,
-        id: `${blockName}_${block[blockName + 'id']}_move`
-    })
-    button_move.append(newEl('i', {
-        classList: 'material-icons md-24',
-        textContent: 'swap_vert',
-        title: 'Click to move this ' + blockName + '.'
-    }))
-    container.append(button_move);
-    button_move.addEventListener('click', startMoveBlock);
-
-    // // move top button
-    // let button_move_top = newEl('button', {
-    //     type: 'button',
-    //     classList: `btn btn-success btn-sm btn-insert-before-${blockName} hidden`,
-    //     id: `${blockName}_${block[blockName + 'id']}_move_top`,
-    //     title: 'Click to move the ' + blockName + ' above this one.'
-    // })
-    // button_move_top.append(newEl('i', {
-    //     classList: 'material-icons md-24',
-    //     textContent: 'vertical_align_top'
-    // }))
-    // container.append(button_move_top);
-    // button_move_top.addEventListener('click', insertBlockBefore);
-
-    // // move bottom button
-    // let button_move_bottom = newEl('button', {
-    //     type: 'button',
-    //     classList: `btn btn-success btn-sm btn-insert-after-${blockName} hidden`,
-    //     id: `${blockName}_${block[blockName + 'id']}_move_bottom`,
-    //     title: 'Click to move the ' + blockName + ' below this one.'
-    // })
-    // button_move_bottom.append(newEl('i', {
-    //     classList: 'material-icons md-24',
-    //     textContent: 'vertical_align_bottom'
-    // }))
-    // container.append(button_move_bottom);
-    // button_move_bottom.addEventListener('click', insertBlockAfter);
+    if(_blocks[blockName].parent != 'tbody') {
+        let button_move = newEl('button', {
+            type: 'button',
+            classList: `btn btn-sm btn-move btn-move-${blockName}`,
+            id: `${blockName}_${block[blockName + 'id']}_move`
+        })
+        button_move.append(newEl('i', {
+            classList: 'material-icons md-24',
+            textContent: 'swap_vert',
+            title: 'Click to move this ' + blockName + '.'
+        }))
+        container.append(button_move);
+        button_move.addEventListener('click', startMoveBlock);
+    }
 
     // delete button
     let button_delete = newEl('button', {
@@ -302,13 +278,14 @@ function generateActions(block, blockName, parent) {
  * @param  {Object} structure           the json structure object
  * @param  {Node} structure_resources the container for resources
  */
-function generateResource(resource, container) {
+function generateResource(resource, container, structure) {
     // resource row
     let resource_row = newEl('div', {
         classList: 'resource',
         id: `resource_${resource.resourceid}`
     })
-    resource_row.dataset.position = resource.resourceposition;    
+    resource_row.dataset.position = resource.resourceposition;   
+    resource_row.dataset.parentid = structure.structureid; 
 
     // resource name
     let resource_name = newEl('div', {
@@ -348,13 +325,14 @@ function generateResource(resource, container) {
  * @param  {Object} week            the json week object
  * @param  {Node} structures the container for structures
  */
-function generateStructure(structure, container) {
+function generateStructure(structure, container, week) {
     // structure row
     let structure_row = newEl('div', {
         classList: 'structure',
         id: `structure_${structure.structureid}`
     });
     structure_row.dataset.position = structure.structureposition;
+    structure_row.dataset.parentid = week.weekid;
 
     // structure name
     let structure_name = newEl('div', {
@@ -386,7 +364,7 @@ function generateStructure(structure, container) {
 
     // generate each resource and its components
     structure.resources.forEach(function(resource) {
-        generateResource(resource, structure_resources);
+        generateResource(resource, structure_resources, structure);
     })
 
     // append resource block to structure row
@@ -406,13 +384,22 @@ function generateStructure(structure, container) {
  * @param  {Object} doc       the json document object
  * @param  {Node} container the container for the weeks
  */
-function generateWeek(week, container) {
+function generateWeek(week, container, number = false) {
     // week row
     let week_row = newEl('div', {
         classList: 'week',
         id: `week_${week.weekid}`,
     });
     week_row.dataset.position = week.weekposition;
+    week_row.dataset.parentid = getDocumentId();
+
+    let weeks = container.querySelectorAll('.week').length;
+    number = number ? number : weeks + 1
+    // week name
+    let week_number = newEl('div', {
+        classList: 'td center week-number',
+    });
+    week_row.append(week_number);
 
     // week name
     let week_name = newEl('div', {
@@ -427,28 +414,6 @@ function generateWeek(week, container) {
     week_row.addEventListener('mouseenter', showActions);
     week_row.addEventListener('mouseleave', hideActions);
 
-    // // week period
-    // let week_period = newEl('div', {
-    //     id: `week_${week.weekid}_period`,
-    //     classList: 'td center week-period',
-    // });
-    // week_period.addEventListener('click', showPeriodInput);
-    // // week period text
-    // let week_dates = newEl('span', {
-    //     textContent: getWeekPeriod(week.day).start + '\nto\n' + getWeekPeriod(week.day).end,
-    //     id: `week_${week.weekid}_period_text`
-    // }); week_period.append(week_dates);
-    // // week period input
-    // let week_period_input = newEl('input', {
-    //     type: 'date',
-    //     classList: 'hidden fill',
-    //     id: `week_${week.weekid}_period_input`,
-    //     value: week.day,
-    // }); 
-    // week_period_input.addEventListener('blur', sendUpdate);
-    // week_period.append(week_period_input);
-    // week_row.append(week_period);
-
     // week structure
     let week_structures = newEl('div', {
         classList: 'week-structures',
@@ -457,7 +422,7 @@ function generateWeek(week, container) {
 
     week.structures.forEach(function(structure) {
         // generate each structure and its components
-        generateStructure(structure, week_structures);
+        generateStructure(structure, week_structures, week);
     })
     week_row.append(week_structures);
 
@@ -534,17 +499,19 @@ function insertBlock(data) {
 
             case 'structure':
                 container = `#${data.parent}_${data.parentid}_${data.block}s`;
-                generateStructure(data.structures[0], $(container));
+                generateStructure(data.structures[0], $(container), {weekid: data.parentid});
                 $(`#structure_${data.structures[0].structureid}_name`).focus();
                 break;
 
             case 'resource':
                 container = `#${data.parent}_${data.parentid}_${data.block}s`;
-                generateResource(data.resources[0], $(container));
+                generateResource(data.resources[0], $(container), {structureid: data.parentid});
                 $(`#resource_${data.resources[0].resourceid}_name`).focus();
                 break;
         }
         addEditableListeners();
+        resetWeekNumbers();
+        fixMoveButtons();
     }
 }
 
@@ -554,7 +521,7 @@ function insertBlock(data) {
  */
 function sendUpdate(e) {
     let content = validField(e.currentTarget);
-    if (content) {
+    if (content !== false) {
         let parts = e.currentTarget.id.split('_');
         let parentid = e.currentTarget.parentNode.parentNode.id.split('_')[1];
         parentid = parentid ? parentid : getDocumentId();
@@ -579,7 +546,7 @@ function sendUpdate(e) {
  */
 function validField(block) {
     let parts = block.id.split('_');
-    let content = block.childNodes.length > 0 ? block.childNodes[0].textContent : '';
+    let content = block.textContent;
 
     switch (parts[0] + parts[2]) {
         case 'documentname':
@@ -675,7 +642,7 @@ function updateBlock(data) {
             break;
 
         default:
-            $(`#${data.block}_${data.id}_${data.property}`).childNodes[0].textContent = data.value;
+            $(`#${data.block}_${data.id}_${data.property}`).textContent = data.value;
             break;
     }    
 }
@@ -711,7 +678,6 @@ function deleteBlock(data) {
     let element = $(`#${data.block}_${data.id}`);
     let parent = element.parentNode;
     let siblings = parent.querySelectorAll('.' + data.block);
-    console.log(siblings);
     element.remove();
     if (siblings.length - 1 <= 0) {
         let e = {};
@@ -720,6 +686,8 @@ function deleteBlock(data) {
         }
         sendInsertBlock(e);
     }
+    resetWeekNumbers();
+    fixMoveButtons();
 }
 
 /**
@@ -741,53 +709,47 @@ function startMoveBlock(e) {
                 }
             })
 
-            let parents = $('.' + _blocks[parts[0]].parent).length > 0 ? $('.' + _blocks[parts[0]].parent) : [$('.' + _blocks[parts[0]].parent)];
+            let parents = $('.' + _blocks[parts[0]].parent, true);
             parents.forEach(function(parent) {
-                let last = parent.querySelector('.' + parts[0]);;
-                let blocks = parent.querySelectorAll('.' + parts[0]);
-                blocks.forEach(function(block) {
-                    if(block.id != moveTarget.id) {
-                        block.parentNode.insertBefore(newEl('div', {
-                            textContent:'insert here',
-                            classList: parts[0] + ' block-placeholder',
-                            id: 'before_' + block.id,
-                        }, {
-                            background: '#7DFA5C',
-                            opacity: 0.3,
-                            minHeight: '30px'
-                        }), block);
-                        last = block;                    
-                    }
-                })
+                let last = parent.querySelectorAll('.' + parts[0])[parent.querySelectorAll('.' + parts[0]).length - 1]
                 last.parentNode.append(newEl('div', {
                     textContent:'insert here',
-                    classList: parts[0] + ' block-placeholder',
-                    id: 'after_' + last.id,
-                }, {
-                    background: '#7DFA5C',
-                    opacity: 0.3,
+                    classList: parts[0] + ' block-placeholder td',
+                    id: 'into_' + last.id,
                 }));
             });
 
             $('.tbody').append($('#insert_weeks_' + getDocumentId()));
-            $('.move-alert').childNodes[0].textContent = 'You are moving the ' + parts[0] + ` "${$(`#${parts[0]}_${parts[1]}_name`).textContent.substr(0, 30)}".`;
+            $('#move-alert-text').textContent = 'You are moving the ' + parts[0] + ` "${$(`#${parts[0]}_${parts[1]}_name`).textContent.substr(0, 30)}".`;
             $('.move-alert').style.display = 'block';
 
-            $('.block-placeholder').forEach(function(placeholder) {
+            $('.block-placeholder', true).forEach(function(placeholder) {
                 placeholder.addEventListener('click', function(e) {
-                    let parts = e.currentTarget.id.split('_');
-                    let event = {
-                        currentTarget: $(`#${parts[1]}_${parts[2]}`),
+                    let phParts = e.currentTarget.id.split('_');
+                    let data = {
+                        type: 'move',
+                        block: phParts[1],
+                        id: parts[1],
+                        parent: _blocks[phParts[1]].parent,
+                        prevparentid: moveTarget.dataset.parentid,
+                        currparentid: $(`#${phParts[1]}_${phParts[2]}`).dataset.parentid,
+                        prevpos: moveTarget.dataset.position,
+                        currpos: $(`#${phParts[1]}_${phParts[2]}`).dataset.position,
                     }
-                    switch(parts[0]) {
-                        case 'before':
-                            insertBlockBefore(event);
-                            break;
 
-                        case 'after':
-                            insertBlockAfter(event);
-                            break;
+                    console.log(`#${data.parent}_${data.prevparentid}_${data.block}s`);
+                    if($(`#${data.parent}_${data.prevparentid}_${data.block}s`).childNodes.length <= 1) {
+                        callSocket({
+                            type: 'insert',
+                            block: data.block,
+                            parentid: data.prevparentid,
+                            parent: data.parent,
+                        })
                     }
+
+                    // console.log(data);
+                    stopMoveBlock();
+                    callSocket(data);
                 })
             })
 
@@ -813,7 +775,7 @@ function stopMoveBlock() {
 		moveTarget.style.display = '';
 		moveTarget = false;
 
-        let blocks = $('.block-placeholder').length > 0 ? $('.block-placeholder') : [$('.block-placeholder')];
+        let blocks = $('.block-placeholder', true);
         blocks.forEach(function(block) {
             block.remove();
         })
@@ -827,73 +789,6 @@ function stopMoveBlock() {
 
         $('.move-alert').style.display = 'none';
 	}
-}
-
-/**
- * insert the moveTarget before the current element
- * supports cross parent appending
- * @param  {Event} e
- */
-function insertBlockBefore(e) {
-	let current = e.currentTarget.parentNode.parentNode;
-	let moveParent = moveTarget.parentNode;
-
-	let parent = current.parentNode;
-	parent.append(moveTarget);
-
-	parent.insertBefore(moveTarget, current);
-
-    // if there are no children left, click the insert button
-	if(moveParent.children.length < 2) {
-		moveParent.children[moveParent.children.length - 1].click();
-	}
-
-	let data = {
-		type: 'move',
-		block: moveTarget.id.split('_')[0],
-		id: moveTarget.id.split('_')[1],
-		parent: parent.id.split('_')[0],
-		prevparentid: moveParent.id.split('_')[1],
-		currparentid: parent.id.split('_')[1],
-		prevpos: moveTarget.dataset.position,
-		currpos: current.dataset.position != 0?parseInt(current.dataset.position) - 1:0,
-	}
-	stopMoveBlock();
-	callSocket(data);
-}
-
-/**
- * insert the moveTarget after the current element
- * supports cross parent appending
- * @param  {Event} e
- */
-function insertBlockAfter(e) {
-	let current = e.currentTarget.parentNode.parentNode;
-	let moveParent = moveTarget.parentNode;
-
-	let parent = current.parentNode;
-	parent.append(moveTarget);
-
-	parent.insertBefore(moveTarget, current.nextSibling);
-
-    // if there are no children left, click the insert button
-	if(moveParent.children.length < 2) {
-		moveParent.children[moveParent.children.length - 1].click();
-	}
-
-	let lastpos = parent.children.length - 2;
-	let data = {
-		type: 'move',
-		block: moveTarget.id.split('_')[0],
-		id: moveTarget.id.split('_')[1],
-		parent: parent.id.split('_')[0],
-		prevparentid: moveParent.id.split('_')[1],
-		currparentid: parent.id.split('_')[1],
-		prevpos: moveTarget.dataset.position,
-		currpos: current.dataset.position != lastpos?parseInt(current.dataset.position) + 1:lastpos,
-	}
-	stopMoveBlock();
-	callSocket(data);
 }
 
 /**
@@ -917,5 +812,33 @@ function moveBlock(data) {
  * @param {Event} e
  */
 function setInitialContent(e) {
-    initialContent = e.currentTarget.childNodes.length > 0 ? e.currentTarget.childNodes[0].textContent : ''; 
+    initialContent = e.currentTarget.textContent;
 }
+
+/**
+ * resets the week numbers to a ordered list
+ */
+function resetWeekNumbers() {
+    let weeks = $('.tbody').querySelectorAll('.week');
+    weeks.forEach(function(week, key) {
+        week.querySelector('.week-number').textContent = key + 1;
+    })
+}
+
+/**
+ * display the move buttons only if there is a different parent to move the block to
+ */
+function fixMoveButtons() {
+    ['structure', 'resource'].forEach(function(block) {
+        if($('.tbody .' + _blocks[block].parent, true).length > 1) {
+            $('.tbody .btn-move-' + block, true).forEach(function(btn) {
+                btn.style.visibility = '';
+            })
+        }
+        else {
+            $('.btn-move-' + block, true).forEach(function(btn) {
+                btn.style.visibility = 'hidden';
+            })
+        }
+    })
+} 

@@ -11,8 +11,8 @@
 	    <link rel="stylesheet" href="/static/main.css">
 	    <link rel="stylesheet" href="/static/docview.css">
 		<script src="https://apis.google.com/js/platform.js" async defer></script>
-		<script src="/static/functions.js"></script>
 		<script src="/static/client.js"></script>
+		<script src="/static/functions.js"></script>
 		<script src="/static/docview.js"></script>
 	</head>
 	<body>
@@ -35,7 +35,10 @@
 	            </div>
 	        </nav>
 	    </header>
-	    <main>
+	    <div id="loading" class="center">
+			Loading...
+		</div>
+	    <main class="hidden">
 			<h1 class="center document-name" id="document-name"></h1>
 	    </main>
 	</body>
