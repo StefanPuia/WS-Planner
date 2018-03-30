@@ -73,28 +73,21 @@ function searchDocument() {
 
     // reset the planner if the query is empty
     if(query == '') {
-        let weeks = $('.week');
-        for(let i = 0; i < weeks.length; i++) {
-            let week = weeks[i];
-            week.style.display = '';
-            let structures = week.querySelectorAll('.structure');
-            for(let k = 0; k < structures.length; k++) {
-                structures[k].style.display = '';
-                let resources = structures[k].querySelectorAll('.resource');
-                    for(let k = 0; k < resources.length; k++) {
-                        resources[k].style.display = '';
-                    }
+        ['week', 'structure', 'resource'].forEach(function(blockName) {
+            let blocks = $('.' + blockName, true);
+            for(let i = 0; i < blocks.length; i++) {
+                blocks[i].style.display = '';
             }
-        }
+        })        
     }
     else {
         let weeks = $('.week', true);
         for(let i = 0; i < weeks.length; i++) {
             let week = weeks[i];
             let found_week = false;
-            if(week.textContent.toLowerCase().indexOf(query) > -1) {
+            if(week.innerText.toLowerCase().indexOf(query) > -1) {
                 // if the query is found in the week name, show the whole week
-                if(week.querySelector('.week-name').textContent.toLowerCase().indexOf(query) > -1) {
+                if(week.querySelector('.week-name').innerText.toLowerCase().indexOf(query) > -1) {
                     found_week = true;
                     week.style.display = '';
                     let structures = week.querySelectorAll('.structure');
@@ -111,9 +104,9 @@ function searchDocument() {
                     for(let j = 0; j < structures.length; j++) {
                         let str = structures[j];
                         let found_str = false;
-                        if(str.textContent.toLowerCase().indexOf(query) > -1) {
-                            let name = str.querySelector('.structure-name').textContent.toLowerCase();
-                            let comms = str.querySelector('.structure-comments').textContent.toLowerCase()
+                        if(str.innerText.toLowerCase().indexOf(query) > -1) {
+                            let name = str.querySelector('.structure-name').innerText.toLowerCase();
+                            let comms = str.querySelector('.structure-comments').innerText.toLowerCase()
                             // if the query is found in the structure name or comments
                             // show the whole structure and the parent week
                             if(name.indexOf(query) > -1 || comms.indexOf(query) > -1) {
@@ -130,10 +123,10 @@ function searchDocument() {
                                 let resources = str.querySelectorAll('.resource');
                                 for(let k = 0; k < resources.length; k++) {
                                     let res = resources[k];
-                                    if(res.textContent.toLowerCase().indexOf(query) > -1) {
+                                    if(res.innerText.toLowerCase().indexOf(query) > -1) {
                                         // if the query is found in the resource name
                                         // show the resource and the parent structure and week
-                                        if(res.querySelector('.resource-name').textContent.toLowerCase().indexOf(query) > -1) {
+                                        if(res.querySelector('.resource-name').innerText.toLowerCase().indexOf(query) > -1) {
                                             found_str = true;
                                             found_week = true;
                                             res.style.display = '';
@@ -546,7 +539,7 @@ function sendUpdate(e) {
  */
 function validField(block) {
     let parts = block.id.split('_');
-    let content = block.textContent;
+    let content = block.innerText;
 
     switch (parts[0] + parts[2]) {
         case 'documentname':
@@ -642,7 +635,7 @@ function updateBlock(data) {
             break;
 
         default:
-            $(`#${data.block}_${data.id}_${data.property}`).textContent = data.value;
+            $(`#${data.block}_${data.id}_${data.property}`).innerText = data.value;
             break;
     }    
 }
@@ -655,7 +648,7 @@ function sendDeleteBlock(e) {
     let parts = e.currentTarget.id.split('_');
     let block = $(`#${parts[0]}_${parts[1]}`);
     let parent = block.parentNode;
-    let content = $(`#${parts[0]}_${parts[1]}_name`).textContent;
+    let content = $(`#${parts[0]}_${parts[1]}_name`).innerText;
     let blockdesc = content != '' ? `"${content}" ${parts[0]}` : parts[0];
     if (window.confirm(`Are you sure you want to delete the ${blockdesc}? This action is irreversible!`)) {
         let payload = {
@@ -679,13 +672,6 @@ function deleteBlock(data) {
     let parent = element.parentNode;
     let siblings = parent.querySelectorAll('.' + data.block);
     element.remove();
-    if (siblings.length - 1 <= 0) {
-        let e = {};
-        e.currentTarget = {
-            id: 'insert_' + data.block + 's_' + parent.id.split('_')[1]
-        }
-        sendInsertBlock(e);
-    }
     resetWeekNumbers();
     fixMoveButtons();
 }
@@ -720,7 +706,7 @@ function startMoveBlock(e) {
             });
 
             $('.tbody').append($('#insert_weeks_' + getDocumentId()));
-            $('#move-alert-text').textContent = 'You are moving the ' + parts[0] + ` "${$(`#${parts[0]}_${parts[1]}_name`).textContent.substr(0, 30)}".`;
+            $('#move-alert-text').innerText = 'You are moving the ' + parts[0] + ` "${$(`#${parts[0]}_${parts[1]}_name`).innerText.substr(0, 30)}".`;
             $('.move-alert').style.display = 'block';
 
             $('.block-placeholder', true).forEach(function(placeholder) {
@@ -735,16 +721,6 @@ function startMoveBlock(e) {
                         currparentid: $(`#${phParts[1]}_${phParts[2]}`).dataset.parentid,
                         prevpos: moveTarget.dataset.position,
                         currpos: $(`#${phParts[1]}_${phParts[2]}`).dataset.position,
-                    }
-
-                    console.log(`#${data.parent}_${data.prevparentid}_${data.block}s`);
-                    if($(`#${data.parent}_${data.prevparentid}_${data.block}s`).childNodes.length <= 1) {
-                        callSocket({
-                            type: 'insert',
-                            block: data.block,
-                            parentid: data.prevparentid,
-                            parent: data.parent,
-                        })
                     }
 
                     // console.log(data);
@@ -812,7 +788,7 @@ function moveBlock(data) {
  * @param {Event} e
  */
 function setInitialContent(e) {
-    initialContent = e.currentTarget.textContent;
+    initialContent = e.currentTarget.innerText;
 }
 
 /**
@@ -821,7 +797,7 @@ function setInitialContent(e) {
 function resetWeekNumbers() {
     let weeks = $('.tbody').querySelectorAll('.week');
     weeks.forEach(function(week, key) {
-        week.querySelector('.week-number').textContent = key + 1;
+        week.querySelector('.week-number').innerText = key + 1;
     })
 }
 

@@ -28,7 +28,7 @@ nav {
 	z-index: 3000;
 
 	display: grid;
-	grid-template-columns: auto 1fr auto;
+	grid-template-columns: auto auto 1fr auto;
 }
 
 .nav-right {
@@ -106,3 +106,22 @@ main {
 	padding: 5px;
 }
 
+.nav-expand {
+	display: none;
+}
+
+
+@media (max-width: 1150px) {
+	nav {
+		display: grid;
+		grid-template-columns: auto 1fr auto;
+	}
+
+	.nav-left, .nav-right {
+		display: none;
+	}
+
+	.nav-expand {
+		display: inline-block;
+	}
+}

@@ -43,8 +43,8 @@ function generateDocument(doc) {
 	let main = $('main');
 
 	// generate each week
-	doc.weeks.forEach(function(week) {
-		generateWeek(week, main);
+	doc.weeks.forEach(function(week, key) {
+		generateWeek(week, main, key + 1);
 	})
 }
 
@@ -53,7 +53,7 @@ function generateDocument(doc) {
  * @param  {Object} week
  * @param  {Node} container
  */
-function generateWeek(week, container) {
+function generateWeek(week, container, number) {
 	let week_block = newEl('section');
 
 	// week header
@@ -64,12 +64,7 @@ function generateWeek(week, container) {
 	// week name
 	week_head.append(newEl('h2', {
 		classList: 'week-head',
-		innerText: week.weekname,
-	}))
-	// week period
-	week_head.append(newEl('span', {
-		classList: 'week-period', 
-		textContent: getWeekPeriod(week.day).start + ' to ' +  getWeekPeriod(week.day).end,
+		innerText: number + '. ' + week.weekname,
 	}))
 	week_block.append(week_head);
 

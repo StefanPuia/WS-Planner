@@ -43,28 +43,10 @@ module.exports = function(app) {
                         block: data.block
                     }
 
-                    switch(data.block) {
-                        case 'week':
-                            util.insertWeek(data.parentid, function(response) {
-                                payload.weeks = response;
-                                sendAll(payload);
-                            })
-                            break;
-
-                        case 'structure':
-                            util.insertStructure(data.parentid, function(response) {
-                                payload.structures = response;
-                                sendAll(payload);
-                            })
-                            break;
-
-                        case 'resource':
-                            util.insertResource(data.parentid, function(response) {
-                                payload.resources = response;
-                                sendAll(payload);
-                            })
-                            break;
-                    }
+                    util.insertChild(payload.parent, payload.parentid, function(response) {
+                        payload[payload.block + 's'] = response;
+                        sendAll(payload);
+                    })
                     break;
 
                 // update a block
@@ -80,9 +62,27 @@ module.exports = function(app) {
                 // move a block
                 case 'move':
                     conditions = ['id', data.id, data.parent + 'id', data.prevparentid]
-                    console.log(data.block, data.parent + 'id', data.currparentid, conditions);
                     util.updateBlock(data.block, data.parent + 'id', data.currparentid, conditions, function(results) {
-                        sendAll(data);
+                        // check if the previous parent still has children, if not insert one
+                        util.getChildren(data.parent, data.prevparentid, function(siblings) {                        
+                            if(siblings.length == 0) {
+                                util.insertChild(data.parent, data.prevparentid, function(children) {
+                                    payload = {
+                                        type: 'insert',
+                                        docid: data.docid,
+                                        parent: data.parent,
+                                        parentid: data.prevparentid,
+                                        block: data.block,
+                                    }
+                                    payload[data.block + 's'] = children;
+                                    sendAll(payload);
+                                    sendAll(data);
+                                })
+                            }
+                            else {
+                                sendAll(data);
+                            }
+                        })
                     })
                     break;
 
@@ -90,6 +90,22 @@ module.exports = function(app) {
                 case 'delete':
                     util.deleteBlock(data.block, data.id, data.parent, data.parentid, data.position, function(results) {
                         sendAll(data);
+                        // check if the parent still has children, if not insert one
+                        util.getChildren(data.parent, data.parentid, function(siblings) {                        
+                            if(siblings.length == 0) {
+                                util.insertChild(data.parent, data.parentid, function(children) {
+                                    payload = {
+                                        type: 'insert',
+                                        docid: data.docid,
+                                        parent: data.parent,
+                                        parentid: data.parentid,
+                                        block: data.block,
+                                    }
+                                    payload[data.block + 's'] = children;
+                                    sendAll(payload);
+                                })
+                            }
+                        })
                     })
                     break;
             }
@@ -103,6 +119,7 @@ module.exports = function(app) {
  * @param  {Object} data
  */
 function sendAll(data) {
+    if(config.verbose) console.log(new Date(), "WS Sending: ", data);
     sv.clients.forEach(function(client) {
         if (client.readyState === WebSocket.OPEN && client.docid == data.docid) {
             client.send(JSON.stringify(data));

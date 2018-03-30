@@ -84,5 +84,5 @@ module.exports = {
     blocksbyparentid: `SELECT * FROM ?? WHERE ?? = ?`,
 
     cloneblock: `INSERT INTO ??(??)
-        SELECT ?? FROM ?? WHERE id = ?`
+        SELECT ?? FROM ?? WHERE id = ?`,
 }

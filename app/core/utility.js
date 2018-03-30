@@ -217,7 +217,7 @@ module.exports.getDocumentByKey = function(docid, callback) {
  * @param  {String}   docid    document key
  * @param  {Function} callback
  */
-module.exports.insertWeek = function(docid, callback) {
+function insertWeek(docid, callback) {
     mysqlConnection.query(queries.weeksbydoc, [docid], function(err, weeks) {
         if(err) throw err;
         let date = new Date();
@@ -225,7 +225,7 @@ module.exports.insertWeek = function(docid, callback) {
         mysqlConnection.query(queries.insert, ['week', config.cols.week, vals], function(err, results) {
             if(err) throw err;
             let weekid = results.insertId;
-            exports.insertStructure(weekid, function(response) {
+            insertStructure(weekid, function(response) {
                 let week = {
                     weekid: results.insertId,
                     weekname: '',
@@ -244,14 +244,14 @@ module.exports.insertWeek = function(docid, callback) {
  * @param  {Int}   weekid
  * @param  {Function} callback
  */
-module.exports.insertStructure = function(weekid, callback) {
+function insertStructure(weekid, callback) {
     mysqlConnection.query(queries.structuresbyweek, [weekid], function(err, structures) {
         if(err) throw err;
         let vals = [weekid, '', '', structures.length];
         mysqlConnection.query(queries.insert, ['structure', config.cols.structure, vals], function(err, results) {
             if(err) throw err;
             let structureid = results.insertId;
-            exports.insertResource(structureid, function(response) {
+            insertResource(structureid, function(response) {
                 let structure = {
                     structureid: results.insertId,
                     structurename: '',
@@ -270,7 +270,7 @@ module.exports.insertStructure = function(weekid, callback) {
  * @param  {Int}   structureid
  * @param  {Function} callback
  */
-module.exports.insertResource = function(structureid, callback) {
+function insertResource(structureid, callback) {
     mysqlConnection.query(queries.resourcesbystructure, [structureid], function(err, resources) {
         if(err) throw err;
         let vals = [structureid, '', '', resources.length];
@@ -282,7 +282,6 @@ module.exports.insertResource = function(structureid, callback) {
                 url: '',
                 resourceposition: resources.length,
             }
-            console.log(results);
             callback([resource]);
         })
     })
@@ -432,5 +431,36 @@ module.exports.moveToNewParent = function(block, id, newparentid, callback) {
                 })
             })
         })
+    })
+}
+
+module.exports.insertChild = function(parent, parentid, callback) {
+    switch(parent) {
+        case 'document':
+            insertWeek(parentid, function(results) {
+                callback(results);
+            })
+            break;
+
+        case 'week':
+            insertStructure(parentid, function(results) {
+                callback(results);
+            })
+            break;
+
+        case 'structure':
+            insertResource(parentid, function(results) {
+                callback(results);
+            })
+            break;
+    }
+}
+
+module.exports.getChildren = function(parent, parentid, callback) {
+    let block = config.blocks[parent].child;
+    let inserts = [block, parent + 'id', parentid];
+    mysqlConnection.query(queries.selectall, inserts, function(err, results) {
+        if(err) throw err;
+        callback(results);
     })
 }

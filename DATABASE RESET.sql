@@ -70,7 +70,7 @@ INSERT INTO `resource` (`id`, `structureid`, `name`, `url`, `position`) VALUES
 (1, 1, 'Presenatation', 'http://goo.gl/aw23tg', 0),
 (2, 1, 'Documentation', 'http://goo.gl/aw23tg', 1),
 (3, 2, 'Practical', 'http://goo.gl/uohcsa32', 0),
-(4, 2, 'GitHub', 'http://github.com/portsoc/ws_sockets', 1);
+(4, 2, 'GitHub', 'http://github.com/portsoc/ws-sockets', 1);
 
 -- --------------------------------------------------------
 
@@ -111,8 +111,7 @@ CREATE TABLE `user` (
 --
 
 INSERT INTO `user` (`id`, `email`, `name`) VALUES
-(1, 'stephano.tutorials@gmail.com', 'Stefan Puia'),
-(2, 'up823744@myport.ac.uk', 'Adrian Stefan Puia');
+(1, 'up823744@myport.ac.uk', 'Anonymous Student');
 
 -- --------------------------------------------------------
 
