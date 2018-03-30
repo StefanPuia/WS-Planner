@@ -85,9 +85,9 @@ function searchDocument() {
         for(let i = 0; i < weeks.length; i++) {
             let week = weeks[i];
             let found_week = false;
-            if(week.innerText.toLowerCase().indexOf(query) > -1) {
+            if(week.textContent.toLowerCase().indexOf(query) > -1) {
                 // if the query is found in the week name, show the whole week
-                if(week.querySelector('.week-name').innerText.toLowerCase().indexOf(query) > -1) {
+                if(week.querySelector('.week-name').textContent.toLowerCase().indexOf(query) > -1) {
                     found_week = true;
                     week.style.display = '';
                     let structures = week.querySelectorAll('.structure');
@@ -104,9 +104,9 @@ function searchDocument() {
                     for(let j = 0; j < structures.length; j++) {
                         let str = structures[j];
                         let found_str = false;
-                        if(str.innerText.toLowerCase().indexOf(query) > -1) {
-                            let name = str.querySelector('.structure-name').innerText.toLowerCase();
-                            let comms = str.querySelector('.structure-comments').innerText.toLowerCase()
+                        if(str.textContent.toLowerCase().indexOf(query) > -1) {
+                            let name = str.querySelector('.structure-name').textContent.toLowerCase();
+                            let comms = str.querySelector('.structure-comments').textContent.toLowerCase()
                             // if the query is found in the structure name or comments
                             // show the whole structure and the parent week
                             if(name.indexOf(query) > -1 || comms.indexOf(query) > -1) {
@@ -123,10 +123,10 @@ function searchDocument() {
                                 let resources = str.querySelectorAll('.resource');
                                 for(let k = 0; k < resources.length; k++) {
                                     let res = resources[k];
-                                    if(res.innerText.toLowerCase().indexOf(query) > -1) {
+                                    if(res.textContent.toLowerCase().indexOf(query) > -1) {
                                         // if the query is found in the resource name
                                         // show the resource and the parent structure and week
-                                        if(res.querySelector('.resource-name').innerText.toLowerCase().indexOf(query) > -1) {
+                                        if(res.querySelector('.resource-name').textContent.toLowerCase().indexOf(query) > -1) {
                                             found_str = true;
                                             found_week = true;
                                             res.style.display = '';

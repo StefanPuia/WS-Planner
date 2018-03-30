@@ -6,16 +6,16 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 		<meta name="google-signin-client_id" content="16592814341-srr33lj6et1lj5ls0dj4v73q495khfko.apps.googleusercontent.com">
 		<title>Weekly Planner</title>
+		<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 		<link rel="stylesheet" href="/static/main.css">
 		<link rel="stylesheet" href="/static/landing.css">
-		<link href="https://fonts.googleapis.com/icon?family=Material+Icons"
-      rel="stylesheet">
 		<script src="https://apis.google.com/js/platform.js" async defer></script>
 		<script src="/static/client.js"></script>
 		<script src="/static/functions.js"></script>
 		<script src="/static/landing.js"></script>
 	</head>
 	<body>
+		<div id="button-google-signin" class="g-signin2 hidden" data-onsuccess="signIn" data-theme="dark"></div>
 		<header>
 			<nav>
 				<div></div>
@@ -29,21 +29,25 @@
 				<div class="nav-right">
 					<span id="nav-greeting">Hello, </span>
 					<a id="nav-log" href="#">Log in</a>
-					<div id="button-google-signin" class="g-signin2 hidden" data-onsuccess="signIn" data-theme="dark"></div>
 				</div>
-
-	            <div class="nav-expand">
-	            	<a href="#"><i class="material-icons">menu</i></a>
-	            </div>
+				<div class="nav-expand">
+					<a href="#"><i class="material-icons">menu</i></a>
+				</div>
 			</nav>
 		</header>
+		<aside class="hidden">
+			<div class="menu-block" id="menu-block-left"></div>
+			<div class="menu-block" id="menu-block-right"></div>
+		</aside>
 		<main>
 			<h1 id="page-title" class="center">My Documents</h1>
 			<section id="loading" class="center">
 				Loading...
 			</section>
+			<section id="emptyResults" class="center hidden">
+				No documents yet. Click here to create one.
+			</section>
 			<section id="documents" class="hidden">
-
 			</section>
 		</main>
 	</body>

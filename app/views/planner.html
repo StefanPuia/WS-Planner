@@ -2,71 +2,68 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8">
-	    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-	    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-	    <meta name="google-signin-client_id" content="16592814341-srr33lj6et1lj5ls0dj4v73q495khfko.apps.googleusercontent.com">
-	    <title>Weekly Planner</title>
-	    <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
-      rel="stylesheet">
-	    <link rel="stylesheet" href="/static/main.css">
-	    <link rel="stylesheet" href="/static/planner.css">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+		<meta name="google-signin-client_id" content="16592814341-srr33lj6et1lj5ls0dj4v73q495khfko.apps.googleusercontent.com">
+		<title>Weekly Planner</title>
+		<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+		<link rel="stylesheet" href="/static/main.css">
+		<link rel="stylesheet" href="/static/planner.css">
 		<script src="https://apis.google.com/js/platform.js" async defer></script>
 		<script src="/static/client.js"></script>
 		<script src="/static/functions.js"></script>
 		<script src="/static/planner.js"></script>
 	</head>
 	<body>
-	    <header>
-	        <nav>
+		<div id="button-google-signin" class="g-signin2 hidden" data-onsuccess="signIn" data-theme="dark"></div>
+		<header>
+			<nav>
 				<input class="document-name" type="text" value="">
-
-	            <div class="nav-left">
-	                <a href="/">My Documents</a>
-	                <a href="#" id="docview">Plain view</a>
-	                <!-- <a href="#" id="timelineview">Timeline view</a> -->
-	                <a href="#" id="share">Share</a>
-	                <input type="text" class="search-input" placeholder="Search...">
-	            </div>
-	            
-	            <div class="nav-spacer"></div>
-
-	            <div class="nav-right">
+				<div class="nav-left">
+					<a href="/">My Documents</a>
+					<a href="#" id="docview">Plain view</a>
+					<!-- <a href="#" id="timelineview">Timeline view</a> -->
+					<a href="#" id="share">Share</a>
+					<input type="text" class="search-input" placeholder="Search...">
+				</div>
+				
+				<div class="nav-spacer"></div>
+				<div class="nav-right">
 					<span id="nav-greeting">Hello, </span>
-	                <a id="nav-log" href="#">Log in</a>
-	            <div id="button-google-signin" class="g-signin2 hidden" data-onsuccess="signIn" data-theme="dark"></div>
-	            </div>
-
-	            <div class="nav-expand">
-	            	<a href="#"><i class="material-icons">menu</i></a>
-	            </div>
-	        </nav>
-	    </header>
-	    <main>
+					<a id="nav-log" href="#">Log in</a>
+				</div>
+				<div class="nav-expand">
+					<a href="#"><i class="material-icons">menu</i></a>
+				</div>
+			</nav>
+		</header>
+		<aside class="hidden">
+			<div class="menu-block" id="menu-block-left"></div>
+			<div class="menu-block" id="menu-block-right"></div>
+		</aside>
+		<main>
 			<section id="loading" class="center">
 				Loading...
 			</section>
-
-	        <section class="table table-bordered hidden" id="planner">
-	            <div class="thead">
-	                <div class="th">Week No.</div>
-	                <div class="th">Week Name</div>
-	                <div class="thead-structure">
-	                    <div class="th">Structure Name</div>
-	                    <div class="th">Comments</div>
-	                    <div class="th">Resource Name</div>
-	                    <div class="th">Resource URL</div>
-	                </div>
-	            </div>
-	            <div class="tbody" id="weeks">
-
-
-	            </div>
-	        </section>
-	        <div class="move-alert">
-	        	<span id="move-alert-text">You are moving.</span>
-	        	<br>
-	        	<button class="btn btn-danger" id="cancel-move">Cancel</button>
-	        </div>
-	    </main>
+			<section class="table table-bordered hidden" id="planner">
+				<div class="thead">
+					<div class="th">Week No.</div>
+					<div class="th">Week Name</div>
+					<div class="thead-structure">
+						<div class="th">Structure Name</div>
+						<div class="th">Comments</div>
+						<div class="th">Resource Name</div>
+						<div class="th">Resource URL</div>
+					</div>
+				</div>
+				<div class="tbody" id="weeks">
+				</div>
+			</section>
+			<div class="move-alert">
+				<span id="move-alert-text">You are moving.</span>
+				<br>
+				<button class="btn btn-danger" id="cancel-move">Cancel (ESC)</button>
+			</div>
+		</main>
 	</body>
 </html>

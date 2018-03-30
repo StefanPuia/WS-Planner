@@ -72,9 +72,7 @@ module.exports = function(app) {
     app.post('/api/document/', function(req, res) {
         util.getUserId(req.user, function(user) {
             util.createDocument(user, function(docid) {
-                util.insertWeek(docid, function() {
-                    res.json(docid);
-                })
+                res.json(docid);
             })
         })
     })

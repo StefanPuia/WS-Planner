@@ -46,7 +46,9 @@ module.exports = {
         ON resource.structureid = structure.id
     WHERE document.id = ?
     ORDER BY
-        week.position ASC`,
+        week.position ASC,
+        structure.name ASC,
+        resource.name ASC`,
 
     useridbyemail: 'SELECT id FROM user WHERE email = ?',
 

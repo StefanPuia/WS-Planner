@@ -297,7 +297,9 @@ module.exports.createDocument = function(user, callback) {
     let vals = [key, user.id, 'New Document'];
     mysqlConnection.query(queries.insert, ['document', config.cols.document, vals], function(err, results) {
         if(err) throw err;
-        callback(key);
+        insertWeek(key, function() {
+            callback(key);
+        })
     })
 }
 

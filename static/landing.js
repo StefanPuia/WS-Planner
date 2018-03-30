@@ -3,9 +3,14 @@
 window.addEventListener('load', async function() {
     await gapi.auth2.getAuthInstance();
 	callServer('/api/document', {}, function(status, documents) {
+        if(documents.length == 0) {
+            $('#emptyResults').classList.remove('hidden');
+        }
+
 		parseDocuments(documents);
 
         $('#document-create-card').addEventListener('click', createDocument);
+        $('#emptyResults').addEventListener('click', createDocument);
         $('.search-input').addEventListener('input', searchDocuments);
         $('.search-input').focus();
 
