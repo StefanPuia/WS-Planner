@@ -85,6 +85,7 @@ function receivedMessageFromServer(message) {
             break;
 
         case 'move':
+        case 'reorderweeks':
             moveBlock(message);
             break;
 
@@ -206,7 +207,7 @@ function shareDocument(view = '') {
     }
     let docid = getDocumentId();
     let url = location.origin + '/doc/' + docname + '-' + docid + '/' + view;
-    window.prompt('Copy this URL and share it.\nEveryone with the URL can EDIT this file.', url);
+    window.prompt('Copy this URL and share it.\nAnyone with the URL can EDIT this file.', url);
 }
 
 /**
@@ -221,6 +222,6 @@ function toggleVerbose() {
     else {
         verbose = false;
         localStorage.verbose = false;
-        console.log("Verbose mode disabled. Enjoy the silence.");
+        console.log("Verbose mode disabled. Enjoy the silence :)");
     }
 }

@@ -466,3 +466,16 @@ module.exports.getChildren = function(parent, parentid, callback) {
         callback(results);
     })
 }
+
+module.exports.reorderWeeks = function(positions, callback) {
+    let inserts = [];
+    let query = '';
+    positions.forEach(function(pos) {
+        query += queries.update;
+        inserts.push('week', 'position', pos.position, 'id', pos.id);
+    })
+    mysqlConnection.query(query, inserts, function(err, results) {
+        if(err) throw err;
+        callback(results);
+    })
+}

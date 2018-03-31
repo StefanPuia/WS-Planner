@@ -115,19 +115,23 @@ function generateStructure(structure, container) {
 	})
 
 	structure.resources.forEach(function(resource) {
-		let resource_item = newEl('li');
+		if(resource.resourcename != '' || resource.url != '') {
+			let resource_item = newEl('li');
 
-		resource_item.append(newEl('b', {
-			textContent: resource.resourcename + ': ',
-		}))
+			if(resource.resourcename  != '') {
+				resource_item.append(newEl('b', {
+					textContent: resource.resourcename + ': ',
+				}))
+			}
 
-		resource_item.append(newEl('a', {
-			href: resource.url,
-			textContent: resource.url,
-			target: '_blank',
-		}))
+			resource_item.append(newEl('a', {
+				href: resource.url,
+				textContent: resource.url,
+				target: '_blank',
+			}))
 
-		resources_list.append(resource_item);
+			resources_list.append(resource_item);
+		}
 	})
 
 	structure_block.append(resources_list);

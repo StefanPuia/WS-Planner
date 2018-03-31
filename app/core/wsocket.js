@@ -86,6 +86,61 @@ module.exports = function(app) {
                     })
                     break;
 
+                // reorder the weeks
+                case 'reorderweeks':
+                    // check if the positions and ids are unique and integers
+                    let char_pos = [];
+                    let char_id = [];
+                    let validpositions = true;
+                    let validids = true;
+                    for(let i = 0; i < data.positions.length; i++) {
+                        if(char_pos[data.positions[i].position] || isNaN(parseInt(data.positions[i].position)) ||
+                            char_id[data.positions[i].id] || isNaN(parseInt(data.positions[i].id))) {
+                            validpositions = false;
+                        }
+                        else {
+                            char_pos[data.positions[i].position] = 1;
+                            char_id[data.positions[i].id] = 1;
+
+                        }
+                    }
+
+                    // check if positions are consecutive
+                    for(let i = 0; i < char_pos.length; i++) {
+                        if(!char_pos[i]) {
+                            validpositions = false;
+                        }
+                    }
+
+                    if(validpositions) {
+                        util.getChildren('document', data.docid, function(weeks) {
+                            // the number of positions received must be the same as the number of weeks
+                            if(weeks.length != data.positions.length) {
+                                validids = false;
+                            }
+
+                            // check if all ids are valid ids from the database
+                            for(let i = 0; i < data.positions.length && validids; i++) {
+                                let found = false;
+                                for(let j = 0; j < weeks.length && !found; j++) {
+                                    if(weeks[j].id == data.positions[i].id) {
+                                        found = true;
+                                    }
+                                }
+                                if(!found) {
+                                    validids = false;
+                                }
+                            }
+                            // if everything passes, change all positions to the ones received
+                            if(validids) {
+                                util.reorderWeeks(data.positions, function(res) {
+                                    sendAll(data);
+                                })
+                            }
+                        })
+                    }
+                    break;
+
                 // delete a block
                 case 'delete':
                     util.deleteBlock(data.block, data.id, data.parent, data.parentid, data.position, function(results) {

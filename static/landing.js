@@ -148,6 +148,9 @@ function createDocument() {
     })
 }
 
+/**
+ * search all documents
+ */
 function searchDocuments() {
     let docs = $('.document-card');
     let query = $('.search-input').value.toLowerCase();

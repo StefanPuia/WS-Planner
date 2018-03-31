@@ -6,6 +6,9 @@ let ws;
 // move target
 let moveTarget = false;
 
+// current dragover target
+let currentlyOver = false;
+
 // initial block content
 let initialContent = '';
 
@@ -25,6 +28,21 @@ let _blocks = {
         parent: 'structure',
         child: 'null',
     },
+}
+
+// temporary object
+let temp = {
+    name: 'temporary document',
+    id: 'temp',
+    weeks: [{
+        weekid: 'temp',
+        structures: [{
+            structureid: 'temp',
+            resources: [{
+                resourceid: 'temp',
+            }]
+        }]
+    }]    
 }
 
 /**
@@ -391,7 +409,11 @@ function generateWeek(week, container, number = false) {
     // week name
     let week_number = newEl('div', {
         classList: 'td center week-number',
+        draggable: 'true',
     });
+    week_number.addEventListener('dragstart', startWeekDrag)
+    week_number.addEventListener('dragend', stopWeekDrag)
+    week_number.addEventListener('dragover', moveHere);
     week_row.append(week_number);
 
     // week name
@@ -817,4 +839,41 @@ function fixMoveButtons() {
             })
         }
     })
-} 
+}
+
+function startWeekDrag(e) {
+    moveTarget = e.currentTarget.parentNode;
+    let btn_insert = $('#insert_weeks_' + getDocumentId());
+    generateWeek(temp.weeks[0], moveTarget.parentNode);
+    moveTarget.parentNode.insertBefore($('#week_temp'), btn_insert);
+}
+
+function stopWeekDrag(e) {
+    moveTarget = false;
+    currentlyOver = false;
+    $('#week_temp').remove();
+    let weeks = $('.week-number', true);
+    let newPositions = [];
+    for(let i = 0; i < weeks.length; i++) {
+        weeks[i].textContent = i + 1;
+        let id = weeks[i].parentNode.id.split('_').slice(-1).pop();
+        newPositions.push({
+            id: id,
+            position: i,
+        })
+    }
+    let payload = {
+        type: 'reorderweeks',
+        positions: newPositions,
+    }
+    callSocket(payload);
+}
+
+function moveHere(e) {
+    let current = e.currentTarget.parentNode;
+    e.preventDefault();
+    if(moveTarget != current && currentlyOver != current) {
+        currentlyOver = current;
+        currentlyOver.parentNode.insertBefore(moveTarget, currentlyOver);
+    }
+}

@@ -57,6 +57,10 @@ nav .document-name:blur{
 	position: relative;
 }
 
+.week-number {
+	cursor: move;
+}
+
 .thead-structure {
 	display: grid;
 	grid-template-columns: 25em 25em 25em 1fr;

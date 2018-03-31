@@ -44,7 +44,7 @@ Features
 * documents on user account
 * document sharing
 * real-time collaboration
-* plain document friendly format
+* plain document (print friendly) format
 * the documents have the following structure (referred to as 'blocks'):
 	1. each document has multiple weeks (or topics)
 	2. each week has multiple structures (lecture/practical/seminar etc.)
@@ -52,11 +52,14 @@ Features
 * search in all documents on the dashboard page
 * search in a specific document brings up the closest result, hiding all other irrelevant blocks
 * each block is saved as soon as the user leaves the respective block container (on blur)
-* every block can be deleted
+* when inserting a new block, the first field in the block is focused so the user can start typing straight away
+* all blocks can be deleted
+* weeks can be reordered by dragging the week number
 * structure and resource blocks can be moved to a new parent
 * if the parent has no children blocks after a move or a deletion, a new child will be inserted automatically
 * responsive display on the dashboard page and the plain view
 * the document structure is only limited on the client's processing capabilities
+* client and server extensive logging
 
 Known bugs
 ----------
@@ -65,17 +68,17 @@ Known bugs
 Planned improvements
 --------------------
 * Proper block ordering
-* Rearranging weeks
 * History, undoing changes, document versions
 * View-only sharing
 * Add shared documents to dashboard
+* Document import and export
 
 # Reflection
 Over the course of the year the project changed quite a lot, mostly because I found new and improved ways to do what was already in the project. Some examples of big changes are:
 
 Drag and drop moving
 
-I started with two buttons which would move a block up or down. I changed it to drag and drop just before moving the database from memory to an sql server. I realised the database would need to hold the positions as well so I did that, but since I was trying to create a robust application the fact that drag and drop started slowing down the app was not something that I liked. Then I changed it to an appending type because I realised that resource and structure ordering is not that important so I changed it to an alphabetic ordering for those.
+I started with two buttons which would move a block up or down. I changed it to drag and drop just before moving the database from memory to an sql server. I realised the database would need to hold the positions as well so I did that, but since I was trying to create a robust application the fact that drag and drop started slowing down the app was not something that I liked. Then I changed it to an appending type because I realised that resource and structure ordering is not that important so I changed it to an alphabetic ordering for those, keeping the drag and drop ordering for the weeks.
 
 Frameworks
 
@@ -84,3 +87,5 @@ Initially I was using Bootstrap because it made the designing easier but I rewro
 Font icons
 
 I ended up using google's material icons because they are lightweight, they match the user interface, and they are built with accessiblity in mind (if the icon doesn't load, the text will be displayed).
+
+I received negative feedback on some of the features (the print feature for example) which I think it is fair from a technology unit/course point of view, but I have friends on non-computing courses who still have printed handouts. Since I am trying to create a universal planning application, I thought that any features that do not overcrowd the interface can still be useful.
