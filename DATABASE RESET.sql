@@ -167,7 +167,8 @@ ALTER TABLE `structure`
 --
 ALTER TABLE `user`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `id` (`id`);
+  ADD UNIQUE KEY `id` (`id`),
+  ADD UNIQUE KEY `email` (`email`);
 
 --
 -- Indexes for table `week`

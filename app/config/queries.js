@@ -3,6 +3,8 @@
 module.exports = {
     insert: `INSERT INTO ??(??) VALUES(?)`,
 
+    insertuser: `INSERT INTO user SET ?`,
+
     delete: `DELETE FROM ?? WHERE ?? = ?`,
 
     update: `UPDATE ?? SET ?? = ? WHERE ?? = ?;`,

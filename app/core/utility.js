@@ -124,37 +124,23 @@ function randomId(length = 24) {
  * @param  {Function} callback  the callback function for async query
  */
 module.exports.findOrCreate = function(profile, callback) {
-    mysqlConnection.query("SELECT * FROM ?? WHERE ?? = ?", ['user', 'email', profile.emails[0].value],
-        function(error, results, fields) {
-            if (error) {
-                throw error;
-                callback(error);
-            } else if (results.length == 0) {
-                console.log('not found, inserting');
+    mysqlConnection.query(queries.selectall, ['user', 'email', profile.emails[0].value],
+        function(err, results) {
+            if (err) throw err;
+            if (results.length == 0) {
+                if(config.verbose) console.log('user not found, inserting');
                 let user = {
                     name: profile.displayName,
                     email: profile.emails[0].value,
                 }
-                mysqlConnection.query('INSERT INTO user SET ?', user)
-                user.id = results.insertId;
-                callback(null, user);
+                mysqlConnection.query(queries.insertuser, user, function(err, insertResult) {
+                    if(err) throw err;
+                    user.id = results.insertId;
+                    callback(null, user);
+                })
             } else {
                 callback(null, results[0]);
             }
-        }
-    )
-}
-
-/**
- * get user id from profile or create user and callback with id
- * @param {Object} profile  openid profile object
- * @param {Function} callback  the callback function for async query
- */
-module.exports.getUserId = function(profile, callback) {
-    mysqlConnection.query(queries.useridbyemail, [profile.emails[0].value],
-        function(err, results) {
-            if (err) throw err;
-            callback(results[0]);
         }
     )
 }

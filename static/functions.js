@@ -142,9 +142,7 @@ async function callServer(fetchURL, options, callback) {
  */
 function signIn() {
     $('#nav-log').textContent = "Log Out";
-    callServer('/api/user/', {}, function(status, user) {
-        $('#nav-greeting').textContent = 'Hello, ' + user.name;
-    })
+    $('#nav-greeting').textContent = 'Hello, ' + localStorage.username;
 }
 
 /**
@@ -152,6 +150,7 @@ function signIn() {
  */
 async function signOut() {
     await gapi.auth2.getAuthInstance().signOut();
+    delete localStorage.username;
     window.location = "/login";
 }
 
@@ -159,7 +158,10 @@ async function signOut() {
  * redirects the user when the login at /login succeeds
  */
 function mainSignIn() {
-    window.location = "/";
+    callServer('/api/user/', {}, function(status, user) {
+        localStorage.username = user.name;
+        window.location = "/";
+    })
 }
 
 /**

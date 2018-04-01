@@ -40,7 +40,8 @@ module.exports = function(app) {
      * @param  {Object} user openID user object
      */
     app.get('/api/document/', function(req, res) {
-        util.getUserId(req.user, function(user) {
+        util.findOrCreate(req.user, function(err, user) {
+            if(err) throw err;
             util.getDocumentsByUser(user.id, function(documents) {
                 res.json(documents);
             })
@@ -53,7 +54,8 @@ module.exports = function(app) {
      * @param {String} docid document key
      */
     app.get('/api/document/:docid', function(req, res) {
-        util.getUserId(req.user, function(user) {
+        util.findOrCreate(req.user, function(err, user) {
+            if(err) throw err;
             util.getDocumentByKey(req.params.docid, function(documents) {
                 if (documents) {
                     res.json(documents);
@@ -69,7 +71,8 @@ module.exports = function(app) {
      * @param {Object} user openID user object
      */
     app.post('/api/document/', function(req, res) {
-        util.getUserId(req.user, function(user) {
+        util.findOrCreate(req.user, function(err, user) {
+            if(err) throw err;
             util.createDocument(user, function(docid) {
                 res.json(docid);
             })
@@ -82,7 +85,8 @@ module.exports = function(app) {
      * @param {String} docid document key
      */
     app.delete('/api/document/:docid', function(req, res) {
-        util.getUserId(req.user, function(user) {
+        util.findOrCreate(req.user, function(err, user) {
+            if(err) throw err;
             util.deleteDocument(user, req.params.docid, function(results) {
                 res.json({
                     status: 200
