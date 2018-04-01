@@ -2,12 +2,12 @@
 
 window.addEventListener('load', async function() {
     await gapi.auth2.getAuthInstance();
-	callServer('/api/document', {}, function(status, documents) {
-        if(documents.length == 0) {
+    callServer('/api/document', {}, function(status, documents) {
+        if (documents.length == 0) {
             $('#emptyResults').classList.remove('hidden');
         }
 
-		parseDocuments(documents);
+        parseDocuments(documents);
 
         $('#document-create-card').addEventListener('click', createDocument);
         $('#emptyResults').addEventListener('click', createDocument);
@@ -24,13 +24,13 @@ window.addEventListener('load', async function() {
  * @param  {Array} documents array of documents to be parsed
  */
 function parseDocuments(documents) {
-	let docsContainer = $('#documents');
+    let docsContainer = $('#documents');
     // remove all existing cards
     document.querySelectorAll('div.document-card:not(#document-create-card)').forEach(function(el) {
         el.remove();
     })
 
-	documents.forEach(function(doc) {
+    documents.forEach(function(doc) {
         // create a full id with a name part for friendly urls
         let fullid = doc.name.substr(0, 17).replace(' ', '-') + '-' + doc.documentid;
 
@@ -39,27 +39,27 @@ function parseDocuments(documents) {
             textContent: doc.name + ' ',
         })
 
-		let card = newEl('div', {
-			classList: 'document-card'
-		})
+        let card = newEl('div', {
+            classList: 'document-card'
+        })
 
         // card header
         let header = newEl('div', {
             classList: 'document-card-header'
         })
-		header.append(newEl('h2', {
-			textContent: doc.name.length < 17 ? doc.name : doc.name.substr(0, 17) + "..."
-		}))
+        header.append(newEl('h2', {
+            textContent: doc.name.length < 17 ? doc.name : doc.name.substr(0, 17) + "..."
+        }))
         card.append(header);
 
         // card content
-		let content = newEl('div', {
-			classList: 'document-card-content',
-		})
+        let content = newEl('div', {
+            classList: 'document-card-content',
+        })
         let contentList = newEl('ul');
 
         // parse every week and add brief parts to the card
-		for (let j = 0; j < 4 && j < doc.weeks.length; j++) {
+        for (let j = 0; j < 4 && j < doc.weeks.length; j++) {
             // week name
             let wna = doc.weeks[j].weekname;
             hidden_content.textContent += wna + ' ';
@@ -67,7 +67,7 @@ function parseDocuments(documents) {
                 wna = wna.substr(0, 19) + "...";
             }
             contentList.append(newEl('li', {
-            	textContent: wna,
+                textContent: wna,
                 classList: 'week-name'
             }))
 
@@ -80,7 +80,7 @@ function parseDocuments(documents) {
                     str = str.substr(0, 29) + "...";
                 }
                 structureList.append(newEl('li', {
-                	textContent: str
+                    textContent: str
                 }))
             }
             contentList.append(structureList);
@@ -93,28 +93,30 @@ function parseDocuments(documents) {
         let footer = newEl('div', {
             classList: 'document-card-footer'
         })
+
         // open button
         let buttonOpen = newEl('button', {
-        	type: 'button',
-        	classList: 'btn',
-        	textContent: 'Open'
+            type: 'button',
+            classList: 'btn',
+            textContent: 'Open'
         });
         buttonOpen.dataset.docid = fullid;
         buttonOpen.addEventListener('click', openDocument);
         footer.append(buttonOpen);
+
         // delete button
         let buttonDelete = newEl('button', {
-        	type: 'button',
-        	classList: 'btn btn-danger',
-        	textContent: 'Delete'
+            type: 'button',
+            classList: 'btn btn-danger',
+            textContent: 'Delete'
         });
         buttonDelete.dataset.docid = doc.documentid;
         buttonDelete.addEventListener('click', deleteDocument);
         footer.append(buttonDelete);
 
         card.append(footer);
-		docsContainer.append(card);
-	})
+        docsContainer.append(card);
+    })
 }
 
 /**
@@ -122,7 +124,7 @@ function parseDocuments(documents) {
  * @param  {Event} e
  */
 function openDocument(e) {
-	window.location = '/doc/' + e.currentTarget.dataset.docid;
+    window.location = '/doc/' + e.currentTarget.dataset.docid;
 }
 
 /**
@@ -130,8 +132,10 @@ function openDocument(e) {
  * @param  {Event} e
  */
 function deleteDocument(e) {
-    if(window.confirm("Are you sure you want to delete this document? This action is irreversable!")) {
-        callServer('/api/document/' + e.currentTarget.dataset.docid, {method: "delete"}, function() {
+    if (window.confirm("Are you sure you want to delete this document? This action is irreversable!")) {
+        callServer('/api/document/' + e.currentTarget.dataset.docid, {
+            method: "delete"
+        }, function() {
             callServer('/api/document', {}, function(status, docs) {
                 parseDocuments(docs);
             })
@@ -143,7 +147,9 @@ function deleteDocument(e) {
  * create a document
  */
 function createDocument() {
-    callServer('/api/document', {method: 'post'}, function(status, docid) {
+    callServer('/api/document', {
+        method: 'post'
+    }, function(status, docid) {
         window.location = '/doc/' + docid;
     })
 }
@@ -154,12 +160,11 @@ function createDocument() {
 function searchDocuments() {
     let docs = $('.document-card');
     let query = $('.search-input').value.toLowerCase();
-    for(let i = 0; i < docs.length; i++) {
+    for (let i = 0; i < docs.length; i++) {
         let text = docs[i].querySelector('.full-text').textContent.toLowerCase();
-        if(text.indexOf(query) > -1) {
+        if (text.indexOf(query) > -1) {
             docs[i].setAttribute('style', 'display:inline-block!important')
-        }
-        else {
+        } else {
             docs[i].setAttribute('style', 'display:none!important')
         }
     }

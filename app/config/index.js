@@ -3,63 +3,56 @@
 const path = require('path');
 
 module.exports = {
-	database: {
-		host: 'sql35.main-hosting.eu',
-		database: 'u619707583_wspla',
-		user:     'u619707583_wspla',
-		password: 'D3uHlNDnYdOP',
-		multipleStatements: true
-	},
+    // enable http and ws requests logging
+    verbose: true,
 
-	localdb: {
-		host: 'localhost',
-		database: 'weeklyplanner',
-		user: 'root',
-		password: '',
-		multipleStatements: true
-	},
+    database: {
+        host: 'sql35.main-hosting.eu',
+        database: 'u619707583_wspla',
+        user: 'u619707583_wspla',
+        password: 'D3uHlNDnYdOP',
+        multipleStatements: true
+    },
 
-	views: path.join(__dirname, './../views'),
+    views: path.join(__dirname, './../views'),
 
-	staticFiles: path.join(__dirname, './../../static'),
-	staticRouted: '/static',
+    staticFiles: path.join(__dirname, './../../static'),
+    staticRouted: '/static',
 
-	serverPort: 8080,
+    serverPort: 8080,
 
-	googleAuth: {
-		clientID: '16592814341-srr33lj6et1lj5ls0dj4v73q495khfko.apps.googleusercontent.com',
-		clientSecret: 'qjfvCowxJTHbDJ_YjWLeg3dP',
-		callbackURL: 'http://localhost:8080/auth/google/callback'
-	}, 
+    googleAuth: {
+        clientID: '16592814341-srr33lj6et1lj5ls0dj4v73q495khfko.apps.googleusercontent.com',
+        clientSecret: 'qjfvCowxJTHbDJ_YjWLeg3dP',
+        callbackURL: 'http://localhost:8080/auth/google/callback'
+    },
 
-	verbose: true,
+    cols: {
+        'document': ['id', 'userid', 'name'],
+        'week': ['documentid', 'name', 'day', 'position'],
+        'structure': ['weekid', 'name', 'comments', 'position'],
+        'resource': ['structureid', 'name', 'url', 'position'],
+    },
 
-	cols: {
-		'document': ['id', 'userid', 'name'], 
-	    'week': ['documentid', 'name', 'day', 'position'],
-	    'structure': ['weekid', 'name', 'comments', 'position'],
-	    'resource': ['structureid', 'name', 'url', 'position'],
-	},
+    blocks: {
+        document: {
+            parent: '',
+            child: 'week',
+        },
 
-	blocks: {
-		document: {
-			parent: '',
-			child: 'week',
-		},
+        week: {
+            parent: 'document',
+            child: 'structure',
+        },
 
-	    week: {
-	        parent: 'document',
-	        child: 'structure',
-	    },
+        structure: {
+            parent: 'week',
+            child: 'resource',
+        },
 
-	    structure: {
-	        parent: 'week',
-	        child: 'resource',
-	    },
-
-	    resource: {
-	        parent: 'structure',
-	        child: '',
-	    },
-	},
+        resource: {
+            parent: 'structure',
+            child: '',
+        },
+    },
 }

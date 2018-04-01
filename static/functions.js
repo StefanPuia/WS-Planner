@@ -3,6 +3,7 @@
 /**
  * Shorthand function for querySelector
  * @param {String} css selector
+ * @param {Bool} returnArray force the function to return an array
  * @return {NodeElement} / {NodeElementList} depending on query returning multiple elements
  */
 const $ = function(query, returnArray = false) {
@@ -22,7 +23,7 @@ const $ = function(query, returnArray = false) {
  * @param  {Object} style style to be applied to the object
  * @return {NodeElement} the new element
  */
-function newEl(tag, attr = {}, style={}) {
+function newEl(tag, attr = {}, style = {}) {
     let el = document.createElement(tag);
     Object.assign(el, attr);
     Object.assign(el.style, style)
@@ -36,7 +37,7 @@ function newEl(tag, attr = {}, style={}) {
  * @return {String} parameter value or undefined if not found
  */
 function getParameterValue(param, path) {
-    path = !!path?path:location.pathname;
+    path = !!path ? path : location.pathname;
     let parts = escape(path).split('/');
     for (let i = 0; i < parts.length; i++) {
         if (parts[i] == param && parts.length > i) {
@@ -60,11 +61,13 @@ function getDocumentId() {
  */
 function callSocket(payload) {
     payload.docid = getDocumentId();
-    if(verbose) console.log("ws sending: ", payload);
     if (ws.readyState !== ws.OPEN) {
-        ws = new WebSocket("ws://" + window.location.hostname + ":" + (window.location.port || 80) + "/" + getDocumentId());
+        alert('Lost the connection to the server. Please reload.')
+        if (verbose) console.log("ws readyState:", ws.readyState);
+    } else {
+        if (verbose) console.log("ws sending: ", payload);
+        ws.send(JSON.stringify(payload));
     }
-    ws.send(JSON.stringify(payload));
 }
 
 /**
@@ -73,9 +76,9 @@ function callSocket(payload) {
  */
 function receivedMessageFromServer(message) {
     message = JSON.parse(message.data)
-    if(verbose) console.log("ws recieved: ", message);
+    if (verbose) console.log("ws recieved: ", message);
 
-    switch(message.type) {
+    switch (message.type) {
         case 'insert':
             insertBlock(message);
             break;
@@ -116,13 +119,12 @@ async function callServer(fetchURL, options, callback) {
 
     Object.assign(fetchOptions, options);
 
-    if(verbose) console.log("requesting: " + fetchOptions.method.toUpperCase() + ' ' + fetchURL);
+    if (verbose) console.log("requesting: " + fetchOptions.method.toUpperCase() + ' ' + fetchURL);
     const response = await fetch(fetchURL, fetchOptions);
     if (!response.ok) {
         console.log("Server error:\n" + response.status);
         callback(response.status);
-    }
-    else {
+    } else {
         let data = await response.json();
         if (!data) {
             data = JSON.stringify({
@@ -130,9 +132,9 @@ async function callServer(fetchURL, options, callback) {
             });
         }
 
-        if(verbose) console.log("recieved: ", data);
+        if (verbose) console.log("recieved: ", data);
         callback(null, data);
-    }    
+    }
 }
 
 /**
@@ -161,48 +163,13 @@ function mainSignIn() {
 }
 
 /**
- * get the start and the end of a week that contains the provided date
- * @param  {String} date date-formatted string
- * @return {Object}      start and end dates
- */
-function getWeekPeriod(date, fullWeek = false) {
-    let startDate = new Date(date);
-
-    if(fullWeek) {
-        while(startDate.getDay() != 1) {
-            startDate.setDate(startDate.getDate() - 1)
-        }
-    }
-
-    let endDate = new Date(date);
-    endDate.setDate(startDate.getDate() + 6)
-    let f = {
-        "sd": startDate.getDate(),
-        "sm": startDate.getMonth() + 1,
-        "sy": startDate.getFullYear(),
-        "ed": endDate.getDate(),
-        "em": endDate.getMonth() + 1,
-        "ey": endDate.getFullYear()
-    }
-
-    f.sd = f.sd<10?'0'+f.sd:f.sd;
-    f.sm = f.sm<10?'0'+f.sm:f.sm;
-    f.ed = f.ed<10?'0'+f.ed:f.ed;
-    f.em = f.em<10?'0'+f.em:f.em;
-
-    return {
-        start: `${f.sd}/${f.sm}/${f.sy}`,
-        end: `${f.ed}/${f.em}/${f.ey}`
-    };
-}
-
-/**
  * displays a prompt with the document url
+ * @param {Strign} view view to be appended to the end of the url
  */
 function shareDocument(view = '') {
     let docNameEl = $('.document-name');
     let docname = docNameEl.textContent;
-    if(docNameEl.tagName == 'input') {
+    if (docNameEl.tagName == 'input') {
         docname = docNameEl.value;
     }
     let docid = getDocumentId();
@@ -214,12 +181,11 @@ function shareDocument(view = '') {
  * toggles the verbose state
  */
 function toggleVerbose() {
-    if(localStorage.verbose == 'false') {
+    if (localStorage.verbose == 'false') {
         verbose = true;
         localStorage.verbose = true;
         console.log("Verbose mode enabled.");
-    }
-    else {
+    } else {
         verbose = false;
         localStorage.verbose = false;
         console.log("Verbose mode disabled. Enjoy the silence :)");

@@ -3,7 +3,7 @@
 // websocket variable
 let ws;
 
-// move target
+// drag move target
 let moveTarget = false;
 
 // current dragover target
@@ -42,7 +42,7 @@ let temp = {
                 resourceid: 'temp',
             }]
         }]
-    }]    
+    }]
 }
 
 /**
@@ -56,10 +56,9 @@ window.addEventListener('load', async function() {
     ws.addEventListener('message', receivedMessageFromServer);
 
     callServer('/api/document/' + docid, {}, function(status, doc) {
-        if(status == 404) {
+        if (status == 404) {
             window.location = '/';
-        }
-        else {
+        } else {
             generateTable(doc);
 
             $('.tbody').id = 'document_' + docid + '_weeks';
@@ -73,7 +72,9 @@ window.addEventListener('load', async function() {
             resizeDocumentName();
 
             $('#docview').href = '/doc/' + docid + '/view';
-            $('#share').addEventListener('click', function() {shareDocument()});
+            $('#share').addEventListener('click', function() {
+                shareDocument()
+            });
             $('.search-input').addEventListener('input', searchDocument);
             $('#cancel-move').addEventListener('click', stopMoveBlock);
 
@@ -90,90 +91,85 @@ function searchDocument() {
     let query = $('.search-input').value.trim().toLowerCase();
 
     // reset the planner if the query is empty
-    if(query == '') {
+    if (query == '') {
         ['week', 'structure', 'resource'].forEach(function(blockName) {
             let blocks = $('.' + blockName, true);
-            for(let i = 0; i < blocks.length; i++) {
+            for (let i = 0; i < blocks.length; i++) {
                 blocks[i].style.display = '';
             }
-        })        
-    }
-    else {
+        })
+    } else {
         let weeks = $('.week', true);
-        for(let i = 0; i < weeks.length; i++) {
+        for (let i = 0; i < weeks.length; i++) {
             let week = weeks[i];
             let found_week = false;
-            if(week.textContent.toLowerCase().indexOf(query) > -1) {
+            if (week.textContent.toLowerCase().indexOf(query) > -1) {
                 // if the query is found in the week name, show the whole week
-                if(week.querySelector('.week-name').textContent.toLowerCase().indexOf(query) > -1) {
+                if (week.querySelector('.week-name').textContent.toLowerCase().indexOf(query) > -1) {
                     found_week = true;
                     week.style.display = '';
                     let structures = week.querySelectorAll('.structure');
-                    for(let j = 0; j < structures.length; j++) {
+                    for (let j = 0; j < structures.length; j++) {
                         structures[j].style.display = '';
                         let resources = structures[j].querySelectorAll('.resource');
-                            for(let k = 0; k < resources.length; k++) {
-                                resources[k].style.display = '';
-                            }
+                        for (let k = 0; k < resources.length; k++) {
+                            resources[k].style.display = '';
+                        }
                     }
-                }
-                else {
+                } else {
                     let structures = week.querySelectorAll('.structure');
-                    for(let j = 0; j < structures.length; j++) {
+                    for (let j = 0; j < structures.length; j++) {
                         let str = structures[j];
                         let found_str = false;
-                        if(str.textContent.toLowerCase().indexOf(query) > -1) {
+                        if (str.textContent.toLowerCase().indexOf(query) > -1) {
                             let name = str.querySelector('.structure-name').textContent.toLowerCase();
                             let comms = str.querySelector('.structure-comments').textContent.toLowerCase()
-                            // if the query is found in the structure name or comments
-                            // show the whole structure and the parent week
-                            if(name.indexOf(query) > -1 || comms.indexOf(query) > -1) {
+                                // if the query is found in the structure name or comments
+                                // show the whole structure and the parent week
+                            if (name.indexOf(query) > -1 || comms.indexOf(query) > -1) {
                                 found_str = true;
                                 found_week = true;
                                 str.style.display = '';
                                 week.style.display = '';
                                 let resources = str.querySelectorAll('.resource');
-                                for(let k = 0; k < resources.length; k++) {
+                                for (let k = 0; k < resources.length; k++) {
                                     resources[k].style.display = '';
                                 }
-                            }
-                            else {
+                            } else {
                                 let resources = str.querySelectorAll('.resource');
-                                for(let k = 0; k < resources.length; k++) {
+                                for (let k = 0; k < resources.length; k++) {
                                     let res = resources[k];
-                                    if(res.textContent.toLowerCase().indexOf(query) > -1) {
+                                    if (res.textContent.toLowerCase().indexOf(query) > -1) {
                                         // if the query is found in the resource name
                                         // show the resource and the parent structure and week
-                                        if(res.querySelector('.resource-name').textContent.toLowerCase().indexOf(query) > -1) {
+                                        if (res.querySelector('.resource-name').textContent.toLowerCase().indexOf(query) > -1) {
                                             found_str = true;
                                             found_week = true;
                                             res.style.display = '';
                                             str.style.display = '';
                                             week.style.display = '';
 
-                                        }
-                                        else {
+                                        } else {
                                             res.style.display = 'none';
                                         }
-                                    }
-                                    else {
+                                    } else {
                                         res.style.display = 'none';
                                     }
                                 }
                             }
                         }
 
-                        if(!found_str) {
+                        if (!found_str) {
                             str.style.display = 'none';
                         }
                     }
                 }
             }
 
-            if(!found_week) {
+            if (!found_week) {
                 week.style.display = 'none';
             }
-        }       
+        }
     }
 }
 
@@ -209,7 +205,7 @@ function generateTable(doc) {
  */
 function addEditableListeners() {
     $('[contenteditable="true"]').forEach(function(el) {
-    	el.addEventListener('focus', setInitialContent);
+        el.addEventListener('focus', setInitialContent);
         el.addEventListener('blur', sendUpdate);
     })
 }
@@ -235,10 +231,10 @@ function generateActions(block, blockName, parent) {
         id: blockName + '_' + block[blockName + 'id'] + '_actions',
     })
 
-    let parentid = parent.id.split('_')[1];  
+    let parentid = parent.id.split('_')[1];
 
     // move button
-    if(_blocks[blockName].parent != 'tbody') {
+    if (_blocks[blockName].parent != 'tbody') {
         let button_move = newEl('button', {
             type: 'button',
             classList: `btn btn-sm btn-move btn-move-${blockName}`,
@@ -267,7 +263,7 @@ function generateActions(block, blockName, parent) {
     button_delete.addEventListener('click', sendDeleteBlock);
     container.append(button_delete);
 
-    if(_blocks[blockName].child != 'null') {
+    if (_blocks[blockName].child != 'null') {
         let insertButton = newEl('button', {
             classList: 'btn md-24 btn-info button-insert',
             id: `insert_${_blocks[blockName].child}s_${parentid}`,
@@ -279,7 +275,7 @@ function generateActions(block, blockName, parent) {
         });
         container.append(insertButton);
         insertButton.addEventListener('click', sendInsertBlock)
-    }  
+    }
 
     parent.append(container);
 }
@@ -295,8 +291,8 @@ function generateResource(resource, container, structure) {
         classList: 'resource',
         id: `resource_${resource.resourceid}`
     })
-    resource_row.dataset.position = resource.resourceposition;   
-    resource_row.dataset.parentid = structure.structureid; 
+    resource_row.dataset.position = resource.resourceposition;
+    resource_row.dataset.parentid = structure.structureid;
 
     // resource name
     let resource_name = newEl('div', {
@@ -406,7 +402,7 @@ function generateWeek(week, container, number = false) {
 
     let weeks = container.querySelectorAll('.week').length;
     number = number ? number : weeks + 1
-    // week name
+        // week name
     let week_number = newEl('div', {
         classList: 'td center week-number',
         draggable: 'true',
@@ -460,7 +456,7 @@ function resizeDocumentName() {
 }
 
 /**
- * display the button for block insertion
+ * display the block actions
  * @param  {Event} e
  */
 function showActions(e) {
@@ -471,7 +467,7 @@ function showActions(e) {
 }
 
 /**
- * hide the button for block insertion
+ * hide the block actions
  * @param  {Event} e
  */
 function hideActions(e) {
@@ -501,7 +497,7 @@ function sendInsertBlock(e) {
  * @param  {Object} data object containing data used for node creation
  */
 function insertBlock(data) {
-	stopMoveBlock();
+    stopMoveBlock();
     let container = '';
     if (data.docid == getDocumentId()) {
         switch (data.block) {
@@ -514,13 +510,17 @@ function insertBlock(data) {
 
             case 'structure':
                 container = `#${data.parent}_${data.parentid}_${data.block}s`;
-                generateStructure(data.structures[0], $(container), {weekid: data.parentid});
+                generateStructure(data.structures[0], $(container), {
+                    weekid: data.parentid
+                });
                 $(`#structure_${data.structures[0].structureid}_name`).focus();
                 break;
 
             case 'resource':
                 container = `#${data.parent}_${data.parentid}_${data.block}s`;
-                generateResource(data.resources[0], $(container), {structureid: data.parentid});
+                generateResource(data.resources[0], $(container), {
+                    structureid: data.parentid
+                });
                 $(`#resource_${data.resources[0].resourceid}_name`).focus();
                 break;
         }
@@ -586,7 +586,7 @@ function validField(block) {
         case 'weekperiod':
             content = block.value;
             let date = new Date(content);
-            if(!isNaN(date.valueOf())) {
+            if (!isNaN(date.valueOf())) {
                 block.style.color = '#333';
             } else {
                 block.style.color = 'red';
@@ -650,7 +650,7 @@ function validField(block) {
  * @param  {Object} data update data
  */
 function updateBlock(data) {
-    switch(data.block + data.property) {
+    switch (data.block + data.property) {
         case 'documentname':
             $('.document-name').value = data.value;
             resizeDocumentName();
@@ -659,7 +659,7 @@ function updateBlock(data) {
         default:
             $(`#${data.block}_${data.id}_${data.property}`).innerText = data.value;
             break;
-    }    
+    }
 }
 
 /**
@@ -699,20 +699,20 @@ function deleteBlock(data) {
 }
 
 /**
- * begin the moving of the block
+ * begin the movement of the block
  * hide the move and delete buttons and show the append ones
  * @param  {Event} e
  */
 function startMoveBlock(e) {
-	if(!moveTarget) {
-	    let parts = e.currentTarget.id.split('_');
-	    moveTarget = $(`#${parts[0]}_${parts[1]}`);
-	    moveTarget.style.display = 'none';
+    if (!moveTarget) {
+        let parts = e.currentTarget.id.split('_');
+        moveTarget = $(`#${parts[0]}_${parts[1]}`);
+        moveTarget.style.display = 'none';
 
-	    if($(`.${parts[0]}`).length > 1) {
+        if ($(`.${parts[0]}`).length > 1) {
             // add the cancel event on "Escape"
             window.addEventListener('keydown', function(e) {
-                if(e.keyCode == 27) {
+                if (e.keyCode == 27) {
                     stopMoveBlock();
                 }
             })
@@ -721,7 +721,7 @@ function startMoveBlock(e) {
             parents.forEach(function(parent) {
                 let last = parent.querySelectorAll('.' + parts[0])[parent.querySelectorAll('.' + parts[0]).length - 1]
                 last.parentNode.append(newEl('div', {
-                    textContent:'insert here',
+                    textContent: 'insert here',
                     classList: parts[0] + ' block-placeholder td',
                     id: 'into_' + last.id,
                 }));
@@ -741,10 +741,8 @@ function startMoveBlock(e) {
                         parent: _blocks[phParts[1]].parent,
                         prevparentid: moveTarget.dataset.parentid,
                         currparentid: $(`#${phParts[1]}_${phParts[2]}`).dataset.parentid,
-                        prevpos: moveTarget.dataset.position,
-                        currpos: $(`#${phParts[1]}_${phParts[2]}`).dataset.position,
                     }
-
+                    
                     // console.log(data);
                     stopMoveBlock();
                     callSocket(data);
@@ -790,6 +788,58 @@ function stopMoveBlock() {
 }
 
 /**
+ * begin the week drag
+ * insert a blank temporary week
+ * @param  {Event} e
+ */
+function startWeekDrag(e) {
+    moveTarget = e.currentTarget.parentNode;
+    let btn_insert = $('#insert_weeks_' + getDocumentId());
+    generateWeek(temp.weeks[0], moveTarget.parentNode);
+    moveTarget.parentNode.insertBefore($('#week_temp'), btn_insert);
+}
+
+/**
+ * stop the week dragging process
+ * send all the week ids and their respective positions to the server
+ * @param  {Event} e
+ */
+function stopWeekDrag(e) {
+    moveTarget = false;
+    currentlyOver = false;
+    $('#week_temp').remove();
+    let weeks = $('.week-number', true);
+    let newPositions = [];
+    for(let i = 0; i < weeks.length; i++) {
+        weeks[i].textContent = i + 1;
+        let id = weeks[i].parentNode.id.split('_').slice(-1).pop();
+        newPositions.push({
+            id: id,
+            position: i,
+        })
+    }
+    let payload = {
+        type: 'reorderweeks',
+        positions: newPositions,
+    }
+    callSocket(payload);
+}
+
+/**
+ * insert the current dragged week before the current dragover target
+ * @param  {Event} e
+ */
+function moveHere(e) {
+    let current = e.currentTarget.parentNode;
+    e.preventDefault();
+    // check if the dragover target is different to avoid unnecessary appendings
+    if(moveTarget != current && currentlyOver != current) {
+        currentlyOver = current;
+        currentlyOver.parentNode.insertBefore(moveTarget, currentlyOver);
+    }
+}
+
+/**
  * regenerate the table when a move request is received
  * @param  {Object} data
  */
@@ -814,7 +864,7 @@ function setInitialContent(e) {
 }
 
 /**
- * resets the week numbers to a ordered list
+ * resets the week numbers to an ordered list
  */
 function resetWeekNumbers() {
     let weeks = $('.tbody').querySelectorAll('.week');
@@ -839,41 +889,4 @@ function fixMoveButtons() {
             })
         }
     })
-}
-
-function startWeekDrag(e) {
-    moveTarget = e.currentTarget.parentNode;
-    let btn_insert = $('#insert_weeks_' + getDocumentId());
-    generateWeek(temp.weeks[0], moveTarget.parentNode);
-    moveTarget.parentNode.insertBefore($('#week_temp'), btn_insert);
-}
-
-function stopWeekDrag(e) {
-    moveTarget = false;
-    currentlyOver = false;
-    $('#week_temp').remove();
-    let weeks = $('.week-number', true);
-    let newPositions = [];
-    for(let i = 0; i < weeks.length; i++) {
-        weeks[i].textContent = i + 1;
-        let id = weeks[i].parentNode.id.split('_').slice(-1).pop();
-        newPositions.push({
-            id: id,
-            position: i,
-        })
-    }
-    let payload = {
-        type: 'reorderweeks',
-        positions: newPositions,
-    }
-    callSocket(payload);
-}
-
-function moveHere(e) {
-    let current = e.currentTarget.parentNode;
-    e.preventDefault();
-    if(moveTarget != current && currentlyOver != current) {
-        currentlyOver = current;
-        currentlyOver.parentNode.insertBefore(moveTarget, currentlyOver);
-    }
 }

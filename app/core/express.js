@@ -17,7 +17,7 @@ app.use('/', (req, res, next) => {
     if (ip.substr(0, 7) == "::ffff:") {
         ip = ip.substr(7)
     }
-    if(config.verbose) console.log(new Date(), ip, req.method, req.url);
+    if (config.verbose) console.log(new Date(), ip, req.method, req.url);
     next();
 });
 
@@ -52,5 +52,5 @@ app.get('/doc/:docid', function(req, res) {
  * @param  {String} docid the document key
  */
 app.get('/doc/:docid/view', function(req, res) {
-	res.status(200).sendFile(config.views + '/document.html');
+    res.status(200).sendFile(config.views + '/document.html');
 })

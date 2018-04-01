@@ -6,7 +6,7 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const GoogleAuth = require('simple-google-openid');
 
-const util = require('./utility'); 
+const util = require('./utility');
 const config = require('./../config');
 
 module.exports = function(app) {
@@ -30,7 +30,7 @@ module.exports = function(app) {
      */
     app.get('/api/user', function(req, res) {
         util.findOrCreate(req.user, function(err, user) {
-            if(err) throw err;
+            if (err) throw err;
             res.json(user);
         })
     })
@@ -53,12 +53,11 @@ module.exports = function(app) {
      * @param {String} docid document key
      */
     app.get('/api/document/:docid', function(req, res) {
-         util.getUserId(req.user, function(user) {
+        util.getUserId(req.user, function(user) {
             util.getDocumentByKey(req.params.docid, function(documents) {
-                if(documents) {
+                if (documents) {
                     res.json(documents);
-                }
-                else {
+                } else {
                     res.sendStatus(404);
                 }
             })
@@ -85,7 +84,9 @@ module.exports = function(app) {
     app.delete('/api/document/:docid', function(req, res) {
         util.getUserId(req.user, function(user) {
             util.deleteDocument(user, req.params.docid, function(results) {
-                res.json({status: 200});
+                res.json({
+                    status: 200
+                });
             })
         })
     })

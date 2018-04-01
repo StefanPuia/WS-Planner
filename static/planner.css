@@ -1,3 +1,12 @@
+@media screen and (max-width: 1800px) {
+	body {
+		width: 1800px;
+	}
+	nav {
+		width: 100%;
+	}
+}
+
 nav .document-name {
 	font-size: 18px;
 	background-color: #f8f8f8;
@@ -16,26 +25,14 @@ nav .document-name:blur{
 	color: #777;
 }
 
-@media screen and (max-width: 1800px) {
-	body {
-		width: 1800px;
-	}
-	nav {
-		width: 100%;
-	}
-}
-
 .document-name {
 	display: none;
 	max-width: 20em;
 	min-width: 3em;
 }
 
-.td, .th {
-	padding: 0.6em;
-	line-height: 1.42;
-	
-	white-space: pre-line;
+.table-bordered .th, .table-bordered .td {
+	border: 1px solid #ddd;
 }
 
 .tbody {
@@ -43,22 +40,9 @@ nav .document-name:blur{
 	grid-template-rows: auto;
 }
 
-.table-bordered .th, .table-bordered .td {
-	border: 1px solid #ddd;
-}
-
 .thead, .week {
 	display: grid;
 	grid-template-columns: 5em 25em auto;
-}
-
-.week {
-	min-height: 4em;
-	position: relative;
-}
-
-.week-number {
-	cursor: move;
 }
 
 .thead-structure {
@@ -71,6 +55,28 @@ nav .document-name:blur{
 	text-align: center;
 }
 
+.td, .th {
+	padding: 0.6em;
+	line-height: 1.42;
+	
+	white-space: pre-line;
+}
+
+.week {
+	min-height: 4em;
+	position: relative;
+}
+
+.week-number {
+	cursor: move;
+}
+
+.week-structures {
+	padding: 0;
+	display: grid;
+	grid-template-rows: auto;
+}
+
 .structure {
 	margin: 0;
 	padding: 0;
@@ -79,14 +85,6 @@ nav .document-name:blur{
 	grid-template-columns: 25em 25em 1fr;
 	position: relative;
 	min-height: 4em;
-}
-
-/*border-left: 1px solid #ddd;*/
-
-.week-structures {
-	padding: 0;
-	display: grid;
-	grid-template-rows: auto;
 }
 
 .structure-resources {
@@ -119,11 +117,17 @@ nav .document-name:blur{
 	opacity: 1;
 }
 
-.block-placeholder {
-	cursor: pointer;
-	padding: 5px;
-    background: #8DFF9D;
-    min-height: 30px;
+.action-structure {
+	left: 33em;
+}
+
+.action-week {
+	left: 16em;
+}
+
+.action-resource {
+	left: auto;
+	right: 1em;
 }
 
 .move-alert {
@@ -141,15 +145,9 @@ nav .document-name:blur{
 	display: none;
 }
 
-.action-structure {
-	left: 33em;
-}
-
-.action-week {
-	left: 16em;
-}
-
-.action-resource {
-	left: auto;
-	right: 1em;
+.block-placeholder {
+	cursor: pointer;
+	padding: 5px;
+    background: #8DFF9D;
+    min-height: 30px;
 }

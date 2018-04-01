@@ -17,5 +17,3 @@ const wsserver = require('./app/core/wsocket')(express);
 wsserver.listen(config.serverPort, function() {
     console.log(`Listening on ${config.serverPort}.`);
 });
-
-

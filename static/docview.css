@@ -5,23 +5,23 @@
 	}	
 }
 
-.nav-left {
-	padding: 5px;
-}
-
 main {
 	margin-top: 10em;
 	margin-left: 25vw;
 	margin-right: 25vw;
 }
 
+section {
+	padding-bottom: 2em;
+}
+
+.nav-left {
+	padding: 5px;
+}
+
 #document-name {
 	padding-bottom: 1em;
 	word-break: break-all;
-}
-
-section {
-	padding-bottom: 2em;
 }
 
 .structure {
@@ -30,7 +30,6 @@ section {
 	grid-template-areas: "structure-name"
 						 "comments"
 						 "resources";
-
 }
 
 .structure-name {

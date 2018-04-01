@@ -36,7 +36,7 @@ To stop the server (Ctrl+C or Command+C):
 ^C
 ```
 
-<i><b>Note:</b> The database is currently remote, if there seem to be any problems with the pages not loading or errors appearing in the console, install a local MySQL server, update /app/config/index.js:6 to point at the local database and import the file /DATABASE RESET.sql</i>
+<i><b>Note:</b> The database is currently remote, if there seem to be any problems with the pages not loading or errors appearing in the console, install a local MySQL server, update /app/config/index.js:9 to point at the local database and import the file /DATABASE RESET.sql</i>
 
 Features
 ========
@@ -61,13 +61,8 @@ Features
 * the document structure is only limited on the client's processing capabilities
 * client and server extensive logging
 
-Known bugs
-----------
-* Moving a block to a diferent parent does not keep a specific order, because the blocks are sorted by id. Inserting an older block into a new parent will cause the block to move to the top.
-
 Planned improvements
 --------------------
-* Proper block ordering
 * History, undoing changes, document versions
 * View-only sharing
 * Add shared documents to dashboard
